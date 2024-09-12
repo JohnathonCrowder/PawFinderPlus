@@ -3,6 +3,8 @@ from flask import Flask, render_template, url_for, request, redirect, flash, sen
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from datetime import date  # Add this at the top
+
 
 db = SQLAlchemy()
 
@@ -103,6 +105,11 @@ def create_app():
             flash('Dog updated successfully!', 'success')
             return redirect(url_for('dog_detail', id=dog.id))
         return render_template('dog_detail.html', dog=dog)
+    
+    @app.route('/dog/<int:id>/profile')
+    def dog_profile(id):
+        dog = Dog.query.get_or_404(id)
+        return render_template('dog_profile.html', dog=dog, date=date)
 
     @app.route('/dog/<int:id>/delete', methods=['POST'])
     def delete_dog(id):
