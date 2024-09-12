@@ -7,6 +7,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User, Dog, DogImage
 from flask import send_file
+from io import BytesIO
 
 
 def create_app():

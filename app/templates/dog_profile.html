@@ -5,32 +5,32 @@
 {% block content %}
 <div class="container mx-auto px-4 py-8">
     <div class="bg-white shadow-xl rounded-lg overflow-hidden">
-        <!-- Image Gallery - Responsive with adjusted height -->
-        <div class="relative aspect-[21/9] lg:aspect-[25/9] w-full">
-            {% if dog.images %}
-                <div id="mainImage" class="w-full h-full">
-                    <img src="{{ url_for('get_dog_image', image_id=image.id) }}"
-                         alt="{{ dog.name }}" 
-                         class="w-full h-full object-cover">
-                </div>
-                {% if dog.images|length > 1 %}
-                    <div class="absolute bottom-0 left-0 right-0 p-4 flex justify-center space-x-2 bg-black bg-opacity-50 overflow-x-auto">
-                        {% for image in dog.images %}
-                            <button onclick="changeMainImage('{{ url_for('uploaded_file', filename=image.filename) }}')" 
-                                    class="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
-                                     alt="{{ dog.name }}" 
-                                     class="w-full h-full object-cover">
-                            </button>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% else %}
-                <div class="w-full h-full flex items-center justify-center bg-gray-200">
-                    <i class="fas fa-paw text-7xl md:text-9xl text-gray-400"></i>
-                </div>
-            {% endif %}
+        <!-- Image Gallery -->
+<div class="relative aspect-[21/9] lg:aspect-[25/9] w-full">
+    {% if dog.images and dog.images[0] %}
+        <div id="mainImage" class="w-full h-full">
+            <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
+                 alt="{{ dog.name }}" 
+                 class="w-full h-full object-cover">
         </div>
+        {% if dog.images|length > 1 %}
+            <div class="absolute bottom-0 left-0 right-0 p-4 flex justify-center space-x-2 bg-black bg-opacity-50 overflow-x-auto">
+                {% for image in dog.images %}
+                    <button onclick="changeMainImage('{{ url_for('get_dog_image', image_id=image.id) }}')" 
+                            class="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
+                             alt="{{ dog.name }}" 
+                             class="w-full h-full object-cover">
+                    </button>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="w-full h-full flex items-center justify-center bg-gray-200">
+            <i class="fas fa-paw text-7xl md:text-9xl text-gray-400"></i>
+        </div>
+    {% endif %}
+</div>
 
         <!-- Dog Info -->
         <div class="p-8">

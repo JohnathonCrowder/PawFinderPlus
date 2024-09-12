@@ -27,20 +27,20 @@
     {% endwith %}
 
     <!-- Card View -->
-    <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for dog in dogs %}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="h-48 bg-gray-300 relative">
-                {% if dog.images %}
-                    <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
-                         alt="{{ dog.name }}" 
-                         class="w-full h-full object-cover">
-                {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-gray-500">
-                        <i class="fas fa-paw text-5xl"></i>
-                    </div>
-                {% endif %}
-            </div>
+<div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for dog in dogs %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="h-48 bg-gray-300 relative">
+            {% if dog.images and dog.images[0] %}
+                <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
+                     alt="{{ dog.name }}" 
+                     class="w-full h-full object-cover">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center text-gray-500">
+                    <i class="fas fa-paw text-5xl"></i>
+                </div>
+            {% endif %}
+        </div>
             <div class="p-4">
                 <h2 class="text-xl font-bold mb-2">{{ dog.name }}</h2>
                 <p class="text-gray-600 mb-2">{{ dog.breed }}</p>
@@ -75,8 +75,8 @@
                 {% for dog in dogs %}
                 <tr>
                     <td class="border border-gray-300 px-4 py-2 w-20">
-                        {% if dog.images %}
-                            <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
+                        {% if dog.images and dog.images[0] %}
+                            <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
                                  alt="{{ dog.name }}" 
                                  class="w-16 h-16 object-cover rounded">
                         {% else %}
@@ -85,6 +85,7 @@
                             </div>
                         {% endif %}
                     </td>
+    
                     <td class="border border-gray-300 px-4 py-2">{{ dog.name }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ dog.breed }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ dog.date_of_birth.strftime('%Y-%m-%d') }}</td>

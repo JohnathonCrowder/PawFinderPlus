@@ -122,27 +122,27 @@
         {% endwith %}
 
         <!-- Image Gallery -->
-        <div class="mb-8">
-            <h2 class="text-2xl font-semibold mb-4">Photos</h2>
-            {% if dog.images %}
-                <div class="image-preview-container">
-                    {% for image in dog.images %}
-                        <div class="image-container">
-                            <img src="{{ url_for('get_dog_image', image_id=image.id) }}"
-                                 alt="{{ dog.name }}" 
-                                 class="image-preview">
-                            <form action="{{ url_for('delete_image', id=dog.id, image_id=image.id) }}" method="POST">
-                                <button type="submit" class="delete-image" onclick="return confirm('Are you sure you want to delete this image?')">
-                                    &times;
-                                </button>
-                            </form>
-                        </div>
-                    {% endfor %}
+<div class="mb-8">
+    <h2 class="text-2xl font-semibold mb-4">Photos</h2>
+    {% if dog.images %}
+        <div class="image-preview-container">
+            {% for image in dog.images %}
+                <div class="image-container">
+                    <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
+                         alt="{{ dog.name }}" 
+                         class="image-preview">
+                    <form action="{{ url_for('delete_image', id=dog.id, image_id=image.id) }}" method="POST">
+                        <button type="submit" class="delete-image" onclick="return confirm('Are you sure you want to delete this image?')">
+                            &times;
+                        </button>
+                    </form>
                 </div>
-            {% else %}
-                <p class="text-gray-500 italic">No images uploaded yet.</p>
-            {% endif %}
+            {% endfor %}
         </div>
+    {% else %}
+        <p class="text-gray-500 italic">No images uploaded yet.</p>
+    {% endif %}
+</div>
 
         <!-- Dog Details Form -->
         <form action="{{ url_for('dog_detail', id=dog.id) }}" method="POST" enctype="multipart/form-data">
