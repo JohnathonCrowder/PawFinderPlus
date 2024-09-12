@@ -96,14 +96,21 @@ def create_app():
     ########################     Page Routes    ##################################
 
     @app.route('/')
-    @login_required
     def home():
+        # This will be replaced in the next step
+        return render_template('index.html')
+    
+    @app.route('/dog_management')
+    @login_required
+    def dog_management():
         dogs = Dog.query.filter_by(user_id=current_user.id).all()
-        return render_template('index.html', dogs=dogs)
+        return render_template('dog_management.html', dogs=dogs)
 
     @app.route('/uploads/<filename>')
     def uploaded_file(filename):
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    
+
 
     @app.route('/add_dog', methods=['GET', 'POST'])
     def add_dog():
@@ -139,7 +146,7 @@ def create_app():
             
             db.session.commit()
             flash('Dog added successfully!', 'success')
-            return redirect(url_for('home'))
+            return redirect(url_for('dog_management'))
         return render_template('add_dog.html')
 
     @app.route('/dog/<int:id>', methods=['GET', 'POST'])
@@ -187,7 +194,7 @@ def create_app():
         db.session.delete(dog)
         db.session.commit()
         flash('Dog deleted successfully!', 'success')
-        return redirect(url_for('home'))
+        return redirect(url_for('dog_management'))
 
     @app.route('/dog/<int:id>/delete_image/<int:image_id>', methods=['POST'])
     def delete_image(id, image_id):

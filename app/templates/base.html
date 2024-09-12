@@ -14,15 +14,16 @@
             <a href="/" class="text-2xl font-bold">DogBreederPlus</a>
             <ul class="flex space-x-4">
                 <li><a href="/" class="hover:underline">Home</a></li>
-                <li><a href="{{ url_for('add_dog') }}" class="hover:underline">Add Dog</a></li>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('dog_management') }}" class="hover:underline">Dog Management</a></li>
+                    <li><a href="{{ url_for('add_dog') }}" class="hover:underline">Add Dog</a></li>
+                    <li><a href="{{ url_for('logout') }}" class="hover:underline">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}" class="hover:underline">Login</a></li>
+                    <li><a href="{{ url_for('register') }}" class="hover:underline">Register</a></li>
+                {% endif %}
                 <li><a href="{{ url_for('about') }}" class="hover:underline">About</a></li>
                 <li><a href="{{ url_for('contact') }}" class="hover:underline">Contact</a></li>
-                {% if current_user.is_authenticated %}
-        <li><a href="{{ url_for('logout') }}" class="hover:underline">Logout</a></li>
-    {% else %}
-        <li><a href="{{ url_for('login') }}" class="hover:underline">Login</a></li>
-        <li><a href="{{ url_for('register') }}" class="hover:underline">Register</a></li>
-    {% endif %}
             </ul>
         </div>
     </nav>
