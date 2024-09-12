@@ -6,37 +6,118 @@
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-4xl font-bold mb-6" style="color: #0080ff;">Add New Dog</h1>
     
-    <form action="{{ url_for('add_dog') }}" method="POST" class="max-w-md">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form action="{{ url_for('add_dog') }}" method="POST" enctype="multipart/form-data" class="max-w-md">
         <div class="mb-4">
-            <label for="name" class="block mb-2">Name</label>
+            <label for="name" class="block mb-2 font-semibold">Name</label>
             <input type="text" id="name" name="name" class="w-full px-3 py-2 border rounded-lg" required>
         </div>
         <div class="mb-4">
-            <label for="breed" class="block mb-2">Breed</label>
+            <label for="breed" class="block mb-2 font-semibold">Breed</label>
             <input type="text" id="breed" name="breed" class="w-full px-3 py-2 border rounded-lg" required>
         </div>
         <div class="mb-4">
-            <label for="date_of_birth" class="block mb-2">Date of Birth</label>
+            <label for="date_of_birth" class="block mb-2 font-semibold">Date of Birth</label>
             <input type="date" id="date_of_birth" name="date_of_birth" class="w-full px-3 py-2 border rounded-lg" required>
         </div>
         <div class="mb-4">
-            <label for="gender" class="block mb-2">Gender</label>
+            <label for="gender" class="block mb-2 font-semibold">Gender</label>
             <select id="gender" name="gender" class="w-full px-3 py-2 border rounded-lg" required>
+                <option value="">Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
             </select>
         </div>
         <div class="mb-4">
-            <label for="weight" class="block mb-2">Weight (kg)</label>
+            <label for="weight" class="block mb-2 font-semibold">Weight (kg)</label>
             <input type="number" id="weight" name="weight" step="0.1" class="w-full px-3 py-2 border rounded-lg">
         </div>
         <div class="mb-4">
-            <label for="color" class="block mb-2">Color</label>
+            <label for="color" class="block mb-2 font-semibold">Color</label>
             <input type="text" id="color" name="color" class="w-full px-3 py-2 border rounded-lg">
         </div>
-        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Add Dog
-        </button>
+        <div class="mb-4">
+            <label for="images" class="block mb-2 font-semibold">Upload Images</label>
+            <input type="file" id="images" name="images" multiple accept="image/*" class="w-full px-3 py-2 border rounded-lg">
+            <div id="imagePreview" class="mt-2 grid grid-cols-3 gap-2"></div>
+        </div>
+        <div class="flex space-x-4">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Add Dog
+            </button>
+            <a href="{{ url_for('home') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                Cancel
+            </a>
+        </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('images');
+    const imagePreview = document.getElementById('imagePreview');
+
+    imageInput.addEventListener('change', function() {
+        imagePreview.innerHTML = ''; // Clear existing previews
+        
+        if (this.files) {
+            [...this.files].forEach((file, index) => {
+                if (index < 9) { // Limit to 9 preview images
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'relative';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'w-full h-32 object-cover rounded';
+                        div.appendChild(img);
+
+                        imagePreview.appendChild(div);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+
+    // Simple form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('border-red-500');
+                const errorMsg = document.createElement('p');
+                errorMsg.textContent = `${field.previousElementSibling.textContent} is required.`;
+                errorMsg.className = 'text-red-500 text-sm mt-1';
+                if (!field.nextElementSibling || !field.nextElementSibling.classList.contains('text-red-500')) {
+                    field.parentNode.insertBefore(errorMsg, field.nextSibling);
+                }
+            } else {
+                field.classList.remove('border-red-500');
+                if (field.nextElementSibling && field.nextElementSibling.classList.contains('text-red-500')) {
+                    field.nextElementSibling.remove();
+                }
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
 {% endblock %}

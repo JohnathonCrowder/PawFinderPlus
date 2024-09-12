@@ -24,6 +24,7 @@
     <table class="w-full border-collapse border border-gray-300">
         <thead>
             <tr class="bg-gray-100">
+                <th class="border border-gray-300 px-4 py-2">Image</th>
                 <th class="border border-gray-300 px-4 py-2">Name</th>
                 <th class="border border-gray-300 px-4 py-2">Breed</th>
                 <th class="border border-gray-300 px-4 py-2">Date of Birth</th>
@@ -33,6 +34,13 @@
         <tbody>
             {% for dog in dogs %}
             <tr>
+                <td class="border border-gray-300 px-4 py-2">
+                    {% if dog.images %}
+                        <img src="{{ url_for('uploaded_file', filename=dog.images[0].filename) }}" alt="{{ dog.name }}" class="w-16 h-16 object-cover rounded">
+                    {% else %}
+                        <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">No Image</div>
+                    {% endif %}
+                </td>
                 <td class="border border-gray-300 px-4 py-2">{{ dog.name }}</td>
                 <td class="border border-gray-300 px-4 py-2">{{ dog.breed }}</td>
                 <td class="border border-gray-300 px-4 py-2">{{ dog.date_of_birth.strftime('%Y-%m-%d') }}</td>
