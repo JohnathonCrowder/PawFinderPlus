@@ -2,41 +2,90 @@
 
 {% block title %}Register - DogBreederPlus{% endblock %}
 
+{% block head %}
+<style>
+    .dog-bg {
+        background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
+        background-color: #f0f4f8;
+    }
+    .dog-icon {
+        font-size: 4rem;
+        color: #0080ff;
+    }
+    .input-group {
+        position: relative;
+    }
+    .input-group .icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #0080ff;
+    }
+    .input-group input {
+        padding-left: 40px;
+    }
+    .bone-button {
+        background-color: #0080ff;
+        color: white;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .bone-button:hover {
+        background-color: #0060c0;
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold mb-6" style="color: #0080ff;">Register</h1>
-    
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <span class="block sm:inline">{{ message }}</span>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    
-    <form action="{{ url_for('register') }}" method="POST" class="max-w-md">
-        <div class="mb-4">
-            <label for="username" class="block mb-2 font-semibold">Username</label>
-            <input type="text" id="username" name="username" class="w-full px-3 py-2 border rounded-lg" required>
+<div class="min-h-screen flex items-center justify-center dog-bg">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
+        <div class="text-center mb-6">
+            <i class="fas fa-dog dog-icon"></i>
+            <h1 class="text-3xl font-bold mt-2" style="color: #0080ff;">Join the Pack!</h1>
+            <p class="text-gray-600">Create your DogBreederPlus account</p>
         </div>
-        <div class="mb-4">
-            <label for="email" class="block mb-2 font-semibold">Email</label>
-            <input type="email" id="email" name="email" class="w-full px-3 py-2 border rounded-lg" required>
-        </div>
-        <div class="mb-4">
-            <label for="password" class="block mb-2 font-semibold">Password</label>
-            <input type="password" id="password" name="password" class="w-full px-3 py-2 border rounded-lg" required>
-        </div>
-        <div class="flex space-x-4">
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <span class="block sm:inline">{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form action="{{ url_for('register') }}" method="POST">
+            <div class="mb-4 input-group">
+                <i class="fas fa-user icon"></i>
+                <input type="text" id="username" name="username" 
+                       class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                       placeholder="Username" required>
+            </div>
+            <div class="mb-4 input-group">
+                <i class="fas fa-envelope icon"></i>
+                <input type="email" id="email" name="email" 
+                       class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                       placeholder="Email" required>
+            </div>
+            <div class="mb-6 input-group">
+                <i class="fas fa-lock icon"></i>
+                <input type="password" id="password" name="password" 
+                       class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                       placeholder="Password" required>
+            </div>
+            <button type="submit" class="w-full bone-button mb-4">
                 Register
             </button>
-            <a href="{{ url_for('login') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                Login
-            </a>
-        </div>
-    </form>
+            <div class="text-center">
+                <span class="text-gray-600">Already have an account? </span>
+                <a href="{{ url_for('login') }}" class="text-blue-500 hover:underline">Login here</a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
