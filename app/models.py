@@ -3,6 +3,7 @@ from .extensions import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from sqlalchemy import LargeBinary
 
 # Add User model
 class User(UserMixin, db.Model):
@@ -33,6 +34,8 @@ class Dog(db.Model):
 
 class DogImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    data = db.Column(LargeBinary, nullable=False)  # Store image data
     filename = db.Column(db.String(255), nullable=False)
+    mimetype = db.Column(db.String(50), nullable=False)  # Store mimetype
     dog_id = db.Column(db.Integer, db.ForeignKey('dog.id'), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)

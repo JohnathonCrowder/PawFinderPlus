@@ -9,7 +9,7 @@
         <div class="relative aspect-[21/9] lg:aspect-[25/9] w-full">
             {% if dog.images %}
                 <div id="mainImage" class="w-full h-full">
-                    <img src="{{ url_for('uploaded_file', filename=dog.images[0].filename) }}" 
+                    <img src="{{ url_for('get_dog_image', image_id=image.id) }}"
                          alt="{{ dog.name }}" 
                          class="w-full h-full object-cover">
                 </div>
@@ -18,7 +18,7 @@
                         {% for image in dog.images %}
                             <button onclick="changeMainImage('{{ url_for('uploaded_file', filename=image.filename) }}')" 
                                     class="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <img src="{{ url_for('uploaded_file', filename=image.filename) }}" 
+                                <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
                                      alt="{{ dog.name }}" 
                                      class="w-full h-full object-cover">
                             </button>

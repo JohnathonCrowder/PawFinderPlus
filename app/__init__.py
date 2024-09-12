@@ -6,6 +6,8 @@ from .extensions import db
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User, Dog, DogImage
+from flask import send_file
+
 
 def create_app():
     app = Flask(__name__)
@@ -139,11 +141,12 @@ def create_app():
             if 'images' in request.files:
                 for image in request.files.getlist('images'):
                     if image and allowed_file(image.filename):
-                        filename = secure_filename(f"{new_dog.id}_{image.filename}")
-                        image.save(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename))
-                        new_image = DogImage(filename=filename, dog_id=new_dog.id)
+                        filename = secure_filename(image.filename)
+                        image_data = image.read()
+                        mimetype = image.mimetype
+                        new_image = DogImage(filename=filename, data=image_data, mimetype=mimetype, dog_id=new_dog.id)
                         db.session.add(new_image)
-            
+
             db.session.commit()
             flash('Dog added successfully!', 'success')
             return redirect(url_for('dog_management'))
@@ -164,9 +167,10 @@ def create_app():
             if 'images' in request.files:
                 for image in request.files.getlist('images'):
                     if image and allowed_file(image.filename):
-                        filename = secure_filename(f"{dog.id}_{image.filename}")
-                        image.save(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename))
-                        new_image = DogImage(filename=filename, dog_id=dog.id)
+                        filename = secure_filename(image.filename)
+                        image_data = image.read()
+                        mimetype = image.mimetype
+                        new_image = DogImage(filename=filename, data=image_data, mimetype=mimetype, dog_id=dog.id)
                         db.session.add(new_image)
 
             db.session.commit()
@@ -178,17 +182,21 @@ def create_app():
     def dog_profile(id):
         dog = Dog.query.get_or_404(id)
         return render_template('dog_profile.html', dog=dog, date=date)
+    
+    @app.route('/dog_image/<int:image_id>')
+    def get_dog_image(image_id):
+        image = DogImage.query.get_or_404(image_id)
+        return send_file(
+            BytesIO(image.data),
+            mimetype=image.mimetype,
+            as_attachment=False,
+            download_name=image.filename
+    )
 
     @app.route('/dog/<int:id>/delete', methods=['POST'])
+    @login_required
     def delete_dog(id):
         dog = Dog.query.get_or_404(id)
-        
-        # Delete associated image files
-        for image in dog.images:
-            try:
-                os.remove(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], image.filename))
-            except Exception as e:
-                app.logger.error(f"Error deleting file {image.filename}: {str(e)}")
         
         # Delete the dog from the database (this will also delete associated DogImage records)
         db.session.delete(dog)
@@ -197,17 +205,12 @@ def create_app():
         return redirect(url_for('dog_management'))
 
     @app.route('/dog/<int:id>/delete_image/<int:image_id>', methods=['POST'])
+    @login_required
     def delete_image(id, image_id):
         image = DogImage.query.get_or_404(image_id)
         if image.dog_id != id:
             flash('Invalid image!', 'error')
             return redirect(url_for('dog_detail', id=id))
-        
-        # Delete the file
-        try:
-            os.remove(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], image.filename))
-        except Exception as e:
-            flash(f'Error deleting image file: {str(e)}', 'error')
         
         # Delete from database
         db.session.delete(image)

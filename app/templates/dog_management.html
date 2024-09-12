@@ -32,7 +32,7 @@
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="h-48 bg-gray-300 relative">
                 {% if dog.images %}
-                    <img src="{{ url_for('uploaded_file', filename=dog.images[0].filename) }}" 
+                    <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
                          alt="{{ dog.name }}" 
                          class="w-full h-full object-cover">
                 {% else %}
@@ -76,7 +76,7 @@
                 <tr>
                     <td class="border border-gray-300 px-4 py-2 w-20">
                         {% if dog.images %}
-                            <img src="{{ url_for('uploaded_file', filename=dog.images[0].filename) }}" 
+                            <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
                                  alt="{{ dog.name }}" 
                                  class="w-16 h-16 object-cover rounded">
                         {% else %}
