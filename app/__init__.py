@@ -1,12 +1,9 @@
 import os
 from flask import Flask, render_template, url_for, request, redirect, flash, send_from_directory
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 from werkzeug.utils import secure_filename
-from datetime import date  # Add this at the top
-
-
-db = SQLAlchemy()
+from datetime import datetime, date
+from .extensions import db
+from .models import Dog, DogImage
 
 def create_app():
     app = Flask(__name__)
@@ -14,28 +11,14 @@ def create_app():
     app.config['SECRET_KEY'] = 'your_secret_key_here'
     app.config['UPLOAD_FOLDER'] = 'uploads'
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+    
+    # Initialize the database
     db.init_app(app)
 
     # Ensure the upload folder exists
     os.makedirs(os.path.join(app.root_path, app.config['UPLOAD_FOLDER']), exist_ok=True)
 
-    class Dog(db.Model):
-        id = db.Column(db.Integer, primary_key=True)
-        name = db.Column(db.String(100), nullable=False)
-        breed = db.Column(db.String(100), nullable=False)
-        date_of_birth = db.Column(db.Date, nullable=False)
-        gender = db.Column(db.String(10), nullable=False)
-        weight = db.Column(db.Float)
-        color = db.Column(db.String(50))
-        created_at = db.Column(db.DateTime, default=datetime.utcnow)
-        images = db.relationship('DogImage', backref='dog', lazy=True, cascade="all, delete-orphan")
-
-    class DogImage(db.Model):
-        id = db.Column(db.Integer, primary_key=True)
-        filename = db.Column(db.String(255), nullable=False)
-        dog_id = db.Column(db.Integer, db.ForeignKey('dog.id'), nullable=False)
-        uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
-
+    # Create database tables
     with app.app_context():
         db.create_all()
 
