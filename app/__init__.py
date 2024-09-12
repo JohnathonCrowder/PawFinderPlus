@@ -3,7 +3,9 @@ from flask import Flask, render_template, url_for, request, redirect, flash, sen
 from werkzeug.utils import secure_filename
 from datetime import datetime, date
 from .extensions import db
-from .models import Dog, DogImage
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from .models import User, Dog, DogImage
 
 def create_app():
     app = Flask(__name__)
@@ -25,10 +27,78 @@ def create_app():
     def allowed_file(filename):
         ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    
+
+    #######################    Login Code   ##################################
+
+    # Initialize Flask-Login
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    # Registration route
+    @app.route('/register', methods=['GET', 'POST'])
+    def register():
+        if request.method == 'POST':
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
+            
+            if User.query.filter_by(username=username).first():
+                flash('Username already exists', 'error')
+                return redirect(url_for('register'))
+            
+            if User.query.filter_by(email=email).first():
+                flash('Email already exists', 'error')
+                return redirect(url_for('register'))
+            
+            new_user = User(username=username, email=email)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            
+            flash('Registration successful. Please log in.', 'success')
+            return redirect(url_for('login'))
+        
+        return render_template('register.html')
+
+    # Login route
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            user = User.query.filter_by(username=username).first()
+            
+            if user and user.check_password(password):
+                login_user(user)
+                flash('Logged in successfully.', 'success')
+                return redirect(url_for('home'))
+            else:
+                flash('Invalid username or password', 'error')
+        
+        return render_template('login.html')
+
+    # Logout route
+    @app.route('/logout')
+    @login_required
+    def logout():
+        logout_user()
+        flash('Logged out successfully.', 'success')
+        return redirect(url_for('home'))
+    
+
+
+    ########################     Page Routes    ##################################
 
     @app.route('/')
+    @login_required
     def home():
-        dogs = Dog.query.all()
+        dogs = Dog.query.filter_by(user_id=current_user.id).all()
         return render_template('index.html', dogs=dogs)
 
     @app.route('/uploads/<filename>')
@@ -45,8 +115,16 @@ def create_app():
             weight = float(request.form['weight']) if request.form['weight'] else None
             color = request.form['color']
             
-            new_dog = Dog(name=name, breed=breed, date_of_birth=date_of_birth, 
-                          gender=gender, weight=weight, color=color)
+            new_dog = Dog(
+                name=name, 
+                breed=breed, 
+                date_of_birth=date_of_birth, 
+                gender=gender, 
+                weight=weight, 
+                color=color,
+                user_id=current_user.id  # Associate dog with current user 
+                
+                )
             db.session.add(new_dog)
             db.session.commit()
 

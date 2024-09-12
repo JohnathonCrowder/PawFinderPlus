@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Login - DogBreederPlus{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-6" style="color: #0080ff;">Login</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form action="{{ url_for('login') }}" method="POST" class="max-w-md">
+        <div class="mb-4">
+            <label for="username" class="block mb-2 font-semibold">Username</label>
+            <input type="text" id="username" name="username" class="w-full px-3 py-2 border rounded-lg" required>
+        </div>
+        <div class="mb-4">
+            <label for="password" class="block mb-2 font-semibold">Password</label>
+            <input type="password" id="password" name="password" class="w-full px-3 py-2 border rounded-lg" required>
+        </div>
+        <div class="flex space-x-4">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Login
+            </button>
+            <a href="{{ url_for('register') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Register
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
