@@ -4,7 +4,7 @@
 
 {% block head %}
 <style>
-     .hero {
+    .hero {
         position: relative;
         height: 600px;
         overflow: hidden;
@@ -28,11 +28,18 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.4); /* Slightly reduced opacity */
     }
     .hero-content {
         position: relative;
         z-index: 1;
+        background: rgba(0, 50, 100, 0.7); /* Semi-transparent blue background */
+        padding: 2rem;
+        border-radius: 15px;
+        backdrop-filter: blur(5px); /* Adds a subtle blur effect */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 800px; /* Limit width for better readability */
+        margin: 0 auto; /* Center the content box */
     }
     @keyframes zoomBackground {
         0% {
@@ -45,6 +52,57 @@
             transform: scale(1);
         }
     }
+    
+    /* Button enhancements */
+    .hero-button {
+        padding: 0.75rem 2rem;
+        font-weight: bold;
+        border-radius: 9999px; /* Fully rounded buttons */
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .primary-button {
+        background-color: #ffffff;
+        color: #2563eb;
+    }
+    .primary-button:hover {
+        background-color: #f3f4f6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .secondary-button {
+        background-color: transparent;
+        color: #ffffff;
+        border: 2px solid #ffffff;
+    }
+    .secondary-button:hover {
+        background-color: #ffffff;
+        color: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+       font-size: 2.5rem;
+   }
+
+   @keyframes fadeInUp {
+       from {
+           opacity: 0;
+           transform: translateY(20px);
+       }
+       to {
+           opacity: 1;
+           transform: translateY(0);
+       }
+   }
+   .hero-content {
+       animation: fadeInUp 1s ease-out;
+   }
+   @media (min-width: 768px) {
+       h1 {
+           font-size: 3.5rem;
+       }
+   }
     .feature-icon {
         font-size: 3rem;
         color: #0080ff;
@@ -63,16 +121,16 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero text-white text-center py-24 dog-pattern">
+<section class="hero text-white text-center py-24">
     <div class="container mx-auto hero-content">
         <h1 class="text-5xl font-bold mb-4">Welcome to DogBreederPlus</h1>
         <p class="text-2xl mb-8">The ultimate platform for dog breeders and enthusiasts</p>
         {% if not current_user.is_authenticated %}
         <div class="space-x-4">
-            <a href="{{ url_for('register') }}" class="bg-white text-blue-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100">
+            <a href="{{ url_for('register') }}" class="hero-button primary-button">
                 Get Started
             </a>
-            <a href="{{ url_for('login') }}" class="border-2 border-white font-bold py-3 px-8 rounded-full hover:bg-white hover:text-blue-600">
+            <a href="{{ url_for('login') }}" class="hero-button secondary-button">
                 Log In
             </a>
         </div>
