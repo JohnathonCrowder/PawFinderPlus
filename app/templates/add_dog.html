@@ -2,122 +2,230 @@
 
 {% block title %}Add New Dog - DogBreederPlus{% endblock %}
 
+{% block head %}
+<style>
+    .dog-bg {
+        background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
+        background-color: #f0f4f8;
+    }
+    .form-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+    }
+    .input-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .input-group .icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #0080ff;
+    }
+    .input-group input, 
+    .input-group select {
+        padding-left: 40px;
+    }
+    .bone-button {
+        background-color: #0080ff;
+        color: white;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .bone-button:hover {
+        background-color: #0060c0;
+        transform: scale(1.05);
+    }
+    .cancel-button {
+        background-color: #6c757d;
+    }
+    .cancel-button:hover {
+        background-color: #545b62;
+    }
+    .image-preview-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+    }
+    .image-preview {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    /* Style the file input */
+    input[type="file"]::file-selector-button {
+        background-color: #e1f0ff;
+        color: #0080ff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    input[type="file"]::file-selector-button:hover {
+        background-color: #b3d9ff;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold mb-6" style="color: #0080ff;">Add New Dog</h1>
-    
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <span class="block sm:inline">{{ message }}</span>
+<div class="container mx-auto px-4 py-8 dog-bg">
+    <div class="form-container">
+        <div class="text-center mb-6">
+            <i class="fas fa-dog text-6xl text-blue-500"></i>
+            <h1 class="text-3xl font-bold mt-2" style="color: #0080ff;">Add New Dog</h1>
+            <p class="text-gray-600">Fill in the details to add a new dog to your profile</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <span class="block sm:inline">{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form action="{{ url_for('add_dog') }}" method="POST" enctype="multipart/form-data">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="input-group">
+                    <i class="fas fa-dog icon"></i>
+                    <input type="text" id="name" name="name" 
+                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                           placeholder="Dog's Name" required>
                 </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    
-    <form action="{{ url_for('add_dog') }}" method="POST" enctype="multipart/form-data" class="max-w-md">
-        <div class="mb-4">
-            <label for="name" class="block mb-2 font-semibold">Name</label>
-            <input type="text" id="name" name="name" class="w-full px-3 py-2 border rounded-lg" required>
-        </div>
-        <div class="mb-4">
-            <label for="breed" class="block mb-2 font-semibold">Breed</label>
-            <input type="text" id="breed" name="breed" class="w-full px-3 py-2 border rounded-lg" required>
-        </div>
-        <div class="mb-4">
-            <label for="date_of_birth" class="block mb-2 font-semibold">Date of Birth</label>
-            <input type="date" id="date_of_birth" name="date_of_birth" class="w-full px-3 py-2 border rounded-lg" required>
-        </div>
-        <div class="mb-4">
-            <label for="gender" class="block mb-2 font-semibold">Gender</label>
-            <select id="gender" name="gender" class="w-full px-3 py-2 border rounded-lg" required>
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-            </select>
-        </div>
-        <div class="mb-4">
-            <label for="weight" class="block mb-2 font-semibold">Weight (kg)</label>
-            <input type="number" id="weight" name="weight" step="0.1" class="w-full px-3 py-2 border rounded-lg">
-        </div>
-        <div class="mb-4">
-            <label for="color" class="block mb-2 font-semibold">Color</label>
-            <input type="text" id="color" name="color" class="w-full px-3 py-2 border rounded-lg">
-        </div>
-        <div class="mb-4">
-            <label for="images" class="block mb-2 font-semibold">Upload Images</label>
-            <input type="file" id="images" name="images" multiple accept="image/*" class="w-full px-3 py-2 border rounded-lg">
-            <div id="imagePreview" class="mt-2 grid grid-cols-3 gap-2"></div>
-        </div>
-        <div class="flex space-x-4">
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Add Dog
-            </button>
-            <a href="{{ url_for('home') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                Cancel
-            </a>
-        </div>
-    </form>
+                <div class="input-group">
+                    <i class="fas fa-paw icon"></i>
+                    <input type="text" id="breed" name="breed" 
+                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                           placeholder="Breed" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-calendar-alt icon"></i>
+                    <input type="date" id="date_of_birth" name="date_of_birth" 
+                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                           required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-venus-mars icon"></i>
+                    <select id="gender" name="gender" 
+                            class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-weight icon"></i>
+                    <input type="number" id="weight" name="weight" step="0.1" 
+                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                           placeholder="Weight (kg)">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-palette icon"></i>
+                    <input type="text" id="color" name="color" 
+                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                           placeholder="Color">
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label for="images" class="block mb-2 font-semibold">Upload Images</label>
+                <div class="input-group">
+                    <i class="fas fa-camera icon"></i>
+                    <input type="file" id="images" name="images" multiple accept="image/*" 
+                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 
+                                  file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 
+                                  file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 
+                                  hover:file:bg-blue-100">
+                </div>
+                <div id="imagePreview" class="image-preview-container mt-4"></div>
+            </div>
+
+            <div class="flex justify-center space-x-4">
+                <button type="submit" class="bone-button">
+                    <i class="fas fa-plus mr-2"></i> Add Dog
+                </button>
+                <a href="{{ url_for('home') }}" class="bone-button cancel-button">
+                    <i class="fas fa-times mr-2"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const imageInput = document.getElementById('images');
-    const imagePreview = document.getElementById('imagePreview');
-
-    imageInput.addEventListener('change', function() {
-        imagePreview.innerHTML = ''; // Clear existing previews
+    document.getElementById('images').addEventListener('change', function(event) {
+        const imagePreview = document.getElementById('imagePreview');
+        imagePreview.innerHTML = '';
         
-        if (this.files) {
-            [...this.files].forEach((file, index) => {
-                if (index < 9) { // Limit to 9 preview images
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const div = document.createElement('div');
-                        div.className = 'relative';
-                        
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.className = 'w-full h-32 object-cover rounded';
-                        div.appendChild(img);
-
-                        imagePreview.appendChild(div);
+        Array.from(event.target.files).forEach((file, index) => {
+            if (index < 9) {  // Limit to 9 images
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'relative';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('image-preview');
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.className = 'absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold';
+                    removeBtn.onclick = function() {
+                        div.remove();
+                        // Remove the file from the input
+                        const dt = new DataTransfer();
+                        const files = Array.from(event.target.files).filter(f => f !== file);
+                        files.forEach(file => dt.items.add(file));
+                        event.target.files = dt.files;
                     }
-                    reader.readAsDataURL(file);
+                    
+                    div.appendChild(img);
+                    div.appendChild(removeBtn);
+                    imagePreview.appendChild(div);
                 }
-            });
-        }
-    });
-
-    // Simple form validation
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(e) {
-        const requiredFields = form.querySelectorAll('[required]');
-        let isValid = true;
-
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                isValid = false;
-                field.classList.add('border-red-500');
-                const errorMsg = document.createElement('p');
-                errorMsg.textContent = `${field.previousElementSibling.textContent} is required.`;
-                errorMsg.className = 'text-red-500 text-sm mt-1';
-                if (!field.nextElementSibling || !field.nextElementSibling.classList.contains('text-red-500')) {
-                    field.parentNode.insertBefore(errorMsg, field.nextSibling);
-                }
-            } else {
-                field.classList.remove('border-red-500');
-                if (field.nextElementSibling && field.nextElementSibling.classList.contains('text-red-500')) {
-                    field.nextElementSibling.remove();
-                }
+                reader.readAsDataURL(file);
             }
         });
+    });
 
-        if (!isValid) {
-            e.preventDefault();
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    let isValid = true;
+    const requiredFields = document.querySelectorAll('[required]');
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            isValid = false;
+            field.classList.add('border-red-500');
+            const errorMsg = document.createElement('p');
+            errorMsg.textContent = `${field.previousElementSibling.textContent} is required.`;
+            errorMsg.className = 'text-red-500 text-sm mt-1';
+            if (!field.nextElementSibling || !field.nextElementSibling.classList.contains('text-red-500')) {
+                field.parentNode.insertBefore(errorMsg, field.nextSibling);
+            }
+        } else {
+            field.classList.remove('border-red-500');
+            if (field.nextElementSibling && field.nextElementSibling.classList.contains('text-red-500')) {
+                field.nextElementSibling.remove();
+            }
         }
     });
+
+    if (!isValid) {
+        e.preventDefault();
+    }
 });
 </script>
 {% endblock %}
