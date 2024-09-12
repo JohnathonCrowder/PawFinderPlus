@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Dog - DogBreederPlus{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-6" style="color: #0080ff;">Add New Dog</h1>
+    
+    <form action="{{ url_for('add_dog') }}" method="POST" class="max-w-md">
+        <div class="mb-4">
+            <label for="name" class="block mb-2">Name</label>
+            <input type="text" id="name" name="name" class="w-full px-3 py-2 border rounded-lg" required>
+        </div>
+        <div class="mb-4">
+            <label for="breed" class="block mb-2">Breed</label>
+            <input type="text" id="breed" name="breed" class="w-full px-3 py-2 border rounded-lg" required>
+        </div>
+        <div class="mb-4">
+            <label for="date_of_birth" class="block mb-2">Date of Birth</label>
+            <input type="date" id="date_of_birth" name="date_of_birth" class="w-full px-3 py-2 border rounded-lg" required>
+        </div>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Add Dog
+        </button>
+    </form>
+</div>
+{% endblock %}

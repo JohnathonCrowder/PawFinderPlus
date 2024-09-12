@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}DogBreederPlus - Home{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-6" style="color: #0080ff;">DogBreederPlus</h1>
+    
+    <a href="{{ url_for('add_dog') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 inline-block">
+        Add New Dog
+    </a>
+    
+    <h2 class="text-2xl font-semibold mb-4">Dog List</h2>
+    <table class="w-full border-collapse border border-gray-300">
+        <thead>
+            <tr class="bg-gray-100">
+                <th class="border border-gray-300 px-4 py-2">Name</th>
+                <th class="border border-gray-300 px-4 py-2">Breed</th>
+                <th class="border border-gray-300 px-4 py-2">Date of Birth</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dog in dogs %}
+            <tr>
+                <td class="border border-gray-300 px-4 py-2">{{ dog.name }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ dog.breed }}</td>
+                <td class="border border-gray-300 px-4 py-2">{{ dog.date_of_birth.strftime('%Y-%m-%d') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

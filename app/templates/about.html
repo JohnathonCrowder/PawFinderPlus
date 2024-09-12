@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}About - DogBreederPlus{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12">
+    <h1 class="text-5xl font-bold mb-8 text-center" data-aos="fade-down" style="color: #0080ff;">About DogBreederPlus</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+        <div class="bg-white shadow-lg rounded-lg p-8" data-aos="fade-right">
+            <h2 class="text-3xl font-semibold mb-6" style="color: #0080c0;">Our Story</h2>
+            <p class="mb-4 text-lg">Founded in 2005, DogBreederPlus emerged as a beacon of innovation in the tech industry. Our journey began with a simple yet powerful vision: to revolutionize how businesses interact with technology.</p>
+            <p class="mb-4 text-lg">From our humble beginnings in a small garage to our current status as a global leader, we've never lost sight of our core mission - to empower businesses through cutting-edge software solutions.</p>
+            <div class="mt-6 flex justify-center">
+                <img src="{{ url_for('static', filename='img/office.jpg') }}" alt="DogBreederPlus Office" class="rounded-lg shadow-md" data-aos="zoom-in" data-aos-delay="300">
+            </div>
+        </div>
+        
+        <div class="bg-white shadow-lg rounded-lg p-8" data-aos="fade-left">
+            <h2 class="text-3xl font-semibold mb-6" style="color: #0080c0;">Our Mission</h2>
+            <p class="mb-6 text-lg">At DogBreederPlus, we're on a relentless pursuit to transform the digital landscape. Our mission is to create intuitive, powerful software that not only meets the current needs of businesses but anticipates future challenges.</p>
+            <ul class="space-y-4">
+                <li class="flex items-center" data-aos="fade-left" data-aos-delay="200">
+                    <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Innovate relentlessly to stay ahead of technological curves</span>
+                </li>
+                <li class="flex items-center" data-aos="fade-left" data-aos-delay="400">
+                    <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Empower businesses of all sizes with enterprise-grade solutions</span>
+                </li>
+                <li class="flex items-center" data-aos="fade-left" data-aos-delay="600">
+                    <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Foster a global community of tech enthusiasts and problem solvers</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="bg-white shadow-lg rounded-lg p-8 mb-12" data-aos="fade-up">
+        <h2 class="text-3xl font-semibold mb-6 text-center" style="color: #0080c0;">Our Core Values</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center" data-aos="zoom-in" data-aos-delay="200">
+                <div class="bg-gray-100 rounded-full p-4 mb-4 inline-block">
+                    <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Innovation</h3>
+                <p>Pushing boundaries and challenging the status quo in everything we do.</p>
+            </div>
+            <div class="text-center" data-aos="zoom-in" data-aos-delay="400">
+                <div class="bg-gray-100 rounded-full p-4 mb-4 inline-block">
+                    <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Integrity</h3>
+                <p>Upholding the highest standards of honesty and ethical conduct.</p>
+            </div>
+            <div class="text-center" data-aos="zoom-in" data-aos-delay="600">
+                <div class="bg-gray-100 rounded-full p-4 mb-4 inline-block">
+                    <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Customer-Centric</h3>
+                <p>Putting our clients at the heart of every decision and innovation.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white shadow-lg rounded-lg p-8 mb-12" data-aos="fade-up">
+        <h2 class="text-3xl font-semibold mb-6 text-center" style="color: #0080c0;">Our Impact</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div data-aos="fade-up" data-aos-delay="200">
+                <div class="text-4xl font-bold mb-2" style="color: #0080ff;">500+</div>
+                <p class="text-lg">Employees Worldwide</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="400">
+                <div class="text-4xl font-bold mb-2" style="color: #0080ff;">15</div>
+                <p class="text-lg">Countries</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="600">
+                <div class="text-4xl font-bold mb-2" style="color: #0080ff;">10,000+</div>
+                <p class="text-lg">Clients Served</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="800">
+                <div class="text-4xl font-bold mb-2" style="color: #0080ff;">30%</div>
+                <p class="text-lg">Carbon Footprint Reduction</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white shadow-lg rounded-lg p-8" data-aos="fade-up">
+        <h2 class="text-3xl font-semibold mb-6 text-center" style="color: #0080c0;">Join Our Journey</h2>
+        <p class="text-lg text-center mb-8">At DogBreederPlus, we're always looking for passionate individuals to join our team. If you're ready to make a difference in the world of technology, we want to hear from you!</p>
+        <div class="text-center">
+            <a href="#" class="inline-block px-6 py-3 text-lg font-semibold text-white rounded-lg transition duration-300 ease-in-out" style="background-color: #0080ff; hover:opacity-90;">View Career Opportunities</a>
+        </div>
+    </div>
+</div>
+
+<script>
+  AOS.init({
+    duration: 1000,
+    once: true,
+  });
+</script>
+{% endblock %}
