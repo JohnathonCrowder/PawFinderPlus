@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -7,6 +7,7 @@ db = SQLAlchemy()
 def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dogbreeder.db'
+    app.config['SECRET_KEY'] = 'your_secret_key_here'  # Add this line for flash messages
     db.init_app(app)
 
     class Dog(db.Model):
@@ -39,6 +40,7 @@ def create_app():
             new_dog = Dog(name=name, breed=breed, date_of_birth=date_of_birth, gender=gender, weight=weight, color=color)
             db.session.add(new_dog)
             db.session.commit()
+            flash('Dog added successfully!', 'success')
             return redirect(url_for('home'))
         return render_template('add_dog.html')
 
@@ -53,8 +55,17 @@ def create_app():
             dog.weight = float(request.form['weight']) if request.form['weight'] else None
             dog.color = request.form['color']
             db.session.commit()
+            flash('Dog updated successfully!', 'success')
             return redirect(url_for('home'))
         return render_template('dog_detail.html', dog=dog)
+
+    @app.route('/dog/<int:id>/delete', methods=['POST'])
+    def delete_dog(id):
+        dog = Dog.query.get_or_404(id)
+        db.session.delete(dog)
+        db.session.commit()
+        flash('Dog deleted successfully!', 'success')
+        return redirect(url_for('home'))
 
     @app.route('/about')
     def about():

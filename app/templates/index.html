@@ -6,6 +6,16 @@
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-4xl font-bold mb-6" style="color: #0080ff;">DogBreederPlus</h1>
     
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <a href="{{ url_for('add_dog') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4 inline-block">
         Add New Dog
     </a>
@@ -27,7 +37,10 @@
                 <td class="border border-gray-300 px-4 py-2">{{ dog.breed }}</td>
                 <td class="border border-gray-300 px-4 py-2">{{ dog.date_of_birth.strftime('%Y-%m-%d') }}</td>
                 <td class="border border-gray-300 px-4 py-2">
-                    <a href="{{ url_for('dog_detail', id=dog.id) }}" class="text-blue-500 hover:text-blue-700">View/Edit</a>
+                    <a href="{{ url_for('dog_detail', id=dog.id) }}" class="text-blue-500 hover:text-blue-700 mr-2">Edit</a>
+                    <form action="{{ url_for('delete_dog', id=dog.id) }}" method="POST" class="inline">
+                        <button type="submit" class="text-red-500 hover:text-red-700" onclick="return confirm('Are you sure you want to delete this dog?')">Delete</button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}
