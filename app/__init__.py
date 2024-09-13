@@ -94,6 +94,51 @@ def create_app():
         flash('Logged out successfully.', 'success')
         return redirect(url_for('home'))
     
+    ##### User Settings Routes #########
+
+    @app.route('/user_settings', methods=['GET', 'POST'])
+    @login_required
+    def user_settings():
+        if request.method == 'POST':
+            action = request.form.get('action')
+
+            if action == 'change_email':
+                new_email = request.form.get('new_email')
+                if User.query.filter_by(email=new_email).first():
+                    flash('Email already exists', 'error')
+                else:
+                    current_user.email = new_email
+                    db.session.commit()
+                    flash('Email updated successfully', 'success')
+
+            elif action == 'change_password':
+                current_password = request.form.get('current_password')
+                new_password = request.form.get('new_password')
+                if check_password_hash(current_user.password_hash, current_password):
+                    current_user.set_password(new_password)
+                    db.session.commit()
+                    flash('Password updated successfully', 'success')
+                else:
+                    flash('Current password is incorrect', 'error')
+
+            elif action == 'delete_account':
+                password_confirm = request.form.get('password_confirm')
+                if check_password_hash(current_user.password_hash, password_confirm):
+                    # Delete user's dogs and associated images
+                    for dog in current_user.dogs:
+                        db.session.delete(dog)
+                    db.session.delete(current_user)
+                    db.session.commit()
+                    logout_user()
+                    flash('Your account has been deleted', 'success')
+                    return redirect(url_for('home'))
+                else:
+                    flash('Password is incorrect', 'error')
+
+            return redirect(url_for('user_settings'))
+
+        return render_template('user_settings.html')
+    
 
 
     ########################     Page Routes    ##################################
