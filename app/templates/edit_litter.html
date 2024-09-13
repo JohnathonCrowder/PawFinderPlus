@@ -41,6 +41,18 @@
         background-color: #0060c0;
         transform: scale(1.05);
     }
+    .cancel-button {
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+.cancel-button:hover {
+    background-color: #c0392b;
+    transform: scale(1.05);
+}
 </style>
 {% endblock %}
 
@@ -114,10 +126,13 @@
                 </div>
             </div>
 
-            <div class="flex justify-center mt-6">
+            <div class="flex justify-center mt-6 space-x-4">
                 <button type="submit" class="bone-button">
                     <i class="fas fa-save mr-2"></i> Update Litter
                 </button>
+                <a href="{{ url_for('litter_management') }}" class="cancel-button">
+                    <i class="fas fa-times mr-2"></i> Cancel
+                </a>
             </div>
         </form>
     </div>
