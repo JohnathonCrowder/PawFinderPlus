@@ -183,6 +183,31 @@
                            placeholder="Color">
                 </div>
             </div>
+
+            <div class="input-group">
+                <i class="fas fa-dog icon"></i>
+                <select id="father_id" name="father_id" 
+                        class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select Father (optional)</option>
+                    {% for potential_father in all_dogs if potential_father.gender == 'Male' and potential_father.id != dog.id %}
+                    <option value="{{ potential_father.id }}" {% if dog.father_id == potential_father.id %}selected{% endif %}>
+                        {{ potential_father.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-dog icon"></i>
+                <select id="mother_id" name="mother_id" 
+                        class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select Mother (optional)</option>
+                    {% for potential_mother in all_dogs if potential_mother.gender == 'Female' and potential_mother.id != dog.id %}
+                    <option value="{{ potential_mother.id }}" {% if dog.mother_id == potential_mother.id %}selected{% endif %}>
+                        {{ potential_mother.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
             
             <div class="mb-6">
                 <label for="images" class="block mb-2 font-semibold">Add New Images</label>

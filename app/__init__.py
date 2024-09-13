@@ -247,6 +247,12 @@ def create_app():
             dog.gender = request.form['gender']
             dog.weight = float(request.form['weight']) if request.form['weight'] else None
             dog.color = request.form['color']
+            
+            # Handle father and mother updates
+            father_id = request.form.get('father_id')
+            mother_id = request.form.get('mother_id')
+            dog.father_id = int(father_id) if father_id else None
+            dog.mother_id = int(mother_id) if mother_id else None
 
             # Handle new image uploads
             if 'images' in request.files:
@@ -261,7 +267,10 @@ def create_app():
             db.session.commit()
             flash('Dog updated successfully!', 'success')
             return redirect(url_for('dog_detail', id=dog.id))
-        return render_template('dog_detail.html', dog=dog)
+
+        # Get all dogs for parent selection, excluding the current dog
+        all_dogs = Dog.query.filter(Dog.id != id, Dog.user_id == current_user.id).all()
+        return render_template('dog_detail.html', dog=dog, all_dogs=all_dogs)
     
     @app.route('/change_email', methods=['POST'])
     @login_required
