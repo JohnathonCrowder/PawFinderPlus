@@ -1,12 +1,11 @@
 import os
-from flask import Flask, render_template, url_for, request, redirect, flash, send_from_directory
+from flask import Flask, render_template, url_for, request, redirect, flash, send_file
 from werkzeug.utils import secure_filename
 from datetime import datetime, date
 from .extensions import db
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User, Dog, DogImage
-from flask import send_file
 from io import BytesIO
 
 
@@ -20,20 +19,6 @@ def create_app():
     # Initialize the database
     db.init_app(app)
 
-    # Ensure the upload folder exists
-    os.makedirs(os.path.join(app.root_path, app.config['UPLOAD_FOLDER']), exist_ok=True)
-
-    # Create database tables
-    with app.app_context():
-        db.create_all()
-
-    def allowed_file(filename):
-        ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-    
-
-    #######################    Login Code   ##################################
-
     # Initialize Flask-Login
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -43,7 +28,73 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # Registration route
+    def allowed_file(filename):
+        ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+    # User Settings Routes
+    @app.route('/user_settings')
+    @login_required
+    def user_settings():
+        # Fetch the current user's information
+        user_data = {
+            'full_name': current_user.full_name or '',
+            'location': current_user.location or '',
+            'phone_number': current_user.phone_number or '',
+            'bio': current_user.bio or '',
+            'has_profile_picture': current_user.profile_picture_data is not None
+        }
+        return render_template('user_settings.html', user_data=user_data)
+
+    @app.route('/update_profile', methods=['POST'])
+    @login_required
+    def update_profile():
+        # Handle profile picture upload
+        if 'profile_picture' in request.files:
+            file = request.files['profile_picture']
+            if file and file.filename:
+                # Read the file data and store it in the database
+                current_user.profile_picture_data = file.read()
+                current_user.profile_picture_filename = secure_filename(file.filename)
+                current_user.profile_picture_mimetype = file.mimetype
+
+        # Update other profile information
+        current_user.full_name = request.form.get('full_name', '').strip() or None
+        current_user.location = request.form.get('location', '').strip() or None
+        current_user.phone_number = request.form.get('phone_number', '').strip() or None
+        current_user.bio = request.form.get('bio', '').strip() or None
+
+        # Commit changes to the database
+        db.session.commit()
+
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('user_settings'))
+
+    @app.route('/profile_picture/<int:user_id>')
+    def get_profile_picture(user_id):
+        user = User.query.get_or_404(user_id)
+        if user.profile_picture_data:
+            return send_file(
+                BytesIO(user.profile_picture_data),
+                mimetype=user.profile_picture_mimetype,
+                as_attachment=False,
+                download_name=user.profile_picture_filename
+            )
+        else:
+            # Return a default image or 404
+            return send_file('path/to/default/profile/image.png', mimetype='image/png')
+
+    @app.route('/remove_profile_picture', methods=['POST'])
+    @login_required
+    def remove_profile_picture():
+        current_user.profile_picture_data = None
+        current_user.profile_picture_filename = None
+        current_user.profile_picture_mimetype = None
+        db.session.commit()
+        flash('Profile picture removed successfully.', 'success')
+        return redirect(url_for('user_settings'))
+
+    # Existing Routes
     @app.route('/register', methods=['GET', 'POST'])
     def register():
         if request.method == 'POST':
@@ -69,7 +120,6 @@ def create_app():
         
         return render_template('register.html')
 
-    # Login route
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         if request.method == 'POST':
@@ -86,74 +136,15 @@ def create_app():
         
         return render_template('login.html')
 
-    # Logout route
     @app.route('/logout')
     @login_required
     def logout():
         logout_user()
         flash('Logged out successfully.', 'success')
         return redirect(url_for('home'))
-    
-    ##### User Settings Routes #########
-
-    @app.route('/update_profile', methods=['POST'])
-    @login_required
-    def update_profile():
-        # Handle profile picture upload
-        if 'profile_picture' in request.files:
-            file = request.files['profile_picture']
-            if file and file.filename:
-                # Read the file data and store it in the database
-                current_user.profile_picture_data = file.read()
-                current_user.profile_picture_filename = secure_filename(file.filename)
-                current_user.profile_picture_mimetype = file.mimetype
-
-        # Update other profile information
-        current_user.full_name = request.form.get('full_name', '').strip() or None
-        current_user.location = request.form.get('location', '').strip() or None
-        current_user.phone_number = request.form.get('phone_number', '').strip() or None
-        current_user.bio = request.form.get('bio', '').strip() or None
-
-        db.session.commit()
-        flash('Profile updated successfully!', 'success')
-        return redirect(url_for('user_settings'))
-
-    @app.route('/profile_picture/<int:user_id>')
-    def get_profile_picture(user_id):
-        user = User.query.get_or_404(user_id)
-        if user.profile_picture_data:
-            return send_file(
-                BytesIO(user.profile_picture_data),
-                mimetype=user.profile_picture_mimetype,
-                as_attachment=False,
-                download_name=user.profile_picture_filename
-            )
-        else:
-            # Return a default image or 404
-            return send_file('path/to/default/profile/image.png', mimetype='image/png')
-        
-    @app.route('/remove_profile_picture', methods=['POST'])
-    @login_required
-    def remove_profile_picture():
-        current_user.profile_picture_data = None
-        current_user.profile_picture_filename = None
-        current_user.profile_picture_mimetype = None
-        db.session.commit()
-        flash('Profile picture removed.', 'success')
-        return redirect(url_for('user_settings'))
-
-    @app.route('/user_settings')
-    @login_required
-    def user_settings():
-        return render_template('user_settings.html')
-    
-
-
-    ########################     Page Routes    ##################################
 
     @app.route('/')
     def home():
-        # This will be replaced in the next step
         return render_template('index.html')
     
     @app.route('/dog_management')
@@ -162,13 +153,8 @@ def create_app():
         dogs = Dog.query.filter_by(user_id=current_user.id).all()
         return render_template('dog_management.html', dogs=dogs)
 
-    @app.route('/uploads/<filename>')
-    def uploaded_file(filename):
-        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-    
-
-
     @app.route('/add_dog', methods=['GET', 'POST'])
+    @login_required
     def add_dog():
         if request.method == 'POST':
             name = request.form['name']
@@ -185,9 +171,8 @@ def create_app():
                 gender=gender, 
                 weight=weight, 
                 color=color,
-                user_id=current_user.id  # Associate dog with current user 
-                
-                )
+                user_id=current_user.id
+            )
             db.session.add(new_dog)
             db.session.commit()
 
@@ -207,6 +192,7 @@ def create_app():
         return render_template('add_dog.html')
 
     @app.route('/dog/<int:id>', methods=['GET', 'POST'])
+    @login_required
     def dog_detail(id):
         dog = Dog.query.get_or_404(id)
         if request.method == 'POST':
@@ -232,6 +218,48 @@ def create_app():
             return redirect(url_for('dog_detail', id=dog.id))
         return render_template('dog_detail.html', dog=dog)
     
+    @app.route('/change_email', methods=['POST'])
+    @login_required
+    def change_email():
+        new_email = request.form.get('new_email')
+        if User.query.filter_by(email=new_email).first():
+            flash('Email already exists', 'error')
+        else:
+            current_user.email = new_email
+            db.session.commit()
+            flash('Email updated successfully', 'success')
+        return redirect(url_for('user_settings'))
+
+    @app.route('/change_password', methods=['POST'])
+    @login_required
+    def change_password():
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        if current_user.check_password(current_password):
+            current_user.set_password(new_password)
+            db.session.commit()
+            flash('Password updated successfully', 'success')
+        else:
+            flash('Current password is incorrect', 'error')
+        return redirect(url_for('user_settings'))
+
+    @app.route('/delete_account', methods=['POST'])
+    @login_required
+    def delete_account():
+        password_confirm = request.form.get('password_confirm')
+        if current_user.check_password(password_confirm):
+            # Delete user's dogs and associated images
+            for dog in current_user.dogs:
+                db.session.delete(dog)
+            db.session.delete(current_user)
+            db.session.commit()
+            logout_user()
+            flash('Your account has been deleted', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('Password is incorrect', 'error')
+        return redirect(url_for('user_settings'))
+    
     @app.route('/dog/<int:id>/profile')
     def dog_profile(id):
         dog = Dog.query.get_or_404(id)
@@ -245,7 +273,7 @@ def create_app():
             mimetype=image.mimetype,
             as_attachment=False,
             download_name=image.filename
-    )
+        )
 
     @app.route('/dog/<int:id>/delete', methods=['POST'])
     @login_required

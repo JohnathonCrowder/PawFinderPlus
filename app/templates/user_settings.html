@@ -2,77 +2,183 @@
 
 {% block title %}User Settings - DogBreederPlus{% endblock %}
 
+{% block head %}
+<style>
+    .settings-bg {
+        background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
+        background-color: #f0f4f8;
+    }
+    .settings-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .profile-picture {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid #0080ff;
+    }
+    .profile-picture-placeholder {
+        width: 150px;
+        height: 150px;
+        background-color: #e0e0e0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #757575;
+        border: 4px solid #0080ff;
+    }
+    .section-title {
+        border-bottom: 2px solid #0080ff;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        color: #0080ff;
+    }
+    .paw-button {
+        background-color: #0080ff;
+        color: white;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .paw-button:hover {
+        background-color: #0060c0;
+        transform: scale(1.05);
+    }
+    .danger-button {
+        background-color: #ff4136;
+    }
+    .danger-button:hover {
+        background-color: #e60000;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6" style="color: #0080ff;">User Settings</h1>
+<div class="settings-bg min-h-screen py-12">
+    <div class="container mx-auto px-4">
+        <h1 class="text-4xl font-bold mb-8 text-center" style="color: #0080ff;">User Settings</h1>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <span class="block sm:inline">{{ message }}</span>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <h2 class="text-2xl font-bold mb-4">Profile Information</h2>
-        <form action="{{ url_for('update_profile') }}" method="POST" enctype="multipart/form-data">
-            <!-- Profile Picture -->
-            <div class="mb-6">
-                {% if current_user.profile_picture_data %}
-                    <img src="{{ url_for('get_profile_picture', user_id=current_user.id) }}" 
-                         alt="Profile Picture" 
-                         class="w-32 h-32 object-cover rounded-full mb-2">
-                {% else %}
-                    <div class="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mb-2">
-                        <i class="fas fa-user text-4xl text-gray-500"></i>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <span class="block sm:inline">{{ message }}</span>
                     </div>
-                {% endif %}
-                <input type="file" name="profile_picture" accept="image/*">
-            </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-            {% if current_user.profile_picture_data %}
-    <form action="{{ url_for('remove_profile_picture') }}" method="POST" class="inline">
-        <button type="submit" class="text-red-500 underline">Remove Picture</button>
-    </form>
-{% endif %}
+        <div class="settings-container p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6 section-title">Profile Information</h2>
+            <form action="{{ url_for('update_profile') }}" method="POST" enctype="multipart/form-data">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-1/3 mb-6 md:mb-0 flex flex-col items-center">
+                        {% if user_data.has_profile_picture %}
+                            <img src="{{ url_for('get_profile_picture', user_id=current_user.id) }}" 
+                                 alt="Profile Picture" 
+                                 class="profile-picture mb-4">
+                        {% else %}
+                            <div class="profile-picture-placeholder mb-4">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                        <input type="file" name="profile_picture" id="profile_picture" accept="image/*" class="mb-2">
+                        {% if user_data.has_profile_picture %}
+                            <button type="submit" form="remove_picture_form" class="text-red-500 underline mt-2">Remove Picture</button>
+                        {% endif %}
+                    </div>
+                    <div class="md:w-2/3 md:pl-8">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="full_name">Full Name</label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                   id="full_name" name="full_name" type="text" value="{{ user_data.full_name }}">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="location">Location</label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                   id="location" name="location" type="text" value="{{ user_data.location }}">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="phone_number">Phone Number</label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                   id="phone_number" name="phone_number" type="tel" value="{{ user_data.phone_number }}">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="bio">About Me</label>
+                            <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32" 
+                                      id="bio" name="bio">{{ user_data.bio }}</textarea>
+                        </div>
+                        <div class="flex items-center justify-end">
+                            <button class="paw-button" type="submit">
+                                <i class="fas fa-paw mr-2"></i>Update Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
 
-            <!-- Full Name -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="full_name">Full Name</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                       id="full_name" name="full_name" type="text" value="{{ current_user.full_name or '' }}">
-            </div>
+        <div class="settings-container p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6 section-title">Change Email</h2>
+            <form action="{{ url_for('change_email') }}" method="POST">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="new_email">New Email</label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                           id="new_email" name="new_email" type="email" required>
+                </div>
+                <div class="flex items-center justify-end">
+                    <button class="paw-button" type="submit">
+                        <i class="fas fa-envelope mr-2"></i>Change Email
+                    </button>
+                </div>
+            </form>
+        </div>
 
-            <!-- Location -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="location">Location</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                       id="location" name="location" type="text" value="{{ current_user.location or '' }}">
-            </div>
+        <div class="settings-container p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6 section-title">Change Password</h2>
+            <form action="{{ url_for('change_password') }}" method="POST">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="current_password">Current Password</label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                           id="current_password" name="current_password" type="password" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="new_password">New Password</label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                           id="new_password" name="new_password" type="password" required>
+                </div>
+                <div class="flex items-center justify-end">
+                    <button class="paw-button" type="submit">
+                        <i class="fas fa-lock mr-2"></i>Change Password
+                    </button>
+                </div>
+            </form>
+        </div>
 
-            <!-- Phone Number -->
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="phone_number">Phone Number</label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                       id="phone_number" name="phone_number" type="tel" value="{{ current_user.phone_number or '' }}">
-            </div>
-
-            <!-- Bio -->
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="bio">About Me</label>
-                <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32" 
-                          id="bio" name="bio">{{ current_user.bio or '' }}</textarea>
-            </div>
-
-            <div class="flex items-center justify-between">
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                    Update Profile
-                </button>
-            </div>
-        </form>
+        <div class="settings-container p-8">
+            <h2 class="text-2xl font-bold mb-6 section-title text-red-600">Delete Account</h2>
+            <p class="mb-4 text-red-600">Warning: This action cannot be undone. All your data will be permanently deleted.</p>
+            <form action="{{ url_for('delete_account') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password_confirm">Confirm Password</label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                           id="password_confirm" name="password_confirm" type="password" required>
+                </div>
+                <div class="flex items-center justify-end">
+                    <button class="paw-button danger-button" type="submit">
+                        <i class="fas fa-trash-alt mr-2"></i>Delete Account
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+<form id="remove_picture_form" action="{{ url_for('remove_profile_picture') }}" method="POST"></form>
 {% endblock %}
