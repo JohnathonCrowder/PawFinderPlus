@@ -7,28 +7,53 @@
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         {% block head %}{% endblock %}
+        <style>
+            .dropdown:hover .dropdown-menu {
+                display: block;
+            }
+        </style>
     </head>
 <body class="flex flex-col min-h-full">
     <nav class="text-white p-4" style="background-color: #0080ff;">
         <div class="container mx-auto flex justify-between items-center">
             <a href="/" class="text-2xl font-bold">DogBreederPlus</a>
-            <ul class="flex space-x-4">
+            <ul class="flex space-x-4 items-center">
                 <li><a href="/" class="hover:underline">Home</a></li>
                 {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('dog_management') }}" class="hover:underline">Dog Management</a></li>
-                    <li><a href="{{ url_for('add_dog') }}" class="hover:underline">Add Dog</a></li>
-                    {% if current_user.is_authenticated %}
-    <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="hover:underline">My Profile</a></li>
-{% endif %}
-                    <li><a href="{{ url_for('user_settings') }}" class="hover:underline">Settings</a></li>
-
-                    <li><a href="{{ url_for('logout') }}" class="hover:underline">Logout</a></li>
+                    <li class="dropdown relative">
+                        <a href="#" class="hover:underline flex items-center">
+                            Management <i class="fas fa-chevron-down ml-1"></i>
+                        </a>
+                        <ul class="dropdown-menu absolute hidden text-gray-700 pt-1 bg-white rounded-md shadow-xl" style="min-width: 150px;">
+                            <li><a href="{{ url_for('dog_management') }}" class="rounded-t hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Dog Management</a></li>
+                            <li><a href="{{ url_for('litter_management') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Litter Management</a></li>
+                            <li><a href="{{ url_for('add_dog') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Add Dog</a></li>
+                            <li><a href="{{ url_for('add_litter') }}" class="rounded-b hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Add Litter</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown relative">
+                        <a href="#" class="hover:underline flex items-center">
+                            <i class="fas fa-user-circle mr-1"></i> {{ current_user.username }} <i class="fas fa-chevron-down ml-1"></i>
+                        </a>
+                        <ul class="dropdown-menu absolute hidden text-gray-700 pt-1 bg-white rounded-md shadow-xl" style="min-width: 150px;">
+                            <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="rounded-t hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">My Profile</a></li>
+                            <li><a href="{{ url_for('user_settings') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Settings</a></li>
+                            <li><a href="{{ url_for('logout') }}" class="rounded-b hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Logout</a></li>
+                        </ul>
+                    </li>
                 {% else %}
                     <li><a href="{{ url_for('login') }}" class="hover:underline">Login</a></li>
                     <li><a href="{{ url_for('register') }}" class="hover:underline">Register</a></li>
                 {% endif %}
-                <li><a href="{{ url_for('about') }}" class="hover:underline">About</a></li>
-                <li><a href="{{ url_for('contact') }}" class="hover:underline">Contact</a></li>
+                <li class="dropdown relative">
+                    <a href="#" class="hover:underline flex items-center">
+                        More <i class="fas fa-chevron-down ml-1"></i>
+                    </a>
+                    <ul class="dropdown-menu absolute hidden text-gray-700 pt-1 bg-white rounded-md shadow-xl" style="min-width: 150px;">
+                        <li><a href="{{ url_for('about') }}" class="rounded-t hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">About</a></li>
+                        <li><a href="{{ url_for('contact') }}" class="rounded-b hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Contact</a></li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </nav>

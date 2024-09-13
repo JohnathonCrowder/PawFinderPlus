@@ -5,7 +5,7 @@ from datetime import datetime, date
 from .extensions import db
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User, Dog, DogImage
+from .models import User, Dog, DogImage, Litter
 from io import BytesIO
 from flask_migrate import Migrate
 
