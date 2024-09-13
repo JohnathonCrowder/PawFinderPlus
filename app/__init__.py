@@ -8,6 +8,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User, Dog, DogImage, Litter
 from io import BytesIO
 from flask_migrate import Migrate
+from sqlalchemy.orm import joinedload
+
 
 def create_app():
     app = Flask(__name__)
@@ -219,11 +221,20 @@ def create_app():
     @app.route('/dog/<int:id>/family_tree')
     @login_required
     def dog_family_tree(id):
-        dog = Dog.query.get_or_404(id)
-        # Eager load the litter and its puppies
-        if dog.litter:
-            dog.litter.puppies
-        return render_template('family_tree.html', dog=dog)
+        dog = Dog.query.options(
+            joinedload(Dog.father).joinedload(Dog.images),
+            joinedload(Dog.mother).joinedload(Dog.images),
+            joinedload(Dog.father).joinedload(Dog.father).joinedload(Dog.images),
+            joinedload(Dog.father).joinedload(Dog.mother).joinedload(Dog.images),
+            joinedload(Dog.mother).joinedload(Dog.father).joinedload(Dog.images),
+            joinedload(Dog.mother).joinedload(Dog.mother).joinedload(Dog.images),
+            joinedload(Dog.images)
+        ).get_or_404(id)
+
+        # Fetch litter information separately if needed
+        litter = Litter.query.filter(Litter.puppies.any(id=dog.id)).first()
+
+        return render_template('family_tree.html', dog=dog, litter=litter)
 
     @app.route('/dog/<int:id>', methods=['GET', 'POST'])
     @login_required

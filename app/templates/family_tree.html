@@ -4,163 +4,175 @@
 
 {% block head %}
 <style>
-    .tree {
+    .family-tree {
         display: flex;
         flex-direction: column;
         align-items: center;
+        padding: 20px;
+        overflow-x: auto;
     }
-    .tree ul {
-        padding-top: 20px; position: relative;
-        transition: all 0.5s;
-        -webkit-transition: all 0.5s;
-        -moz-transition: all 0.5s;
-    }
-    .tree li {
-        float: left; text-align: center;
-        list-style-type: none;
-        position: relative;
-        padding: 20px 5px 0 5px;
-        transition: all 0.5s;
-        -webkit-transition: all 0.5s;
-        -moz-transition: all 0.5s;
-    }
-    .tree li::before, .tree li::after {
-        content: '';
-        position: absolute; top: 0; right: 50%;
-        border-top: 1px solid #ccc;
-        width: 50%; height: 20px;
-    }
-    .tree li::after {
-        right: auto; left: 50%;
-        border-left: 1px solid #ccc;
-    }
-    .tree li:only-child::after, .tree li:only-child::before {
-        display: none;
-    }
-    .tree li:only-child {
-        padding-top: 0;
-    }
-    .tree li:first-child::before, .tree li:last-child::after {
-        border: 0 none;
-    }
-    .tree li:last-child::before {
-        border-right: 1px solid #ccc;
-        border-radius: 0 5px 0 0;
-    }
-    .tree li:first-child::after {
-        border-radius: 5px 0 0 0;
-    }
-    .tree ul ul::before {
-        content: '';
-        position: absolute; top: 0; left: 50%;
-        border-left: 1px solid #ccc;
-        width: 0; height: 20px;
-    }
-    .tree li a {
-        border: 1px solid #ccc;
-        padding: 5px 10px;
-        text-decoration: none;
-        color: #666;
-        font-family: arial, verdana, tahoma;
-        font-size: 11px;
-        display: inline-block;
-        border-radius: 5px;
-        transition: all 0.5s;
-        -webkit-transition: all 0.5s;
-        -moz-transition: all 0.5s;
-    }
-    .tree li a:hover, .tree li a:hover+ul li a {
-        background: #c8e4f8; color: #000; border: 1px solid #94a0b4;
-    }
-    .tree li a:hover+ul li::after, 
-    .tree li a:hover+ul li::before, 
-    .tree li a:hover+ul::before, 
-    .tree li a:hover+ul ul::before {
-        border-color: #94a0b4;
-    }
-    .tree .litter-mates {
+    .generation {
         display: flex;
-        flex-wrap: wrap;
         justify-content: center;
-        margin-top: 20px;
-        padding: 10px;
-        border: 1px dashed #ccc;
-        border-radius: 5px;
-    }
-    .tree .litter-mates li {
-        margin: 0 10px;
-        padding: 5px;
-    }
-    .litter-mates-title {
         width: 100%;
+        margin-bottom: 40px;
+    }
+    .dog-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 20px;
+        position: relative;
+    }
+    .dog-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #3498db;
+    }
+    .dog-info {
         text-align: center;
+        margin-top: 10px;
+    }
+    .dog-name {
         font-weight: bold;
-        margin-bottom: 10px;
+        font-size: 1.1em;
+        color: #2c3e50;
+    }
+    .dog-breed {
+        font-size: 0.9em;
+        color: #7f8c8d;
+    }
+    .connection {
+        position: absolute;
+        border-left: 2px solid #3498db;
+        height: 40px;
+        left: 50%;
+        bottom: -40px;
+    }
+    .connection::before, .connection::after {
+        content: '';
+        position: absolute;
+        left: -1px;
+        width: 50px;
+        border-top: 2px solid #3498db;
+    }
+    .connection::before {
+        bottom: 0;
+        transform: translateX(-100%);
+    }
+    .connection::after {
+        bottom: 0;
+    }
+    .litter-mates {
+        background-color: #ecf0f1;
+        border: 2px dashed #3498db;
+        border-radius: 10px;
+        padding: 10px;
+        margin-top: 20px;
+        text-align: center;
+    }
+    .litter-mate {
+        display: inline-block;
+        margin: 5px;
+        padding: 5px 10px;
+        background-color: #3498db;
+        color: white;
+        border-radius: 15px;
+        font-size: 0.9em;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">{{ dog.name }}'s Family Tree</h1>
-    <div class="tree">
-        <ul>
-            <li>
-                <a href="{{ url_for('dog_profile', id=dog.id) }}">{{ dog.name }}</a>
-                
-                {% if dog.litter and dog.litter.puppies|length > 1 %}
-                <ul class="litter-mates">
-                    <li class="litter-mates-title">Litter Mates:</li>
-                    {% for puppy in dog.litter.puppies if puppy.id != dog.id %}
-                    <li>
-                        <a href="{{ url_for('dog_profile', id=puppy.id) }}">{{ puppy.name }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-                
-                <ul>
-                    {% if dog.father %}
-                    <li>
-                        <a href="{{ url_for('dog_profile', id=dog.father.id) }}">{{ dog.father.name }} (Father)</a>
-                        {% if dog.father.father or dog.father.mother %}
-                        <ul>
-                            {% if dog.father.father %}
-                            <li>
-                                <a href="{{ url_for('dog_profile', id=dog.father.father.id) }}">{{ dog.father.father.name }}</a>
-                            </li>
-                            {% endif %}
-                            {% if dog.father.mother %}
-                            <li>
-                                <a href="{{ url_for('dog_profile', id=dog.father.mother.id) }}">{{ dog.father.mother.name }}</a>
-                            </li>
-                            {% endif %}
-                        </ul>
-                        {% endif %}
-                    </li>
-                    {% endif %}
-                    {% if dog.mother %}
-                    <li>
-                        <a href="{{ url_for('dog_profile', id=dog.mother.id) }}">{{ dog.mother.name }} (Mother)</a>
-                        {% if dog.mother.father or dog.mother.mother %}
-                        <ul>
-                            {% if dog.mother.father %}
-                            <li>
-                                <a href="{{ url_for('dog_profile', id=dog.mother.father.id) }}">{{ dog.mother.father.name }}</a>
-                            </li>
-                            {% endif %}
-                            {% if dog.mother.mother %}
-                            <li>
-                                <a href="{{ url_for('dog_profile', id=dog.mother.mother.id) }}">{{ dog.mother.mother.name }}</a>
-                            </li>
-                            {% endif %}
-                        </ul>
-                        {% endif %}
-                    </li>
-                    {% endif %}
-                </ul>
-            </li>
-        </ul>
+    <h1 class="text-3xl font-bold mb-6 text-center">{{ dog.name }}'s Family Tree</h1>
+    <div class="family-tree">
+        <!-- Current Dog -->
+        <div class="generation">
+            <div class="dog-card">
+                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.images[0].id) if dog.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.name }}">
+                <div class="dog-info">
+                    <div class="dog-name">{{ dog.name }}</div>
+                    <div class="dog-breed">{{ dog.breed }}</div>
+                </div>
+                <div class="connection"></div>
+            </div>
+        </div>
+        
+        <!-- Parents -->
+        <div class="generation">
+            {% if dog.father %}
+            <div class="dog-card">
+                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.father.images[0].id) if dog.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.name }}">
+                <div class="dog-info">
+                    <div class="dog-name">{{ dog.father.name }}</div>
+                    <div class="dog-breed">Father</div>
+                </div>
+                <div class="connection"></div>
+            </div>
+            {% endif %}
+            {% if dog.mother %}
+            <div class="dog-card">
+                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.mother.images[0].id) if dog.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.name }}">
+                <div class="dog-info">
+                    <div class="dog-name">{{ dog.mother.name }}</div>
+                    <div class="dog-breed">Mother</div>
+                </div>
+                <div class="connection"></div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Grandparents -->
+        <div class="generation">
+            {% if dog.father and dog.father.father %}
+            <div class="dog-card">
+                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.father.father.images[0].id) if dog.father.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.father.name }}">
+                <div class="dog-info">
+                    <div class="dog-name">{{ dog.father.father.name }}</div>
+                    <div class="dog-breed">Paternal Grandfather</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if dog.father and dog.father.mother %}
+            <div class="dog-card">
+                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.father.mother.images[0].id) if dog.father.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.mother.name }}">
+                <div class="dog-info">
+                    <div class="dog-name">{{ dog.father.mother.name }}</div>
+                    <div class="dog-breed">Paternal Grandmother</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if dog.mother and dog.mother.father %}
+            <div class="dog-card">
+                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.mother.father.images[0].id) if dog.mother.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.father.name }}">
+                <div class="dog-info">
+                    <div class="dog-name">{{ dog.mother.father.name }}</div>
+                    <div class="dog-breed">Maternal Grandfather</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if dog.mother and dog.mother.mother %}
+            <div class="dog-card">
+                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.mother.mother.images[0].id) if dog.mother.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.mother.name }}">
+                <div class="dog-info">
+                    <div class="dog-name">{{ dog.mother.mother.name }}</div>
+                    <div class="dog-breed">Maternal Grandmother</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
+    
+    {% if litter and litter.puppies|length > 1 %}
+    <div class="litter-mates">
+        <h4 class="font-bold mb-2">Litter Mates:</h4>
+        {% for puppy in litter.puppies if puppy.id != dog.id %}
+        <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="litter-mate">{{ puppy.name }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

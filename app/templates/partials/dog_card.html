@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}{{ dog.name }}'s Family Tree - DogBreederPlus{% endblock %}
+
+{% block head %}
+<style>
+    .family-tree-container {
+        width: 100%;
+        overflow-x: auto;
+        padding: 20px;
+    }
+    .family-tree {
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: center;
+    }
+    .generation {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-right: 40px;
+    }
+    .dog-card {
+        background-color: #ffffff;
+        border: 2px solid #3498db;
+        border-radius: 10px;
+        padding: 10px;
+        margin: 10px 0;
+        width: 200px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .dog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    .dog-card img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+    }
+    .dog-card h3 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1.1em;
+    }
+    .dog-card p {
+        margin: 5px 0;
+        color: #7f8c8d;
+        font-size: 0.9em;
+    }
+    .litter-mates {
+        background-color: #ecf0f1;
+        border: 2px dashed #3498db;
+        border-radius: 10px;
+        padding: 10px;
+        margin-top: 20px;
+    }
+    .litter-mates h4 {
+        margin: 0 0 10px 0;
+        color: #2c3e50;
+    }
+    .litter-mate {
+        display: inline-block;
+        margin: 5px;
+        padding: 5px 10px;
+        background-color: #3498db;
+        color: white;
+        border-radius: 15px;
+        font-size: 0.9em;
+    }
+    .connector {
+        width: 40px;
+        border-top: 2px solid #3498db;
+        margin-right: -40px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">{{ dog.name }}'s Family Tree</h1>
+    <div class="family-tree-container">
+        <div class="family-tree">
+            <!-- Current Dog -->
+            <div class="generation">
+                <div class="dog-card">
+                    <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) if dog.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.name }}">
+                    <h3>{{ dog.name }}</h3>
+                    <p>{{ dog.breed }}</p>
+                    <p>{{ dog.date_of_birth.strftime('%Y-%m-%d') }}</p>
+                </div>
+                {% if dog.litter and dog.litter.puppies|length > 1 %}
+                <div class="litter-mates">
+                    <h4>Litter Mates:</h4>
+                    {% for puppy in dog.litter.puppies if puppy.id != dog.id %}
+                    <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="litter-mate">{{ puppy.name }}</a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Parents -->
+            <div class="connector"></div>
+            <div class="generation">
+                {% if dog.father %}
+                <div class="dog-card">
+                    <img src="{{ url_for('get_dog_image', image_id=dog.father.images[0].id) if dog.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.name }}">
+                    <h3>{{ dog.father.name }}</h3>
+                    <p>Father</p>
+                </div>
+                {% endif %}
+                {% if dog.mother %}
+                <div class="dog-card">
+                    <img src="{{ url_for('get_dog_image', image_id=dog.mother.images[0].id) if dog.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.name }}">
+                    <h3>{{ dog.mother.name }}</h3>
+                    <p>Mother</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Grandparents -->
+            <div class="connector"></div>
+            <div class="generation">
+                {% if dog.father %}
+                    {% if dog.father.father %}
+                    <div class="dog-card">
+                        <img src="{{ url_for('get_dog_image', image_id=dog.father.father.images[0].id) if dog.father.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.father.name }}">
+                        <h3>{{ dog.father.father.name }}</h3>
+                        <p>Paternal Grandfather</p>
+                    </div>
+                    {% endif %}
+                    {% if dog.father.mother %}
+                    <div class="dog-card">
+                        <img src="{{ url_for('get_dog_image', image_id=dog.father.mother.images[0].id) if dog.father.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.mother.name }}">
+                        <h3>{{ dog.father.mother.name }}</h3>
+                        <p>Paternal Grandmother</p>
+                    </div>
+                    {% endif %}
+                {% endif %}
+                {% if dog.mother %}
+                    {% if dog.mother.father %}
+                    <div class="dog-card">
+                        <img src="{{ url_for('get_dog_image', image_id=dog.mother.father.images[0].id) if dog.mother.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.father.name }}">
+                        <h3>{{ dog.mother.father.name }}</h3>
+                        <p>Maternal Grandfather</p>
+                    </div>
+                    {% endif %}
+                    {% if dog.mother.mother %}
+                    <div class="dog-card">
+                        <img src="{{ url_for('get_dog_image', image_id=dog.mother.mother.images[0].id) if dog.mother.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.mother.name }}">
+                        <h3>{{ dog.mother.mother.name }}</h3>
+                        <p>Maternal Grandmother</p>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
