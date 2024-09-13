@@ -17,61 +17,59 @@
     {% endwith %}
 
     <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <h2 class="text-2xl font-bold mb-4">Change Email</h2>
-        <form action="{{ url_for('user_settings') }}" method="POST">
-            <input type="hidden" name="action" value="change_email">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="new_email">
-                    New Email
-                </label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="new_email" name="new_email" type="email" required>
+        <h2 class="text-2xl font-bold mb-4">Profile Information</h2>
+        <form action="{{ url_for('update_profile') }}" method="POST" enctype="multipart/form-data">
+            <!-- Profile Picture -->
+            <div class="mb-6">
+                {% if current_user.profile_picture_data %}
+                    <img src="{{ url_for('get_profile_picture', user_id=current_user.id) }}" 
+                         alt="Profile Picture" 
+                         class="w-32 h-32 object-cover rounded-full mb-2">
+                {% else %}
+                    <div class="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-user text-4xl text-gray-500"></i>
+                    </div>
+                {% endif %}
+                <input type="file" name="profile_picture" accept="image/*">
             </div>
+
+            {% if current_user.profile_picture_data %}
+    <form action="{{ url_for('remove_profile_picture') }}" method="POST" class="inline">
+        <button type="submit" class="text-red-500 underline">Remove Picture</button>
+    </form>
+{% endif %}
+
+            <!-- Full Name -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="full_name">Full Name</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                       id="full_name" name="full_name" type="text" value="{{ current_user.full_name or '' }}">
+            </div>
+
+            <!-- Location -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="location">Location</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                       id="location" name="location" type="text" value="{{ current_user.location or '' }}">
+            </div>
+
+            <!-- Phone Number -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="phone_number">Phone Number</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                       id="phone_number" name="phone_number" type="tel" value="{{ current_user.phone_number or '' }}">
+            </div>
+
+            <!-- Bio -->
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="bio">About Me</label>
+                <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32" 
+                          id="bio" name="bio">{{ current_user.bio or '' }}</textarea>
+            </div>
+
             <div class="flex items-center justify-between">
                 <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                    Change Email
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <h2 class="text-2xl font-bold mb-4">Change Password</h2>
-        <form action="{{ url_for('user_settings') }}" method="POST">
-            <input type="hidden" name="action" value="change_password">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="current_password">
-                    Current Password
-                </label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="current_password" name="current_password" type="password" required>
-            </div>
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="new_password">
-                    New Password
-                </label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="new_password" name="new_password" type="password" required>
-            </div>
-            <div class="flex items-center justify-between">
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                    Change Password
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <h2 class="text-2xl font-bold mb-4">Delete Account</h2>
-        <p class="mb-4 text-red-600">Warning: This action cannot be undone. All your data will be permanently deleted.</p>
-        <form action="{{ url_for('user_settings') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
-            <input type="hidden" name="action" value="delete_account">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="password_confirm">
-                    Confirm Password
-                </label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password_confirm" name="password_confirm" type="password" required>
-            </div>
-            <div class="flex items-center justify-between">
-                <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                    Delete Account
+                    Update Profile
                 </button>
             </div>
         </form>

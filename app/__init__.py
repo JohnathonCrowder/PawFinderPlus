@@ -96,47 +96,55 @@ def create_app():
     
     ##### User Settings Routes #########
 
-    @app.route('/user_settings', methods=['GET', 'POST'])
+    @app.route('/update_profile', methods=['POST'])
+    @login_required
+    def update_profile():
+        # Handle profile picture upload
+        if 'profile_picture' in request.files:
+            file = request.files['profile_picture']
+            if file and file.filename:
+                # Read the file data and store it in the database
+                current_user.profile_picture_data = file.read()
+                current_user.profile_picture_filename = secure_filename(file.filename)
+                current_user.profile_picture_mimetype = file.mimetype
+
+        # Update other profile information
+        current_user.full_name = request.form.get('full_name', '').strip() or None
+        current_user.location = request.form.get('location', '').strip() or None
+        current_user.phone_number = request.form.get('phone_number', '').strip() or None
+        current_user.bio = request.form.get('bio', '').strip() or None
+
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('user_settings'))
+
+    @app.route('/profile_picture/<int:user_id>')
+    def get_profile_picture(user_id):
+        user = User.query.get_or_404(user_id)
+        if user.profile_picture_data:
+            return send_file(
+                BytesIO(user.profile_picture_data),
+                mimetype=user.profile_picture_mimetype,
+                as_attachment=False,
+                download_name=user.profile_picture_filename
+            )
+        else:
+            # Return a default image or 404
+            return send_file('path/to/default/profile/image.png', mimetype='image/png')
+        
+    @app.route('/remove_profile_picture', methods=['POST'])
+    @login_required
+    def remove_profile_picture():
+        current_user.profile_picture_data = None
+        current_user.profile_picture_filename = None
+        current_user.profile_picture_mimetype = None
+        db.session.commit()
+        flash('Profile picture removed.', 'success')
+        return redirect(url_for('user_settings'))
+
+    @app.route('/user_settings')
     @login_required
     def user_settings():
-        if request.method == 'POST':
-            action = request.form.get('action')
-
-            if action == 'change_email':
-                new_email = request.form.get('new_email')
-                if User.query.filter_by(email=new_email).first():
-                    flash('Email already exists', 'error')
-                else:
-                    current_user.email = new_email
-                    db.session.commit()
-                    flash('Email updated successfully', 'success')
-
-            elif action == 'change_password':
-                current_password = request.form.get('current_password')
-                new_password = request.form.get('new_password')
-                if check_password_hash(current_user.password_hash, current_password):
-                    current_user.set_password(new_password)
-                    db.session.commit()
-                    flash('Password updated successfully', 'success')
-                else:
-                    flash('Current password is incorrect', 'error')
-
-            elif action == 'delete_account':
-                password_confirm = request.form.get('password_confirm')
-                if check_password_hash(current_user.password_hash, password_confirm):
-                    # Delete user's dogs and associated images
-                    for dog in current_user.dogs:
-                        db.session.delete(dog)
-                    db.session.delete(current_user)
-                    db.session.commit()
-                    logout_user()
-                    flash('Your account has been deleted', 'success')
-                    return redirect(url_for('home'))
-                else:
-                    flash('Password is incorrect', 'error')
-
-            return redirect(url_for('user_settings'))
-
         return render_template('user_settings.html')
     
 

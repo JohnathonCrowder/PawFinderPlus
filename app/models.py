@@ -13,6 +13,17 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     dogs = db.relationship('Dog', backref='owner', lazy=True)
+    
+    # New profile fields
+    full_name = db.Column(db.String(120))
+    location = db.Column(db.String(120))
+    phone_number = db.Column(db.String(20))
+    bio = db.Column(db.Text)
+
+    # Profile picture stored directly in the database
+    profile_picture_data = db.Column(LargeBinary)
+    profile_picture_filename = db.Column(db.String(255))
+    profile_picture_mimetype = db.Column(db.String(50))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
