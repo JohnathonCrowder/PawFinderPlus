@@ -260,6 +260,56 @@
         color: #7f8c8d;
         font-size: 0.9em;
     }
+
+    .parent-to-dog-connection {
+        width: 100%;
+        height: 60px;
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .connection-line {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 2px;
+        height: 100%;
+        background-color: #3498db;
+        transform: translateX(-50%);
+    }
+
+    .connection-line::before,
+    .connection-line::after {
+        content: '';
+        position: absolute;
+        width: 200px;
+        height: 2px;
+        background-color: #3498db;
+        top: 0;
+    }
+
+    .connection-line::before {
+        right: 0;
+        transform: translateX(50%);
+    }
+
+    .connection-line::after {
+        left: 0;
+        transform: translateX(-50%);
+    }
+
+    /* Adjust the parent cards to align with the new connection */
+    .grandparent-pair {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 45%;
+    }
+
+    .parent-card {
+        margin-bottom: -70px; /* This will make the parent cards overlap with the connection */
+        z-index: 1; /* Ensure the cards are above the connection line */
+    }
 </style>
 {% endblock %}
 
@@ -331,6 +381,11 @@
             </div>
         </div>
 
+        <!-- Connection between parents and current dog -->
+        <div class="parent-to-dog-connection">
+            <div class="connection-line"></div>
+        </div>
+
         <!-- Current Dog -->
         <div class="generation" id="current-dog">
             <div class="dog-card" style="border-color: #e74c3c;">
@@ -395,25 +450,44 @@
         });
     
         // Animate parent cards
-        anime({
-            targets: '.parent-card',
-            opacity: [0, 1],
-            translateY: [20, 0],
-            delay: anime.stagger(200, {start: 1000}),
-            easing: 'easeOutQuad',
-            duration: 800
-        });
-    
-        // Animate current dog
-        anime({
-            targets: '#current-dog',
-            opacity: [0, 1],
-            translateY: [20, 0],
-            scale: [0.9, 1],
-            delay: 1400,
-            easing: 'easeOutElastic(1, .5)',
-            duration: 1000
-        });
+    anime({
+        targets: '.parent-card',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        delay: anime.stagger(200, {start: 1000}),
+        easing: 'easeOutQuad',
+        duration: 800
+    });
+
+    // Animate connection between parents and current dog
+    anime({
+        targets: '.parent-to-dog-connection .connection-line',
+        scaleY: [0, 1],
+        opacity: [0, 1],
+        delay: 1200,
+        easing: 'easeOutQuad',
+        duration: 600
+    });
+
+    anime({
+        targets: '.connection-line::before, .connection-line::after',
+        scaleX: [0, 1],
+        opacity: [0, 1],
+        delay: 1400,
+        easing: 'easeOutQuad',
+        duration: 600
+    });
+
+    // Animate current dog
+    anime({
+        targets: '#current-dog',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        scale: [0.9, 1],
+        delay: 1600,
+        easing: 'easeOutElastic(1, .5)',
+        duration: 1000
+    });
     
         // Animate litter mates section
         anime({
