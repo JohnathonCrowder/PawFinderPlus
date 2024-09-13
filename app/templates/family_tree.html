@@ -310,6 +310,88 @@
         margin-bottom: -70px; /* This will make the parent cards overlap with the connection */
         z-index: 1; /* Ensure the cards are above the connection line */
     }
+    .litter-mates-section {
+        margin-top: 40px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .litter-mates-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .litter-mates-header h4 {
+        color: #2c3e50;
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    .litter-mates-header p {
+        color: #7f8c8d;
+        font-size: 0.9em;
+    }
+
+    .litter-mates-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .litter-mate-card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        padding: 15px;
+        width: 150px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .litter-mate-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .litter-mate-card img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+        border: 3px solid #3498db;
+    }
+
+    .litter-mate-card h5 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1em;
+    }
+
+    .litter-mate-card p {
+        margin: 5px 0;
+        color: #7f8c8d;
+        font-size: 0.8em;
+    }
+
+    .view-profile-btn {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: #3498db;
+        color: white;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 0.8em;
+        transition: background-color 0.3s ease;
+    }
+
+    .view-profile-btn:hover {
+        background-color: #2980b9;
+    }
 </style>
 {% endblock %}
 
@@ -398,13 +480,23 @@
 
         <!-- Litter Mates -->
         {% if dog.litter and dog.litter.puppies|length > 1 %}
-        <div class="litter-mates" id="litter-mates">
-            <h4>Litter Mates</h4>
-            {% for puppy in dog.litter.puppies if puppy.id != dog.id %}
-            <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="litter-mate">{{ puppy.name }}</a>
-            {% endfor %}
+<div class="litter-mates-section">
+    <div class="litter-mates-header">
+        <h4>Litter Mates</h4>
+        <p>Born on {{ dog.litter.date_of_birth.strftime('%B %d, %Y') }}</p>
+    </div>
+    <div class="litter-mates-container">
+        {% for puppy in dog.litter.puppies if puppy.id != dog.id %}
+        <div class="litter-mate-card">
+            <img src="{{ url_for('get_dog_image', image_id=puppy.images[0].id) if puppy.images else url_for('static', filename='default_dog.png') }}" alt="{{ puppy.name }}">
+            <h5>{{ puppy.name }}</h5>
+            <p>{{ puppy.gender }}</p>
+            <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="view-profile-btn">View Profile</a>
         </div>
-        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
     </div>
 </div>
 
@@ -489,25 +581,25 @@
         duration: 1000
     });
     
-        // Animate litter mates section
-        anime({
-            targets: '.litter-mates',
-            opacity: [0, 1],
-            translateY: [20, 0],
-            delay: 1600,
-            easing: 'easeOutQuad',
-            duration: 800
-        });
-    
-        // Animate litter mate buttons
-        anime({
-            targets: '.litter-mate',
-            scale: [0.9, 1],
-            opacity: [0, 1],
-            delay: anime.stagger(50, {start: 1800}),
-            easing: 'easeOutElastic(1, .5)',
-            duration: 600
-        });
+         // Animate litter mates section
+    anime({
+        targets: '.litter-mates-section',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        delay: 1800,
+        easing: 'easeOutQuad',
+        duration: 800
     });
+
+    // Animate litter mate cards
+    anime({
+        targets: '.litter-mate-card',
+        scale: [0.9, 1],
+        opacity: [0, 1],
+        delay: anime.stagger(100, {start: 2000}),
+        easing: 'easeOutElastic(1, .5)',
+        duration: 800
+    });
+});
     </script>
 {% endblock %}
