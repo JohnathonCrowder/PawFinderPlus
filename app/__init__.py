@@ -238,6 +238,30 @@ def create_app():
         litter = Litter.query.filter(Litter.puppies.any(id=dog.id)).first()
 
         return render_template('family_tree.html', dog=dog, litter=litter)
+    
+    @app.route('/edit_litter/<int:id>', methods=['GET', 'POST'])
+    @login_required
+    def edit_litter(id):
+        litter = Litter.query.get_or_404(id)
+        if request.method == 'POST':
+            litter.name = request.form['name']
+            litter.date_of_birth = datetime.strptime(request.form['date_of_birth'], '%Y-%m-%d')
+            litter.father_id = request.form['father_id']
+            litter.mother_id = request.form['mother_id']
+            puppy_ids = request.form.getlist('puppies')
+            
+            # Clear existing puppies and add new ones
+            litter.puppies = []
+            for puppy_id in puppy_ids:
+                puppy = Dog.query.get(puppy_id)
+                litter.puppies.append(puppy)
+
+            db.session.commit()
+            flash('Litter updated successfully!', 'success')
+            return redirect(url_for('litter_management'))
+
+        dogs = Dog.query.filter_by(user_id=current_user.id).all()
+        return render_template('edit_litter.html', litter=litter, dogs=dogs)
 
     @app.route('/dog/<int:id>', methods=['GET', 'POST'])
     @login_required

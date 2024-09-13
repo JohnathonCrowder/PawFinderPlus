@@ -61,9 +61,14 @@
                     <p class="text-gray-600 mb-2">Father: {{ litter.father.name }}</p>
                     <p class="text-gray-600 mb-2">Mother: {{ litter.mother.name }}</p>
                     <p class="text-gray-600 mb-4">Puppies: {{ litter.puppies|length }}</p>
-                    <a href="{{ url_for('litter_detail', id=litter.id) }}" class="bone-button inline-block">
-                        <i class="fas fa-eye mr-2"></i> View Details
-                    </a>
+                    <div class="flex space-x-2">
+                        <a href="{{ url_for('litter_detail', id=litter.id) }}" class="bone-button inline-block">
+                            <i class="fas fa-eye mr-2"></i> View Details
+                        </a>
+                        <a href="{{ url_for('edit_litter', id=litter.id) }}" class="bone-button inline-block bg-green-500 hover:bg-green-600">
+                            <i class="fas fa-edit mr-2"></i> Edit
+                        </a>
+                    </div>
                 </div>
             {% endfor %}
         </div>

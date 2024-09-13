@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Litter - DogBreederPlus{% endblock %}
+
+{% block head %}
+<style>
+    .litter-bg {
+        background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
+        background-color: #f0f4f8;
+    }
+    .form-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+    }
+    .input-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .input-group .icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #0080ff;
+    }
+    .input-group input, 
+    .input-group select {
+        padding-left: 40px;
+    }
+    .bone-button {
+        background-color: #0080ff;
+        color: white;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .bone-button:hover {
+        background-color: #0060c0;
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 litter-bg">
+    <div class="form-container">
+        <div class="text-center mb-6">
+            <i class="fas fa-paw text-6xl text-blue-500"></i>
+            <h1 class="text-3xl font-bold mt-2" style="color: #0080ff;">Edit Litter</h1>
+            <p class="text-gray-600">Update the details of the litter</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <span class="block sm:inline">{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form action="{{ url_for('edit_litter', id=litter.id) }}" method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="input-group">
+                    <i class="fas fa-tag icon"></i>
+                    <input type="text" id="name" name="name" 
+                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                           placeholder="Litter Name" value="{{ litter.name }}" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-calendar-alt icon"></i>
+                    <input type="date" id="date_of_birth" name="date_of_birth" 
+                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                           value="{{ litter.date_of_birth.strftime('%Y-%m-%d') }}" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-dog icon"></i>
+                    <select id="father_id" name="father_id" 
+                            class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            required>
+                        <option value="">Select Father</option>
+                        {% for dog in dogs if dog.gender == 'Male' %}
+                            <option value="{{ dog.id }}" {% if dog.id == litter.father_id %}selected{% endif %}>{{ dog.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-dog icon"></i>
+                    <select id="mother_id" name="mother_id" 
+                            class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            required>
+                        <option value="">Select Mother</option>
+                        {% for dog in dogs if dog.gender == 'Female' %}
+                            <option value="{{ dog.id }}" {% if dog.id == litter.mother_id %}selected{% endif %}>{{ dog.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <h3 class="text-xl font-semibold mb-2">Select Puppies</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {% for dog in dogs %}
+                        <div class="flex items-center">
+                            <input type="checkbox" id="puppy_{{ dog.id }}" name="puppies" value="{{ dog.id }}" 
+                                   {% if dog in litter.puppies %}checked{% endif %} class="mr-2">
+                            <label for="puppy_{{ dog.id }}">{{ dog.name }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex justify-center mt-6">
+                <button type="submit" class="bone-button">
+                    <i class="fas fa-save mr-2"></i> Update Litter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
