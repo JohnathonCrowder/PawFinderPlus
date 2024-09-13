@@ -9,6 +9,7 @@ from .models import User, Dog, DogImage, Litter
 from io import BytesIO
 from flask_migrate import Migrate
 from sqlalchemy.orm import joinedload
+from sqlalchemy import or_
 
 
 def create_app():
@@ -171,8 +172,18 @@ def create_app():
     @app.route('/dog_management')
     @login_required
     def dog_management():
-        dogs = Dog.query.filter_by(user_id=current_user.id).all()
-        return render_template('dog_management.html', dogs=dogs)
+        search = request.args.get('search', '')
+        if search:
+            dogs = Dog.query.filter(
+                Dog.user_id == current_user.id,
+                or_(
+                    Dog.name.ilike(f'%{search}%'),
+                    Dog.breed.ilike(f'%{search}%')
+                )
+            ).all()
+        else:
+            dogs = Dog.query.filter_by(user_id=current_user.id).all()
+        return render_template('dog_management.html', dogs=dogs, search=search)
 
     @app.route('/add_dog', methods=['GET', 'POST'])
     @login_required
