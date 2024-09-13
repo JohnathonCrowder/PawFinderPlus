@@ -17,6 +17,9 @@
                 {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('dog_management') }}" class="hover:underline">Dog Management</a></li>
                     <li><a href="{{ url_for('add_dog') }}" class="hover:underline">Add Dog</a></li>
+                    {% if current_user.is_authenticated %}
+    <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="hover:underline">My Profile</a></li>
+{% endif %}
                     <li><a href="{{ url_for('user_settings') }}" class="hover:underline">Settings</a></li>
 
                     <li><a href="{{ url_for('logout') }}" class="hover:underline">Logout</a></li>

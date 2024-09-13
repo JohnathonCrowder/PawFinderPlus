@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.full_name or user.username }}'s Profile - DogBreederPlus{% endblock %}
+
+{% block head %}
+<style>
+    .profile-bg {
+        background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
+        background-color: #f0f4f8;
+    }
+    .profile-header {
+        background-image: linear-gradient(rgba(0,128,255,0.7), rgba(0,128,255,0.7)), 
+                          url('https://images.unsplash.com/photo-1534351590666-13e3e96b5017?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+        background-size: cover;
+        background-position: center;
+    }
+    .profile-picture {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    .dog-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .dog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    .dog-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-bg min-h-screen pb-12">
+    <!-- Profile Header -->
+    <div class="profile-header text-white py-20 mb-12">
+        <div class="container mx-auto px-4 flex flex-col items-center">
+            {% if user.profile_picture_data %}
+                <img src="{{ url_for('get_profile_picture', user_id=user.id) }}" 
+                     alt="{{ user.full_name or user.username }}" 
+                     class="profile-picture mb-6">
+            {% else %}
+                <div class="profile-picture bg-gray-300 flex items-center justify-center mb-6">
+                    <i class="fas fa-user text-6xl text-gray-500"></i>
+                </div>
+            {% endif %}
+            <h1 class="text-4xl font-bold mb-2">{{ user.full_name or user.username }}</h1>
+            {% if user.location %}
+                <p class="text-xl mb-2"><i class="fas fa-map-marker-alt mr-2"></i>{{ user.location }}</p>
+            {% endif %}
+            {% if user.bio %}
+                <p class="text-lg italic max-w-2xl text-center">"{{ user.bio }}"</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4">
+        <!-- Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div class="stat-card p-6 text-center">
+                <i class="fas fa-dog text-5xl text-blue-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">{{ total_dogs }}</h2>
+                <p class="text-gray-600">Total Dogs</p>
+            </div>
+            <div class="stat-card p-6 text-center">
+                <i class="fas fa-paw text-5xl text-blue-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">{{ dog_breeds|length }}</h2>
+                <p class="text-gray-600">Dog Breeds</p>
+            </div>
+            <div class="stat-card p-6 text-center">
+                <i class="fas fa-calendar-alt text-5xl text-blue-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">{{ user.created_at.strftime('%Y') }}</h2>
+                <p class="text-gray-600">Member Since</p>
+            </div>
+        </div>
+
+        <!-- Dogs Section -->
+        {% if dogs %}
+            <h2 class="text-3xl font-bold mb-6 text-blue-600">{{ user.full_name or user.username }}'s Dogs</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for dog in dogs %}
+                    <div class="dog-card overflow-hidden">
+                        {% if dog.images %}
+                            <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
+                                 alt="{{ dog.name }}" class="dog-image">
+                        {% else %}
+                            <div class="dog-image bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-paw text-5xl text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">{{ dog.name }}</h3>
+                            <p class="text-gray-600 mb-2">{{ dog.breed }}</p>
+                            <p class="text-gray-500 mb-2"><i class="fas fa-birthday-cake mr-2"></i>{{ dog.date_of_birth.strftime('%B %d, %Y') }}</p>
+                            {% if dog.weight %}
+                                <p class="text-gray-500 mb-2"><i class="fas fa-weight mr-2"></i>{{ dog.weight }} kg</p>
+                            {% endif %}
+                            <a href="{{ url_for('dog_profile', id=dog.id) }}" class="inline-block mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">View Profile</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-dog text-6xl text-gray-400 mb-4"></i>
+                <p class="text-xl text-gray-600">{{ user.full_name or user.username }} hasn't added any dogs yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

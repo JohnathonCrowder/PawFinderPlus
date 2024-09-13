@@ -74,6 +74,10 @@
             {% endif %}
         {% endwith %}
 
+        <a href="{{ url_for('user_profile', username=current_user.username) }}" class="inline-block mb-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300">
+            <i class="fas fa-eye mr-2"></i>View Public Profile
+        </a>
+
         <div class="settings-container p-8 mb-8">
             <h2 class="text-2xl font-bold mb-6 section-title">Profile Information</h2>
             <form action="{{ url_for('update_profile') }}" method="POST" enctype="multipart/form-data">

@@ -93,6 +93,24 @@ def create_app():
         db.session.commit()
         flash('Profile picture removed successfully.', 'success')
         return redirect(url_for('user_settings'))
+    
+
+    @app.route('/profile/<username>')
+    def user_profile(username):
+        user = User.query.filter_by(username=username).first_or_404()
+        
+        # Get user's dogs
+        dogs = Dog.query.filter_by(user_id=user.id).all()
+        
+        # Calculate some stats
+        total_dogs = len(dogs)
+        dog_breeds = list(set(dog.breed for dog in dogs))
+        
+        return render_template('user_profile.html', 
+                            user=user, 
+                            dogs=dogs, 
+                            total_dogs=total_dogs, 
+                            dog_breeds=dog_breeds)
 
     # Existing Routes
     @app.route('/register', methods=['GET', 'POST'])
