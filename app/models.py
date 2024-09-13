@@ -47,6 +47,13 @@ class Dog(db.Model):
     father = db.relationship('Dog', remote_side=[id], backref='offspring_as_father', foreign_keys=[father_id])
     mother = db.relationship('Dog', remote_side=[id], backref='offspring_as_mother', foreign_keys=[mother_id])
 
+    # Add a property to easily access the dog's litter
+    @property
+    def litter(self):
+        return Litter.query.filter(
+            (Litter.puppies.any(id=self.id))
+        ).first()
+
 class DogImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(LargeBinary, nullable=False)  # Store image data
@@ -54,6 +61,8 @@ class DogImage(db.Model):
     mimetype = db.Column(db.String(50), nullable=False)  # Store mimetype
     dog_id = db.Column(db.Integer, db.ForeignKey('dog.id'), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    
 
 class Litter(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -66,6 +75,13 @@ class Litter(db.Model):
     puppies = db.relationship('Dog', secondary='litter_puppy', backref='litter')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref='litters')
+
+    # Ensure puppies relationship is properly defined
+    puppies = db.relationship('Dog', 
+        secondary='litter_puppy', 
+        backref=db.backref('litters', lazy='dynamic'),
+        lazy='joined'  # This will eager load the puppies
+    )
 
 litter_puppy = db.Table('litter_puppy',
     db.Column('litter_id', db.Integer, db.ForeignKey('litter.id'), primary_key=True),

@@ -220,6 +220,9 @@ def create_app():
     @login_required
     def dog_family_tree(id):
         dog = Dog.query.get_or_404(id)
+        # Eager load the litter and its puppies
+        if dog.litter:
+            dog.litter.puppies
         return render_template('family_tree.html', dog=dog)
 
     @app.route('/dog/<int:id>', methods=['GET', 'POST'])

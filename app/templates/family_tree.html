@@ -78,6 +78,25 @@
     .tree li a:hover+ul ul::before {
         border-color: #94a0b4;
     }
+    .tree .litter-mates {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px dashed #ccc;
+        border-radius: 5px;
+    }
+    .tree .litter-mates li {
+        margin: 0 10px;
+        padding: 5px;
+    }
+    .litter-mates-title {
+        width: 100%;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
 </style>
 {% endblock %}
 
@@ -88,6 +107,18 @@
         <ul>
             <li>
                 <a href="{{ url_for('dog_profile', id=dog.id) }}">{{ dog.name }}</a>
+                
+                {% if dog.litter and dog.litter.puppies|length > 1 %}
+                <ul class="litter-mates">
+                    <li class="litter-mates-title">Litter Mates:</li>
+                    {% for puppy in dog.litter.puppies if puppy.id != dog.id %}
+                    <li>
+                        <a href="{{ url_for('dog_profile', id=puppy.id) }}">{{ puppy.name }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                
                 <ul>
                     {% if dog.father %}
                     <li>
