@@ -228,10 +228,13 @@ def create_app():
             joinedload(Dog.father).joinedload(Dog.mother).joinedload(Dog.images),
             joinedload(Dog.mother).joinedload(Dog.father).joinedload(Dog.images),
             joinedload(Dog.mother).joinedload(Dog.mother).joinedload(Dog.images),
+            joinedload(Dog.father).joinedload(Dog.father).joinedload(Dog.father).joinedload(Dog.images),
+            joinedload(Dog.father).joinedload(Dog.father).joinedload(Dog.mother).joinedload(Dog.images),
+            joinedload(Dog.father).joinedload(Dog.mother).joinedload(Dog.father).joinedload(Dog.images),
+            joinedload(Dog.father).joinedload(Dog.mother).joinedload(Dog.mother).joinedload(Dog.images),
             joinedload(Dog.images)
         ).get_or_404(id)
 
-        # Fetch litter information separately if needed
         litter = Litter.query.filter(Litter.puppies.any(id=dog.id)).first()
 
         return render_template('family_tree.html', dog=dog, litter=litter)

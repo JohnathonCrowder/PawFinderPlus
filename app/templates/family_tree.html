@@ -3,176 +3,387 @@
 {% block title %}{{ dog.name }}'s Family Tree - DogBreederPlus{% endblock %}
 
 {% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 <style>
+    .family-tree-container {
+        background: linear-gradient(135deg, #f6f9fc 0%, #e9f2f9 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+        font-family: 'Arial', sans-serif;
+    }
+    .tree-header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #2c3e50;
+        position: relative;
+    }
+    .tree-header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    .tree-header::after {
+        content: '';
+        display: block;
+        width: 100px;
+        height: 4px;
+        background: #3498db;
+        margin: 20px auto;
+        border-radius: 2px;
+    }
     .family-tree {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 20px;
-        overflow-x: auto;
+        max-width: 1200px;
+        margin: 0 auto;
     }
     .generation {
         display: flex;
         justify-content: center;
-        width: 100%;
+        flex-wrap: wrap;
         margin-bottom: 40px;
+        opacity: 0;
+        transform: translateY(20px);
     }
     .dog-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 0 20px;
-        position: relative;
-    }
-    .dog-image {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #3498db;
-    }
-    .dog-info {
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        padding: 20px;
+        width: 180px;
         text-align: center;
-        margin-top: 10px;
+        margin: 10px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
-    .dog-name {
-        font-weight: bold;
-        font-size: 1.1em;
-        color: #2c3e50;
-    }
-    .dog-breed {
-        font-size: 0.9em;
-        color: #7f8c8d;
-    }
-    .connection {
-        position: absolute;
-        border-left: 2px solid #3498db;
-        height: 40px;
-        left: 50%;
-        bottom: -40px;
-    }
-    .connection::before, .connection::after {
+    .dog-card::before {
         content: '';
         position: absolute;
-        left: -1px;
-        width: 50px;
-        border-top: 2px solid #3498db;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #3498db, #2980b9);
+    }
+    .dog-card:hover {
+        transform: translateY(-5px) scale(1.03);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    .dog-card img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 15px;
+        border: 3px solid #3498db;
+        transition: all 0.3s ease;
+    }
+    .dog-card:hover img {
+        transform: scale(1.1);
+    }
+    .dog-card h3 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1.1em;
+        font-weight: 600;
+    }
+    .dog-card p {
+        margin: 5px 0;
+        color: #7f8c8d;
+        font-size: 0.9em;
+    }
+    .connection {
+        width: 2px;
+        background-color: #3498db;
+        position: relative;
+        margin: 0 auto;
+    }
+    .connection::before,
+    .connection::after {
+        content: '';
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: #3498db;
+        border-radius: 50%;
+        left: 50%;
+        transform: translateX(-50%);
     }
     .connection::before {
-        bottom: 0;
-        transform: translateX(-100%);
+        top: 0;
     }
     .connection::after {
         bottom: 0;
     }
     .litter-mates {
-        background-color: #ecf0f1;
+        background-color: #ffffff;
         border: 2px dashed #3498db;
-        border-radius: 10px;
-        padding: 10px;
-        margin-top: 20px;
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 40px;
         text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    .litter-mates h4 {
+        color: #2c3e50;
+        margin-bottom: 15px;
     }
     .litter-mate {
         display: inline-block;
         margin: 5px;
-        padding: 5px 10px;
+        padding: 8px 15px;
         background-color: #3498db;
         color: white;
+        border-radius: 20px;
+        font-size: 0.9em;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .litter-mate:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+    }
+    @media (max-width: 768px) {
+        .dog-card {
+            width: 150px;
+        }
+    }
+
+    .grandparents-section {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        max-width: 1200px;
+        margin-bottom: 40px;
+    }
+
+    .grandparent-pair {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 45%;
+    }
+
+    .grandparent-pair-title {
+        font-size: 1.2em;
+        color: #34495e;
+        margin-bottom: 15px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .grandparents {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .grandparent-card {
+        width: 48%;
+        background-color: #ffffff;
         border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        padding: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .grandparent-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .grandparent-card img {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+        border: 3px solid #3498db;
+    }
+
+    .grandparent-card h3 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1em;
+    }
+
+    .grandparent-card p {
+        margin: 5px 0;
+        color: #7f8c8d;
+        font-size: 0.8em;
+    }
+
+    .parent-connection {
+        width: 2px;
+        height: 30px;
+        background-color: #3498db;
+        margin: 10px 0;
+    }
+
+    .parent-card {
+        width: 60%;
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        padding: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .parent-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .parent-card img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+        border: 3px solid #e74c3c;
+    }
+
+    .parent-card h3 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1.1em;
+    }
+
+    .parent-card p {
+        margin: 5px 0;
+        color: #7f8c8d;
         font-size: 0.9em;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6 text-center">{{ dog.name }}'s Family Tree</h1>
+<div class="family-tree-container">
+    <div class="tree-header">
+        <h1>{{ dog.name }}'s Family Tree</h1>
+        <p>Explore the lineage of {{ dog.name }} the {{ dog.breed }}</p>
+    </div>
     <div class="family-tree">
+        <!-- Grandparents and Parents Section -->
+        <div class="grandparents-section">
+            <!-- Paternal Grandparents and Father -->
+            <div class="grandparent-pair">
+                <div class="grandparent-pair-title">Paternal Grandparents</div>
+                <div class="grandparents">
+                    {% if dog.father and dog.father.father %}
+                    <div class="grandparent-card">
+                        <img src="{{ url_for('get_dog_image', image_id=dog.father.father.images[0].id) if dog.father.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.father.name }}">
+                        <h3>{{ dog.father.father.name }}</h3>
+                        <p>Paternal Grandfather</p>
+                    </div>
+                    {% endif %}
+                    {% if dog.father and dog.father.mother %}
+                    <div class="grandparent-card">
+                        <img src="{{ url_for('get_dog_image', image_id=dog.father.mother.images[0].id) if dog.father.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.mother.name }}">
+                        <h3>{{ dog.father.mother.name }}</h3>
+                        <p>Paternal Grandmother</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="parent-connection"></div>
+                {% if dog.father %}
+                <div class="parent-card">
+                    <img src="{{ url_for('get_dog_image', image_id=dog.father.images[0].id) if dog.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.name }}">
+                    <h3>{{ dog.father.name }}</h3>
+                    <p>Father</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Maternal Grandparents and Mother -->
+            <div class="grandparent-pair">
+                <div class="grandparent-pair-title">Maternal Grandparents</div>
+                <div class="grandparents">
+                    {% if dog.mother and dog.mother.father %}
+                    <div class="grandparent-card">
+                        <img src="{{ url_for('get_dog_image', image_id=dog.mother.father.images[0].id) if dog.mother.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.father.name }}">
+                        <h3>{{ dog.mother.father.name }}</h3>
+                        <p>Maternal Grandfather</p>
+                    </div>
+                    {% endif %}
+                    {% if dog.mother and dog.mother.mother %}
+                    <div class="grandparent-card">
+                        <img src="{{ url_for('get_dog_image', image_id=dog.mother.mother.images[0].id) if dog.mother.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.mother.name }}">
+                        <h3>{{ dog.mother.mother.name }}</h3>
+                        <p>Maternal Grandmother</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="parent-connection"></div>
+                {% if dog.mother %}
+                <div class="parent-card">
+                    <img src="{{ url_for('get_dog_image', image_id=dog.mother.images[0].id) if dog.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.name }}">
+                    <h3>{{ dog.mother.name }}</h3>
+                    <p>Mother</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
         <!-- Current Dog -->
-        <div class="generation">
-            <div class="dog-card">
-                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.images[0].id) if dog.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.name }}">
-                <div class="dog-info">
-                    <div class="dog-name">{{ dog.name }}</div>
-                    <div class="dog-breed">{{ dog.breed }}</div>
-                </div>
-                <div class="connection"></div>
+        <div class="generation" id="current-dog">
+            <div class="dog-card" style="border-color: #e74c3c;">
+                <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) if dog.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.name }}">
+                <h3>{{ dog.name }}</h3>
+                <p>{{ dog.breed }}</p>
+                <p>{{ dog.date_of_birth.strftime('%Y-%m-%d') }}</p>
             </div>
         </div>
-        
-        <!-- Parents -->
-        <div class="generation">
-            {% if dog.father %}
-            <div class="dog-card">
-                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.father.images[0].id) if dog.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.name }}">
-                <div class="dog-info">
-                    <div class="dog-name">{{ dog.father.name }}</div>
-                    <div class="dog-breed">Father</div>
-                </div>
-                <div class="connection"></div>
-            </div>
-            {% endif %}
-            {% if dog.mother %}
-            <div class="dog-card">
-                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.mother.images[0].id) if dog.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.name }}">
-                <div class="dog-info">
-                    <div class="dog-name">{{ dog.mother.name }}</div>
-                    <div class="dog-breed">Mother</div>
-                </div>
-                <div class="connection"></div>
-            </div>
-            {% endif %}
+
+        <!-- Litter Mates -->
+        {% if dog.litter and dog.litter.puppies|length > 1 %}
+        <div class="litter-mates" id="litter-mates">
+            <h4>Litter Mates</h4>
+            {% for puppy in dog.litter.puppies if puppy.id != dog.id %}
+            <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="litter-mate">{{ puppy.name }}</a>
+            {% endfor %}
         </div>
-        
-        <!-- Grandparents -->
-        <div class="generation">
-            {% if dog.father and dog.father.father %}
-            <div class="dog-card">
-                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.father.father.images[0].id) if dog.father.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.father.name }}">
-                <div class="dog-info">
-                    <div class="dog-name">{{ dog.father.father.name }}</div>
-                    <div class="dog-breed">Paternal Grandfather</div>
-                </div>
-            </div>
-            {% endif %}
-            {% if dog.father and dog.father.mother %}
-            <div class="dog-card">
-                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.father.mother.images[0].id) if dog.father.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.mother.name }}">
-                <div class="dog-info">
-                    <div class="dog-name">{{ dog.father.mother.name }}</div>
-                    <div class="dog-breed">Paternal Grandmother</div>
-                </div>
-            </div>
-            {% endif %}
-            {% if dog.mother and dog.mother.father %}
-            <div class="dog-card">
-                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.mother.father.images[0].id) if dog.mother.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.father.name }}">
-                <div class="dog-info">
-                    <div class="dog-name">{{ dog.mother.father.name }}</div>
-                    <div class="dog-breed">Maternal Grandfather</div>
-                </div>
-            </div>
-            {% endif %}
-            {% if dog.mother and dog.mother.mother %}
-            <div class="dog-card">
-                <img class="dog-image" src="{{ url_for('get_dog_image', image_id=dog.mother.mother.images[0].id) if dog.mother.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.mother.name }}">
-                <div class="dog-info">
-                    <div class="dog-name">{{ dog.mother.mother.name }}</div>
-                    <div class="dog-breed">Maternal Grandmother</div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
+        {% endif %}
     </div>
-    
-    {% if litter and litter.puppies|length > 1 %}
-    <div class="litter-mates">
-        <h4 class="font-bold mb-2">Litter Mates:</h4>
-        {% for puppy in litter.puppies if puppy.id != dog.id %}
-        <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="litter-mate">{{ puppy.name }}</a>
-        {% endfor %}
-    </div>
-    {% endif %}
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // Animate generations
+        anime({
+            targets: '.generation',
+            opacity: [0, 1],
+            translateY: [20, 0],
+            delay: anime.stagger(200, {start: 300}),
+            easing: 'easeOutQuad',
+            duration: 800
+        });
+
+        // Animate connections
+        anime({
+            targets: '.connection',
+            scaleY: [0, 1],
+            opacity: [0, 1],
+            delay: anime.stagger(200, {start: 500}),
+            easing: 'easeOutQuad',
+            duration: 600
+        });
+
+        // Animate litter mates
+        anime({
+            targets: '.litter-mates',
+            opacity: [0, 1],
+            translateY: [20, 0],
+            delay: 1500,
+            easing: 'easeOutQuad',
+            duration: 800
+        });
+    });
+</script>
 {% endblock %}
