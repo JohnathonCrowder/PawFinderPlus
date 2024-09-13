@@ -341,6 +341,19 @@ def create_app():
             flash('Password is incorrect', 'error')
         return redirect(url_for('user_settings'))
     
+    @app.route('/delete_litter/<int:id>', methods=['POST'])
+    @login_required
+    def delete_litter(id):
+        litter = Litter.query.get_or_404(id)
+        if litter.user_id != current_user.id:
+            flash('You do not have permission to delete this litter.', 'error')
+            return redirect(url_for('litter_management'))
+        
+        db.session.delete(litter)
+        db.session.commit()
+        flash('Litter has been deleted successfully.', 'success')
+        return redirect(url_for('litter_management'))
+    
     @app.route('/dog/<int:id>/profile')
     def dog_profile(id):
         dog = Dog.query.get_or_404(id)

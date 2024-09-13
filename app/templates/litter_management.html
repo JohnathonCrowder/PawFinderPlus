@@ -30,6 +30,19 @@
         background-color: #0060c0;
         transform: scale(1.05);
     }
+    .delete-button {
+        background-color: #e74c3c;
+        color: white;
+        border-radius: 25px;
+        padding: 8px 15px;
+        font-size: 0.9em;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .delete-button:hover {
+        background-color: #c0392b;
+        transform: scale(1.05);
+    }
 </style>
 {% endblock %}
 
@@ -37,9 +50,14 @@
 <div class="container mx-auto px-4 py-8 litter-bg">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-4xl font-bold" style="color: #0080ff;">Litter Management</h1>
-        <a href="{{ url_for('add_litter') }}" class="bone-button">
-            <i class="fas fa-plus mr-2"></i> Add New Litter
-        </a>
+        <div class="flex items-center">
+            <button id="viewToggle" class="mr-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                <i class="fas fa-th mr-2"></i> <span id="viewToggleText">Switch to Table View</span>
+            </button>
+            <a href="{{ url_for('add_litter') }}" class="bone-button">
+                <i class="fas fa-plus mr-2"></i> Add New Litter
+            </a>
+        </div>
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -53,7 +71,8 @@
     {% endwith %}
 
     {% if litters %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Card View -->
+        <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for litter in litters %}
                 <div class="litter-card p-6">
                     <h2 class="text-2xl font-bold mb-2">{{ litter.name }}</h2>
@@ -68,9 +87,52 @@
                         <a href="{{ url_for('edit_litter', id=litter.id) }}" class="bone-button inline-block bg-green-500 hover:bg-green-600">
                             <i class="fas fa-edit mr-2"></i> Edit
                         </a>
+                        <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="delete-button">
+                            <i class="fas fa-trash-alt mr-2"></i> Delete
+                        </button>
                     </div>
                 </div>
             {% endfor %}
+        </div>
+
+        <!-- Table View -->
+        <div id="tableView" class="hidden overflow-x-auto">
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-gray-300 px-4 py-2">Name</th>
+                        <th class="border border-gray-300 px-4 py-2">Date of Birth</th>
+                        <th class="border border-gray-300 px-4 py-2">Father</th>
+                        <th class="border border-gray-300 px-4 py-2">Mother</th>
+                        <th class="border border-gray-300 px-4 py-2">Puppies</th>
+                        <th class="border border-gray-300 px-4 py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for litter in litters %}
+                    <tr>
+                        <td class="border border-gray-300 px-4 py-2">{{ litter.name }}</td>
+                        <td class="border border-gray-300 px-4 py-2">{{ litter.date_of_birth.strftime('%Y-%m-%d') }}</td>
+                        <td class="border border-gray-300 px-4 py-2">{{ litter.father.name }}</td>
+                        <td class="border border-gray-300 px-4 py-2">{{ litter.mother.name }}</td>
+                        <td class="border border-gray-300 px-4 py-2">{{ litter.puppies|length }}</td>
+                        <td class="border border-gray-300 px-4 py-2">
+                            <div class="flex space-x-2">
+                                <a href="{{ url_for('litter_detail', id=litter.id) }}" class="text-blue-500 hover:text-blue-700" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('edit_litter', id=litter.id) }}" class="text-green-500 hover:text-green-700" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="text-red-500 hover:text-red-700" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     {% else %}
         <div class="text-center py-12">
@@ -79,4 +141,80 @@
         </div>
     {% endif %}
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg max-w-md w-full">
+        <h3 class="text-xl font-bold mb-4">Confirm Deletion</h3>
+        <p id="deleteConfirmText" class="mb-6">Are you sure you want to delete this litter?</p>
+        <div class="flex justify-end space-x-4">
+            <button onclick="closeDeleteModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-100">
+                Cancel
+            </button>
+            <form id="deleteForm" action="" method="POST">
+                <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700">
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// View toggling
+const viewToggle = document.getElementById('viewToggle');
+const viewToggleText = document.getElementById('viewToggleText');
+const cardView = document.getElementById('cardView');
+const tableView = document.getElementById('tableView');
+
+// Check local storage for saved view preference
+const currentView = localStorage.getItem('litterListView') || 'card';
+setView(currentView);
+
+viewToggle.addEventListener('click', () => {
+    const newView = cardView.classList.contains('hidden') ? 'card' : 'table';
+    setView(newView);
+    localStorage.setItem('litterListView', newView);
+});
+
+function setView(view) {
+    if (view === 'table') {
+        cardView.classList.add('hidden');
+        tableView.classList.remove('hidden');
+        viewToggleText.textContent = 'Switch to Card View';
+        viewToggle.querySelector('i').classList.remove('fa-list');
+        viewToggle.querySelector('i').classList.add('fa-th');
+    } else {
+        cardView.classList.remove('hidden');
+        tableView.classList.add('hidden');
+        viewToggleText.textContent = 'Switch to Table View';
+        viewToggle.querySelector('i').classList.remove('fa-th');
+        viewToggle.querySelector('i').classList.add('fa-list');
+    }
+}
+
+// Delete functionality
+function confirmDelete(litterId, litterName) {
+    const modal = document.getElementById('deleteModal');
+    const confirmText = document.getElementById('deleteConfirmText');
+    const deleteForm = document.getElementById('deleteForm');
+    
+    confirmText.textContent = `Are you sure you want to delete the litter "${litterName}"? This action cannot be undone.`;
+    deleteForm.action = `/delete_litter/${litterId}`;
+    
+    modal.classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    modal.classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+</script>
 {% endblock %}
