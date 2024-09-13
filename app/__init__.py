@@ -7,7 +7,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User, Dog, DogImage
 from io import BytesIO
-
+from flask_migrate import Migrate
 
 def create_app():
     app = Flask(__name__)
@@ -18,6 +18,7 @@ def create_app():
     
     # Initialize the database
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     # Initialize Flask-Login
     login_manager = LoginManager()
@@ -181,6 +182,8 @@ def create_app():
             gender = request.form['gender']
             weight = float(request.form['weight']) if request.form['weight'] else None
             color = request.form['color']
+            father_id = request.form.get('father_id')
+            mother_id = request.form.get('mother_id')
             
             new_dog = Dog(
                 name=name, 
@@ -189,6 +192,8 @@ def create_app():
                 gender=gender, 
                 weight=weight, 
                 color=color,
+                father_id=father_id if father_id else None,
+                mother_id=mother_id if mother_id else None,
                 user_id=current_user.id
             )
             db.session.add(new_dog)
@@ -207,7 +212,15 @@ def create_app():
             db.session.commit()
             flash('Dog added successfully!', 'success')
             return redirect(url_for('dog_management'))
-        return render_template('add_dog.html')
+        # Get all dogs for parent selection
+        all_dogs = Dog.query.filter_by(user_id=current_user.id).all()
+        return render_template('add_dog.html', all_dogs=all_dogs)
+    
+    @app.route('/dog/<int:id>/family_tree')
+    @login_required
+    def dog_family_tree(id):
+        dog = Dog.query.get_or_404(id)
+        return render_template('family_tree.html', dog=dog)
 
     @app.route('/dog/<int:id>', methods=['GET', 'POST'])
     @login_required
@@ -325,6 +338,49 @@ def create_app():
     @app.route('/contact')
     def contact():
         return render_template('contact.html')
+    
+    @app.route('/add_litter', methods=['GET', 'POST'])
+    @login_required
+    def add_litter():
+        if request.method == 'POST':
+            name = request.form['name']
+            date_of_birth = datetime.strptime(request.form['date_of_birth'], '%Y-%m-%d')
+            father_id = request.form['father_id']
+            mother_id = request.form['mother_id']
+            puppy_ids = request.form.getlist('puppies')
+
+            new_litter = Litter(
+                name=name,
+                date_of_birth=date_of_birth,
+                father_id=father_id,
+                mother_id=mother_id,
+                user_id=current_user.id
+            )
+            db.session.add(new_litter)
+            db.session.commit()
+
+            for puppy_id in puppy_ids:
+                puppy = Dog.query.get(puppy_id)
+                new_litter.puppies.append(puppy)
+
+            db.session.commit()
+            flash('Litter added successfully!', 'success')
+            return redirect(url_for('litter_management'))
+
+        dogs = Dog.query.filter_by(user_id=current_user.id).all()
+        return render_template('add_litter.html', dogs=dogs)
+
+    @app.route('/litter_management')
+    @login_required
+    def litter_management():
+        litters = Litter.query.filter_by(user_id=current_user.id).all()
+        return render_template('litter_management.html', litters=litters)
+
+    @app.route('/litter/<int:id>')
+    @login_required
+    def litter_detail(id):
+        litter = Litter.query.get_or_404(id)
+        return render_template('litter_detail.html', litter=litter)
 
     @app.errorhandler(404)
     def not_found_error(error):

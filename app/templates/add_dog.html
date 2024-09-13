@@ -137,6 +137,25 @@
                            placeholder="Color">
                 </div>
             </div>
+
+            <div class="input-group">
+                <i class="fas fa-dog icon"></i>
+                <select id="father_id" name="father_id" class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select Father (optional)</option>
+                    {% for dog in all_dogs if dog.gender == 'Male' %}
+                    <option value="{{ dog.id }}">{{ dog.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-dog icon"></i>
+                <select id="mother_id" name="mother_id" class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select Mother (optional)</option>
+                    {% for dog in all_dogs if dog.gender == 'Female' %}
+                    <option value="{{ dog.id }}">{{ dog.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             
             <div class="mb-6">
                 <label for="images" class="block mb-2 font-semibold">Upload Images</label>

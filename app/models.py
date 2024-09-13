@@ -42,6 +42,10 @@ class Dog(db.Model):
     color = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     images = db.relationship('DogImage', backref='dog', lazy=True, cascade="all, delete-orphan")
+    father_id = db.Column(db.Integer, db.ForeignKey('dog.id'))
+    mother_id = db.Column(db.Integer, db.ForeignKey('dog.id'))
+    father = db.relationship('Dog', remote_side=[id], backref='offspring_as_father', foreign_keys=[father_id])
+    mother = db.relationship('Dog', remote_side=[id], backref='offspring_as_mother', foreign_keys=[mother_id])
 
 class DogImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -50,3 +54,20 @@ class DogImage(db.Model):
     mimetype = db.Column(db.String(50), nullable=False)  # Store mimetype
     dog_id = db.Column(db.Integer, db.ForeignKey('dog.id'), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Litter(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    date_of_birth = db.Column(db.Date, nullable=False)
+    father_id = db.Column(db.Integer, db.ForeignKey('dog.id'), nullable=False)
+    mother_id = db.Column(db.Integer, db.ForeignKey('dog.id'), nullable=False)
+    father = db.relationship('Dog', foreign_keys=[father_id])
+    mother = db.relationship('Dog', foreign_keys=[mother_id])
+    puppies = db.relationship('Dog', secondary='litter_puppy', backref='litter')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref='litters')
+
+litter_puppy = db.Table('litter_puppy',
+    db.Column('litter_id', db.Integer, db.ForeignKey('litter.id'), primary_key=True),
+    db.Column('dog_id', db.Integer, db.ForeignKey('dog.id'), primary_key=True)
+)
