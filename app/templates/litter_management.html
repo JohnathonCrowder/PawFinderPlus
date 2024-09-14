@@ -8,15 +8,25 @@
         background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
         background-color: #f0f4f8;
     }
+    .litter-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 15px 15px 0 0;
+    }
     .litter-card {
         background: white;
         border-radius: 15px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         transition: all 0.3s ease;
+        overflow: hidden;
     }
     .litter-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    .litter-info {
+        padding: 1rem;
     }
     .bone-button {
         background-color: #0080ff;
@@ -96,22 +106,31 @@
             <!-- Card View -->
             <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for litter in litters %}
-                    <div class="litter-card p-6">
-                        <h2 class="text-2xl font-bold mb-2" style="color: #0080ff;">{{ litter.name }}</h2>
-                        <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2"></i> Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
-                        <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Father: {{ litter.father.name }}</p>
-                        <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Mother: {{ litter.mother.name }}</p>
-                        <p class="text-gray-600 mb-4"><i class="fas fa-paw mr-2"></i> Puppies: {{ litter.puppies|length }}</p>
-                        <div class="flex space-x-2">
-                            <a href="{{ url_for('litter_detail', id=litter.id) }}" class="bone-button flex-grow text-center">
-                                <i class="fas fa-eye mr-2"></i> View Details
-                            </a>
-                            <a href="{{ url_for('edit_litter', id=litter.id) }}" class="bone-button edit-button flex-grow text-center">
-                                <i class="fas fa-edit mr-2"></i> Edit
-                            </a>
-                            <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="bone-button delete-button flex-grow">
-                                <i class="fas fa-trash-alt mr-2"></i> Delete
-                            </button>
+                    <div class="litter-card">
+                        {% if litter.images %}
+                            <img src="{{ url_for('get_litter_image', image_id=litter.images[0].id) }}" alt="{{ litter.name }}" class="litter-image">
+                        {% else %}
+                            <div class="litter-image bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-paw text-gray-400 text-5xl"></i>
+                            </div>
+                        {% endif %}
+                        <div class="litter-info">
+                            <h2 class="text-2xl font-bold mb-2" style="color: #0080ff;">{{ litter.name }}</h2>
+                            <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2"></i> Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
+                            <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Father: {{ litter.father.name }}</p>
+                            <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Mother: {{ litter.mother.name }}</p>
+                            <p class="text-gray-600 mb-4"><i class="fas fa-paw mr-2"></i> Puppies: {{ litter.puppies|length }}</p>
+                            <div class="flex space-x-2">
+                                <a href="{{ url_for('litter_detail', id=litter.id) }}" class="bone-button flex-grow text-center">
+                                    <i class="fas fa-eye mr-2"></i> View Details
+                                </a>
+                                <a href="{{ url_for('edit_litter', id=litter.id) }}" class="bone-button edit-button flex-grow text-center">
+                                    <i class="fas fa-edit mr-2"></i> Edit
+                                </a>
+                                <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="bone-button delete-button flex-grow">
+                                    <i class="fas fa-trash-alt mr-2"></i> Delete
+                                </button>
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
@@ -122,6 +141,7 @@
                 <table class="w-full border-collapse">
                     <thead>
                         <tr class="table-header">
+                            <th class="px-4 py-2 text-left">Image</th>
                             <th class="px-4 py-2 text-left">Name</th>
                             <th class="px-4 py-2 text-left">Date of Birth</th>
                             <th class="px-4 py-2 text-left">Father</th>
@@ -133,6 +153,15 @@
                     <tbody>
                         {% for litter in litters %}
                         <tr class="table-row">
+                            <td class="border px-4 py-2">
+                                {% if litter.images %}
+                                    <img src="{{ url_for('get_litter_image', image_id=litter.images[0].id) }}" alt="{{ litter.name }}" class="w-16 h-16 object-cover rounded">
+                                {% else %}
+                                    <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
+                                        <i class="fas fa-paw text-gray-400 text-2xl"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
                             <td class="border px-4 py-2">{{ litter.name }}</td>
                             <td class="border px-4 py-2">{{ litter.date_of_birth.strftime('%Y-%m-%d') }}</td>
                             <td class="border px-4 py-2">{{ litter.father.name }}</td>
