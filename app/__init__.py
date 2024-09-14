@@ -502,8 +502,10 @@ def create_app():
             flash('Litter added successfully!', 'success')
             return redirect(url_for('litter_management'))
 
-        dogs = Dog.query.filter_by(user_id=current_user.id).all()
-        return render_template('add_litter.html', dogs=dogs)
+        # Get all dogs for this user
+        all_dogs = Dog.query.filter(Dog.user_id == current_user.id).order_by(Dog.date_of_birth).all()
+
+        return render_template('add_litter.html', dogs=all_dogs)
 
     @app.route('/litter_management')
     @login_required
