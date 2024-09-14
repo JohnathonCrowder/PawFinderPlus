@@ -1,41 +1,50 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}DogBreederPlus{% endblock %}</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        {% block head %}{% endblock %}
-        <style>
-            .dropdown:hover .dropdown-menu {
-                display: block;
-            }
-            .dropdown-menu {
-                z-index: 1000;
-            }
-            nav {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                z-index: 1000;
-                transition: background-color 0.3s ease;
-            }
-            body {
-                padding-top: 64px; /* Adjust this value to match your nav height */
-            }
-            .scrolled {
-                background-color: rgba(0, 128, 255, 0.9) !important;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            }
-        </style>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DogBreederPlus{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block head %}{% endblock %}
+    <style>
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .dropdown-menu {
+            z-index: 1000;
+        }
+        nav {
+            transition: background-color 0.3s ease;
+        }
+        body {
+            padding-top: 0; /* Remove this line or set it to 0 */
+        }
+        main {
+            padding-top: 64px; /* Add this line */
+        }
+        .scrolled {
+            background-color: rgba(0, 128, 255, 0.9) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #mobile-menu {
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #mobile-menu.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+</head>
 <body class="flex flex-col min-h-full">
     <nav class="text-white p-4 fixed top-0 left-0 right-0 z-50" style="background-color: #0080ff;">
         <div class="container mx-auto flex justify-between items-center">
             <a href="/" class="text-2xl font-bold">DogBreederPlus</a>
-            <ul class="flex space-x-4 items-center">
+            
+            <!-- Desktop Menu -->
+            <ul class="hidden md:flex space-x-4 items-center">
                 <li><a href="/" class="hover:underline">Home</a></li>
                 {% if current_user.is_authenticated %}
                     <li class="dropdown relative">
@@ -73,8 +82,41 @@
                     </ul>
                 </li>
             </ul>
+            
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-button" class="md:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
         </div>
     </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-blue-600 z-50 flex flex-col items-center justify-center hidden">
+        <button id="close-mobile-menu" class="absolute top-4 right-4 text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        <ul class="text-white text-2xl space-y-4">
+            <li><a href="/" class="hover:underline">Home</a></li>
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('dog_management') }}" class="hover:underline">Dog Management</a></li>
+                <li><a href="{{ url_for('litter_management') }}" class="hover:underline">Litter Management</a></li>
+                <li><a href="{{ url_for('add_dog') }}" class="hover:underline">Add Dog</a></li>
+                <li><a href="{{ url_for('add_litter') }}" class="hover:underline">Add Litter</a></li>
+                <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="hover:underline">My Profile</a></li>
+                <li><a href="{{ url_for('user_settings') }}" class="hover:underline">Settings</a></li>
+                <li><a href="{{ url_for('logout') }}" class="hover:underline">Logout</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}" class="hover:underline">Login</a></li>
+                <li><a href="{{ url_for('register') }}" class="hover:underline">Register</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('about') }}" class="hover:underline">About</a></li>
+            <li><a href="{{ url_for('contact') }}" class="hover:underline">Contact</a></li>
+        </ul>
+    </div>
 
     <main class="flex-grow">
         {% block content %}{% endblock %}
@@ -85,14 +127,32 @@
             <p>&copy; 2023 DogBreederPlus. All rights reserved.</p>
         </div>
     </footer>
+
     <script>
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const nav = document.querySelector('nav');
+
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('active');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        mobileMenuButton.addEventListener('click', toggleMobileMenu);
+        closeMobileMenuButton.addEventListener('click', toggleMobileMenu);
+
         window.addEventListener('scroll', function() {
-            var nav = document.querySelector('nav');
             if (window.scrollY > 50) {
                 nav.classList.add('scrolled');
             } else {
                 nav.classList.remove('scrolled');
             }
+        });
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', toggleMobileMenu);
         });
     </script>
 </body>
