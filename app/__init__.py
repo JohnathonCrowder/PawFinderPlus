@@ -310,8 +310,10 @@ def create_app():
             flash('Litter updated successfully!', 'success')
             return redirect(url_for('litter_management'))
 
-        dogs = Dog.query.filter_by(user_id=current_user.id).all()
-        return render_template('edit_litter.html', litter=litter, dogs=dogs)
+        # Get all dogs for this user
+        all_dogs = Dog.query.filter(Dog.user_id == current_user.id).order_by(Dog.date_of_birth).all()
+
+        return render_template('edit_litter.html', litter=litter, dogs=all_dogs)
 
     @app.route('/dog/<int:id>', methods=['GET', 'POST'])
     @login_required
