@@ -48,6 +48,7 @@
             </a>
         </div>
 
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
                 <h2 class="text-2xl font-semibold mb-4">Litter Details</h2>
@@ -55,6 +56,14 @@
                 <p class="mb-2"><strong>Father:</strong> <a href="{{ url_for('dog_profile', id=litter.father.id) }}" class="text-blue-500 hover:underline">{{ litter.father.name }}</a></p>
                 <p class="mb-2"><strong>Mother:</strong> <a href="{{ url_for('dog_profile', id=litter.mother.id) }}" class="text-blue-500 hover:underline">{{ litter.mother.name }}</a></p>
                 <p class="mb-2"><strong>Number of Puppies:</strong> {{ litter.puppies|length }}</p>
+            </div>
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Litter Images</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {% for image in litter.images %}
+                    <img src="{{ url_for('get_litter_image', image_id=image.id) }}" alt="Litter Image" class="w-full h-48 object-cover rounded">
+                    {% endfor %}
+                </div>
             </div>
             <div>
                 <h2 class="text-2xl font-semibold mb-4">Parents</h2>

@@ -73,6 +73,7 @@ class Litter(db.Model):
     father = db.relationship('Dog', foreign_keys=[father_id])
     mother = db.relationship('Dog', foreign_keys=[mother_id])
     puppies = db.relationship('Dog', secondary='litter_puppy', backref='litter')
+    images = db.relationship('LitterImage', backref='litter', lazy=True, cascade="all, delete-orphan")
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref='litters')
 
@@ -87,3 +88,12 @@ litter_puppy = db.Table('litter_puppy',
     db.Column('litter_id', db.Integer, db.ForeignKey('litter.id'), primary_key=True),
     db.Column('dog_id', db.Integer, db.ForeignKey('dog.id'), primary_key=True)
 )
+
+
+class LitterImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    data = db.Column(LargeBinary, nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    mimetype = db.Column(db.String(50), nullable=False)
+    litter_id = db.Column(db.Integer, db.ForeignKey('litter.id'), nullable=False)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)

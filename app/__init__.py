@@ -5,7 +5,7 @@ from datetime import datetime, date
 from .extensions import db
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User, Dog, DogImage, Litter
+from .models import User, Dog, DogImage, Litter, LitterImage
 from io import BytesIO
 from flask_migrate import Migrate
 from sqlalchemy.orm import joinedload
@@ -256,6 +256,29 @@ def create_app():
 
         return render_template('family_tree.html', dog=dog, litter=litter)
     
+    @app.route('/litter_image/<int:image_id>')
+    def get_litter_image(image_id):
+        image = LitterImage.query.get_or_404(image_id)
+        return send_file(
+            BytesIO(image.data),
+            mimetype=image.mimetype,
+            as_attachment=False,
+            download_name=image.filename
+        )
+    
+    @app.route('/litter/<int:litter_id>/delete_image/<int:image_id>', methods=['POST'])
+    @login_required
+    def delete_litter_image(litter_id, image_id):
+        image = LitterImage.query.get_or_404(image_id)
+        if image.litter_id != litter_id or image.litter.user_id != current_user.id:
+            flash('Invalid image!', 'error')
+            return redirect(url_for('edit_litter', id=litter_id))
+        
+        db.session.delete(image)
+        db.session.commit()
+        flash('Image deleted successfully!', 'success')
+        return redirect(url_for('edit_litter', id=litter_id))
+
     @app.route('/edit_litter/<int:id>', methods=['GET', 'POST'])
     @login_required
     def edit_litter(id):
@@ -272,6 +295,16 @@ def create_app():
             for puppy_id in puppy_ids:
                 puppy = Dog.query.get(puppy_id)
                 litter.puppies.append(puppy)
+
+            # Handle new image uploads
+            if 'images' in request.files:
+                for image in request.files.getlist('images'):
+                    if image and allowed_file(image.filename):
+                        filename = secure_filename(image.filename)
+                        image_data = image.read()
+                        mimetype = image.mimetype
+                        new_image = LitterImage(filename=filename, data=image_data, mimetype=mimetype, litter_id=litter.id)
+                        db.session.add(new_image)
 
             db.session.commit()
             flash('Litter updated successfully!', 'success')
@@ -442,6 +475,26 @@ def create_app():
             for puppy_id in puppy_ids:
                 puppy = Dog.query.get(puppy_id)
                 new_litter.puppies.append(puppy)
+
+            new_litter = Litter(
+                name=name,
+                date_of_birth=date_of_birth,
+                father_id=father_id,
+                mother_id=mother_id,
+                user_id=current_user.id
+            )
+            db.session.add(new_litter)
+            db.session.commit()
+
+            # Handle image uploads
+            if 'images' in request.files:
+                for image in request.files.getlist('images'):
+                    if image and allowed_file(image.filename):
+                        filename = secure_filename(image.filename)
+                        image_data = image.read()
+                        mimetype = image.mimetype
+                        new_image = LitterImage(filename=filename, data=image_data, mimetype=mimetype, litter_id=new_litter.id)
+                        db.session.add(new_image)
 
             db.session.commit()
             flash('Litter added successfully!', 'success')
