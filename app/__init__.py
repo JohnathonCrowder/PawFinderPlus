@@ -106,14 +106,20 @@ def create_app():
         # Get user's dogs
         dogs = Dog.query.filter_by(user_id=user.id).all()
         
+        # Get user's litters
+        litters = Litter.query.filter_by(user_id=user.id).all()
+        
         # Calculate some stats
         total_dogs = len(dogs)
+        total_litters = len(litters)
         dog_breeds = list(set(dog.breed for dog in dogs))
         
         return render_template('user_profile.html', 
                             user=user, 
                             dogs=dogs, 
+                            litters=litters,
                             total_dogs=total_dogs, 
+                            total_litters=total_litters,
                             dog_breeds=dog_breeds)
 
     # Existing Routes
