@@ -112,60 +112,102 @@
         </div>
 
         <!-- Dogs Section -->
-        {% if dogs %}
-            <h2 class="text-3xl font-bold mb-6 text-blue-600">{{ user.full_name or user.username }}'s Dogs</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for dog in dogs %}
-                    <div class="dog-card overflow-hidden">
-                        {% if dog.images %}
-                            <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
-                                 alt="{{ dog.name }}" class="dog-image">
-                        {% else %}
-                            <div class="dog-image bg-gray-200 flex items-center justify-center">
-                                <i class="fas fa-paw text-5xl text-gray-400"></i>
-                            </div>
-                        {% endif %}
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">{{ dog.name }}</h3>
-                            <p class="text-gray-600 mb-2">{{ dog.breed }}</p>
-                            <p class="text-gray-500 mb-2"><i class="fas fa-birthday-cake mr-2"></i>{{ dog.date_of_birth.strftime('%B %d, %Y') }}</p>
-                            {% if dog.weight %}
-                                <p class="text-gray-500 mb-2"><i class="fas fa-weight mr-2"></i>{{ dog.weight }} kg</p>
-                            {% endif %}
-                            <a href="{{ url_for('dog_profile', id=dog.id) }}" class="inline-block mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">View Profile</a>
-                        </div>
+{% if dogs %}
+<h2 class="text-3xl font-bold mb-6 text-blue-600">{{ user.full_name or user.username }}'s Dogs</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% for dog in dogs %}
+        <div class="dog-card bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="relative w-full h-64 md:h-80">
+                {% if dog.images %}
+                    <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
+                         alt="{{ dog.name }}" 
+                         class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-paw text-6xl text-gray-400"></i>
                     </div>
-                {% endfor %}
+                {% endif %}
             </div>
-        {% else %}
-            <div class="text-center py-12">
-                <i class="fas fa-dog text-6xl text-gray-400 mb-4"></i>
-                <p class="text-xl text-gray-600">{{ user.full_name or user.username }} hasn't added any dogs yet.</p>
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-2">{{ dog.name }}</h3>
+                <p class="text-gray-600 mb-2">{{ dog.breed }}</p>
+                <p class="text-gray-500 mb-2"><i class="fas fa-birthday-cake mr-2"></i>{{ dog.date_of_birth.strftime('%B %d, %Y') }}</p>
+                {% if dog.weight %}
+                    <p class="text-gray-500 mb-2"><i class="fas fa-weight mr-2"></i>{{ dog.weight }} kg</p>
+                {% endif %}
+                {% if dog.color %}
+                    <p class="text-gray-500 mb-2"><i class="fas fa-palette mr-2"></i>{{ dog.color }}</p>
+                {% endif %}
+                <a href="{{ url_for('dog_profile', id=dog.id) }}" class="inline-block mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">View Profile</a>
             </div>
-        {% endif %}
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-12">
+    <i class="fas fa-dog text-6xl text-gray-400 mb-4"></i>
+    <p class="text-xl text-gray-600">{{ user.full_name or user.username }} hasn't added any dogs yet.</p>
+</div>
+{% endif %}
 
 
         <!-- Litters Section -->
-        {% if litters %}
-        <h2 class="text-3xl font-bold mb-6 mt-12 text-blue-600">{{ user.full_name or user.username }}'s Litters</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {% for litter in litters %}
-                <div class="litter-card p-6 bg-white rounded-lg shadow-md">
-                    <h3 class="text-xl font-bold mb-2">{{ litter.name }}</h3>
-                    <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2"></i>Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
-                    <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i>Father: {{ litter.father.name }}</p>
-                    <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i>Mother: {{ litter.mother.name }}</p>
-                    <p class="text-gray-600 mb-4"><i class="fas fa-paw mr-2"></i>Puppies: {{ litter.puppies|length }}</p>
-                    <a href="{{ url_for('litter_detail', id=litter.id) }}" class="inline-block mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">View Litter</a>
-                </div>
-            {% endfor %}
+{% if litters %}
+<h2 class="text-3xl font-bold mb-6 mt-12 text-blue-600">{{ user.full_name or user.username }}'s Litters</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% for litter in litters %}
+        <div class="litter-card bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="carousel relative w-full h-64 md:h-80" data-litter-id="{{ litter.id }}">
+                {% if litter.images %}
+                    {% for image in litter.images %}
+                        <img src="{{ url_for('get_litter_image', image_id=image.id) }}" 
+                             alt="{{ litter.name }}" 
+                             class="w-full h-full object-cover absolute top-0 left-0 opacity-0 transition-opacity duration-500"
+                             style="{% if loop.first %}opacity: 1;{% endif %}">
+                    {% endfor %}
+                {% else %}
+                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-paw text-6xl text-gray-400"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-2">{{ litter.name }}</h3>
+                <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2"></i>Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
+                <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i>Father: {{ litter.father.name }}</p>
+                <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i>Mother: {{ litter.mother.name }}</p>
+                <p class="text-gray-600 mb-4"><i class="fas fa-paw mr-2"></i>Puppies: {{ litter.puppies|length }}</p>
+                <a href="{{ url_for('litter_detail', id=litter.id) }}" class="inline-block mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">View Litter</a>
+            </div>
         </div>
-        {% else %}
-        <div class="text-center py-12 mt-12">
-            <i class="fas fa-paw text-6xl text-gray-400 mb-4"></i>
-            <p class="text-xl text-gray-600">{{ user.full_name or user.username }} hasn't added any litters yet.</p>
-        </div>
-        {% endif %}
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-12 mt-12">
+    <i class="fas fa-paw text-6xl text-gray-400 mb-4"></i>
+    <p class="text-xl text-gray-600">{{ user.full_name or user.username }} hasn't added any litters yet.</p>
+</div>
+{% endif %}
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const carousels = document.querySelectorAll('.carousel');
+        
+        carousels.forEach(carousel => {
+            const images = carousel.querySelectorAll('img');
+            let currentIndex = 0;
+            
+            function showNextImage() {
+                images[currentIndex].style.opacity = '0';
+                currentIndex = (currentIndex + 1) % images.length;
+                images[currentIndex].style.opacity = '1';
+            }
+            
+            if (images.length > 1) {
+                setInterval(showNextImage, 5000); // Change image every 5 seconds
+            }
+        });
+    });
+    </script>
 {% endblock %}
