@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Messages</h1>
+<ul>
+    {% for user in conversations %}
+        <li><a href="{{ url_for('conversation', user_id=user.id) }}">{{ user.username }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

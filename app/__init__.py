@@ -5,11 +5,13 @@ from datetime import datetime, date
 from .extensions import db
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User, Dog, DogImage, Litter, LitterImage
+from .models import User, Dog, DogImage, Litter, LitterImage, Message
 from io import BytesIO
 from flask_migrate import Migrate
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_
+from flask_socketio import SocketIO, emit, join_room, leave_room
+
 
 
 def create_app():
@@ -35,6 +37,30 @@ def create_app():
     def allowed_file(filename):
         ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+
+    socketio = SocketIO(app)
+
+    @socketio.on('join')
+    def on_join(data):
+        room = data['room']
+        join_room(room)
+
+    @socketio.on('leave')
+    def on_leave(data):
+        room = data['room']
+        leave_room(room)
+
+    @socketio.on('message')
+    def handle_message(data):
+        room = data['room']
+        emit('message', data, room=room)
+
+    if __name__ == '__main__':
+        socketio.run(app)
+
+
 
     # User Settings Routes
     @app.route('/user_settings')
@@ -518,6 +544,33 @@ def create_app():
         all_dogs = Dog.query.filter(Dog.user_id == current_user.id).order_by(Dog.date_of_birth).all()
 
         return render_template('add_litter.html', dogs=all_dogs)
+    
+    @app.route('/messages')
+    @login_required
+    def messages():
+        conversations = db.session.query(User).join(Message, (User.id == Message.sender_id) | (User.id == Message.recipient_id))\
+            .filter((Message.sender_id == current_user.id) | (Message.recipient_id == current_user.id))\
+            .distinct().all()
+        return render_template('messages.html', conversations=conversations)
+
+    @app.route('/messages/<int:user_id>', methods=['GET', 'POST'])
+    @login_required
+    def conversation(user_id):
+        other_user = User.query.get_or_404(user_id)
+        if request.method == 'POST':
+            content = request.form.get('content')
+            if content:
+                new_message = Message(sender_id=current_user.id, recipient_id=user_id, content=content)
+                db.session.add(new_message)
+                db.session.commit()
+                return redirect(url_for('conversation', user_id=user_id))
+        
+        messages = Message.query.filter(
+            ((Message.sender_id == current_user.id) & (Message.recipient_id == user_id)) |
+            ((Message.sender_id == user_id) & (Message.recipient_id == current_user.id))
+        ).order_by(Message.timestamp).all()
+        
+        return render_template('conversation.html', messages=messages, other_user=other_user)
 
     @app.route('/litter_management')
     @login_required

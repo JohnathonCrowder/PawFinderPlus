@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Conversation with {{ other_user.username }}</h1>
+<div id="messages">
+    {% for message in messages %}
+        <div class="message {% if message.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+            <p>{{ message.content }}</p>
+            <small>{{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+        </div>
+    {% endfor %}
+</div>
+<form method="POST">
+    <input type="text" name="content" required>
+    <button type="submit">Send</button>
+</form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    var socket = io();
+    var room = "{{ current_user.id }}_{{ other_user.id }}";
+    
+    socket.on('connect', function() {
+        socket.emit('join', {room: room});
+    });
+
+    socket.on('message', function(data) {
+        var messagesDiv = document.getElementById('messages');
+        var messageDiv = document.createElement('div');
+        messageDiv.className = 'message ' + (data.sender_id == {{ current_user.id }} ? 'sent' : 'received');
+        messageDiv.innerHTML = '<p>' + data.content + '</p><small>' + new Date().toLocaleString() + '</small>';
+        messagesDiv.appendChild(messageDiv);
+    });
+
+    document.querySelector('form').onsubmit = function(e) {
+        e.preventDefault();
+        var content = document.querySelector('input[name="content"]').value;
+        socket.emit('message', {room: room, content: content, sender_id: {{ current_user.id }}});
+        this.reset();
+    };
+</script>
+{% endblock %}
