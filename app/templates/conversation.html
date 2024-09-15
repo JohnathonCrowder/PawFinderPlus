@@ -1,88 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-    .message.sent {
-        display: flex;
-        justify-content: flex-end;
-    }
-    .message.received {
-        display: flex;
-        justify-content: flex-start;
-    }
-    #messages {
-        height: calc(100vh - 160px);
-    }
-</style>
-<div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-1/4 bg-gray-100 h-screen p-4">
-        <h2 class="text-xl font-bold mb-4">Conversations</h2>
-        <ul>
-            {% for user in conversations %}
-                <li class="mb-2">
-                    <a href="{{ url_for('conversation', user_id=user.id) }}" class="flex items-center p-2 hover:bg-gray-200 rounded">
-                        <img src="{{ url_for('get_profile_picture', user_id=user.id) }}" alt="{{ user.username }}" class="w-10 h-10 rounded-full mr-3">
-                        <span>{{ user.username }}</span>
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Conversation with {{ other_user.username }}</h1>
     
-    <!-- Chat area -->
-    <div class="w-3/4 flex flex-col">
-        <!-- Chat header -->
-        <div class="bg-gray-200 p-4 flex items-center">
-            <img src="{{ url_for('get_profile_picture', user_id=other_user.id) }}" alt="{{ other_user.username }}" class="w-10 h-10 rounded-full mr-3">
-            <h1 class="text-xl font-bold">{{ other_user.username }}</h1>
-        </div>
-        
-        <!-- Messages -->
-        <div id="messages" class="flex-grow overflow-y-auto p-4">
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold mb-4">Messages:</h2>
+        {% if messages %}
             {% for message in messages %}
-                <div class="message {% if message.sender_id == current_user.id %}sent{% else %}received{% endif %} mb-4">
-                    <div class="max-w-xs mx-2 py-2 px-4 {% if message.sender_id == current_user.id %}bg-blue-500 text-white ml-auto{% else %}bg-gray-300{% endif %} rounded-lg">
-                        <p>{{ message.content }}</p>
-                    </div>
-                    <small class="text-gray-500 {% if message.sender_id == current_user.id %}text-right{% endif %} block">
-                        {{ message.timestamp.strftime('%H:%M') }}
-                    </small>
+                <div class="mb-4 {% if message.sender_id == current_user.id %}text-right{% endif %}">
+                    <p><strong>{{ message.sender.username }}:</strong> {{ message.content }}</p>
+                    <small class="text-gray-500">{{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
                 </div>
             {% endfor %}
-        </div>
-        
-        <!-- Message input -->
-        <form method="POST" class="bg-gray-200 p-4">
-            <div class="flex">
-                <input type="text" name="content" required class="flex-grow mr-2 p-2 rounded">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Send</button>
-            </div>
-        </form>
+        {% else %}
+            <p>No messages yet.</p>
+        {% endif %}
     </div>
+
+    <form method="POST" class="mt-4">
+        <textarea name="content" rows="3" class="w-full p-2 border rounded" required></textarea>
+        <button type="submit" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Send</button>
+    </form>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-<script>
-    var socket = io();
-    var room = "{{ current_user.id }}_{{ other_user.id }}";
-    
-    socket.on('connect', function() {
-        socket.emit('join', {room: room});
-    });
-
-    socket.on('message', function(data) {
-        var messagesDiv = document.getElementById('messages');
-        var messageDiv = document.createElement('div');
-        messageDiv.className = 'message ' + (data.sender_id == {{ current_user.id }} ? 'sent' : 'received');
-        messageDiv.innerHTML = '<p>' + data.content + '</p><small>' + new Date().toLocaleString() + '</small>';
-        messagesDiv.appendChild(messageDiv);
-    });
-
-    document.querySelector('form').onsubmit = function(e) {
-        e.preventDefault();
-        var content = document.querySelector('input[name="content"]').value;
-        socket.emit('message', {room: room, content: content, sender_id: {{ current_user.id }}});
-        this.reset();
-    };
-</script>
 {% endblock %}

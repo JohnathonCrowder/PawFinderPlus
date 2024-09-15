@@ -1,39 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-    .message.sent {
-        display: flex;
-        justify-content: flex-end;
-    }
-    .message.received {
-        display: flex;
-        justify-content: flex-start;
-    }
-    #messages {
-        height: calc(100vh - 160px);
-    }
-</style>
-<div class="flex">
-    <!-- Sidebar -->
-    <div class="w-1/4 bg-gray-100 h-screen p-4">
-        <h2 class="text-xl font-bold mb-4">Conversations</h2>
-        <ul>
-            {% for user in conversations %}
-                <li class="mb-2">
-                    <a href="{{ url_for('conversation', user_id=user.id) }}" class="flex items-center p-2 hover:bg-gray-200 rounded">
-                        <img src="{{ url_for('get_profile_picture', user_id=user.id) }}" alt="{{ user.username }}" class="w-10 h-10 rounded-full mr-3">
-                        <span>{{ user.username }}</span>
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-    
-    <!-- Main content area -->
-    <div class="w-3/4 p-4">
-        <h1 class="text-2xl font-bold mb-4">Select a conversation</h1>
-        <p>Choose a conversation from the sidebar to start chatting.</p>
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Messages</h1>
+    <div class="space-y-4">
+        {% for conversation in conversations %}
+            <a href="{{ url_for('conversation', user_id=conversation.user_id) }}" class="block bg-white shadow rounded-lg p-4 hover:shadow-md transition duration-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <img src="{{ url_for('get_profile_picture', user_id=conversation.user_id) }}" alt="{{ conversation.username }}" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h2 class="text-xl font-semibold">{{ conversation.username }}</h2>
+                        </div>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ conversation.last_message_time.strftime('%b %d, %Y') }}</span>
+                </div>
+            </a>
+        {% else %}
+            <p class="text-gray-600">You have no conversations yet.</p>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

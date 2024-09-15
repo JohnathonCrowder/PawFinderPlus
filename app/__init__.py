@@ -11,6 +11,8 @@ from flask_migrate import Migrate
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_
 from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask import current_app
+
 
 
 
@@ -548,9 +550,27 @@ def create_app():
     @app.route('/messages')
     @login_required
     def messages():
-        conversations = db.session.query(User).join(Message, (User.id == Message.sender_id) | (User.id == Message.recipient_id))\
-            .filter((Message.sender_id == current_user.id) | (Message.recipient_id == current_user.id))\
-            .distinct().all()
+        conversations = db.session.query(
+            Message.conversation_id,
+            User.id.label('user_id'),
+            User.username,
+            db.func.max(Message.timestamp).label('last_message_time')
+        ).join(
+            User, 
+            db.or_(Message.sender_id == User.id, Message.recipient_id == User.id)
+        ).filter(
+            db.and_(
+                User.id != current_user.id,
+                db.or_(Message.sender_id == current_user.id, Message.recipient_id == current_user.id)
+            )
+        ).group_by(
+            Message.conversation_id, User.id, User.username
+        ).order_by(
+            db.desc('last_message_time')
+        ).all()
+
+        current_app.logger.info(f"Retrieved {len(conversations)} conversations for user {current_user.id}")
+
         return render_template('messages.html', conversations=conversations)
 
     @app.route('/messages/<int:user_id>', methods=['GET', 'POST'])
@@ -558,24 +578,29 @@ def create_app():
     def conversation(user_id):
         other_user = User.query.get_or_404(user_id)
         
-        # Check if there's an existing conversation
-        conversation = Message.query.filter(
-            ((Message.sender_id == current_user.id) & (Message.recipient_id == user_id)) |
-            ((Message.sender_id == user_id) & (Message.recipient_id == current_user.id))
-        ).first()
+        # Create a unique conversation ID
+        conversation_id = '_'.join(sorted([str(current_user.id), str(user_id)]))
         
         if request.method == 'POST':
             content = request.form.get('content')
             if content:
-                new_message = Message(sender_id=current_user.id, recipient_id=user_id, content=content)
+                new_message = Message(
+                    conversation_id=conversation_id,
+                    sender_id=current_user.id,
+                    recipient_id=user_id,
+                    content=content
+                )
                 db.session.add(new_message)
-                db.session.commit()
+                try:
+                    db.session.commit()
+                    current_app.logger.info(f"Message saved: {new_message.id}")
+                except Exception as e:
+                    db.session.rollback()
+                    current_app.logger.error(f"Error saving message: {str(e)}")
                 return redirect(url_for('conversation', user_id=user_id))
         
-        messages = Message.query.filter(
-            ((Message.sender_id == current_user.id) & (Message.recipient_id == user_id)) |
-            ((Message.sender_id == user_id) & (Message.recipient_id == current_user.id))
-        ).order_by(Message.timestamp).all()
+        messages = Message.query.filter_by(conversation_id=conversation_id).order_by(Message.timestamp).all()
+        current_app.logger.info(f"Retrieved {len(messages)} messages for conversation {conversation_id}")
         
         return render_template('conversation.html', messages=messages, other_user=other_user)
 

@@ -70,6 +70,7 @@ class DogImage(db.Model):
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.String(50), nullable=False)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     content = db.Column(db.Text, nullable=False)
