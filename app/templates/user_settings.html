@@ -113,6 +113,25 @@
                             <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                                    id="phone_number" name="phone_number" type="tel" value="{{ user_data.phone_number }}">
                         </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="website">Website</label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                   id="website" name="website" type="text" pattern="https?://.+" 
+                                   title="Please include http:// or https:// in the URL" value="{{ user_data.website }}">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="facebook">Facebook</label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                   id="facebook" name="facebook" type="text" pattern="https?://.+" 
+                                   title="Please include http:// or https:// in the URL" value="{{ user_data.facebook }}">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="instagram">Instagram</label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                   id="instagram" name="instagram" type="text" pattern="https?://.+" 
+                                   title="Please include http:// or https:// in the URL" value="{{ user_data.instagram }}">
+                        </div>
+                        
                         <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2" for="bio">About Me</label>
                             <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32" 

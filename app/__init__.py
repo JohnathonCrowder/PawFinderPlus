@@ -40,13 +40,15 @@ def create_app():
     @app.route('/user_settings')
     @login_required
     def user_settings():
-        # Fetch the current user's information
         user_data = {
             'full_name': current_user.full_name or '',
             'location': current_user.location or '',
             'phone_number': current_user.phone_number or '',
             'bio': current_user.bio or '',
-            'has_profile_picture': current_user.profile_picture_data is not None
+            'has_profile_picture': current_user.profile_picture_data is not None,
+            'website': current_user.website or '',
+            'facebook': current_user.facebook or '',
+            'instagram': current_user.instagram or ''
         }
         return render_template('user_settings.html', user_data=user_data)
 
@@ -67,6 +69,16 @@ def create_app():
         current_user.location = request.form.get('location', '').strip() or None
         current_user.phone_number = request.form.get('phone_number', '').strip() or None
         current_user.bio = request.form.get('bio', '').strip() or None
+        
+
+        def format_url(url):
+            if url and not url.startswith(('http://', 'https://')):
+                return f'https://{url}'
+            return url
+
+        current_user.website = format_url(request.form.get('website', '').strip()) or None
+        current_user.facebook = format_url(request.form.get('facebook', '').strip()) or None
+        current_user.instagram = format_url(request.form.get('instagram', '').strip()) or None
 
         # Commit changes to the database
         db.session.commit()
