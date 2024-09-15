@@ -2,128 +2,179 @@
 
 {% block title %}{{ dog.name }}'s Profile - DogBreederPlus{% endblock %}
 
-{% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="bg-white shadow-xl rounded-lg overflow-hidden">
-        <!-- Image Gallery -->
-<div class="relative aspect-[21/9] lg:aspect-[25/9] w-full">
-    {% if dog.images and dog.images[0] %}
-        <div id="mainImage" class="w-full h-full">
-            <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
-                 alt="{{ dog.name }}" 
-                 class="w-full h-full object-cover">
-        </div>
-        {% if dog.images|length > 1 %}
-            <div class="absolute bottom-0 left-0 right-0 p-4 flex justify-center space-x-2 bg-black bg-opacity-50 overflow-x-auto">
-                {% for image in dog.images %}
-                    <button onclick="changeMainImage('{{ url_for('get_dog_image', image_id=image.id) }}')" 
-                            class="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
-                             alt="{{ dog.name }}" 
-                             class="w-full h-full object-cover">
-                    </button>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% else %}
-        <div class="w-full h-full flex items-center justify-center bg-gray-200">
-            <i class="fas fa-paw text-7xl md:text-9xl text-gray-400"></i>
-        </div>
-    {% endif %}
-</div>
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f0f2f5;
+    }
+    .dog-header {
+        background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    .dog-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('https://images.unsplash.com/photo-1568572933382-74d440642117?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
+        background-size: cover;
+        opacity: 0.2;
+        z-index: 0;
+    }
+    .dog-header-content {
+        position: relative;
+        z-index: 1;
+    }
+    .image-gallery {
+        background-color: #000;
+    }
+    .thumbnail {
+        opacity: 0.6;
+        transition: all 0.3s ease;
+    }
+    .thumbnail:hover, .thumbnail.active {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+    .stat-item {
+        transition: all 0.3s ease;
+    }
+    .stat-item:hover {
+        transform: translateY(-3px);
+    }
+    .family-tree-btn {
+        background-image: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    }
+    .family-tree-btn:hover {
+        background-image: linear-gradient(135deg, #66c88a 0%, #5cacce 100%);
+    }
+</style>
+{% endblock %}
 
-        <!-- Dog Info -->
-        <div class="p-8">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-4xl font-bold text-blue-600">{{ dog.name }}</h1>
-                <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+{% block content %}
+<div class="min-h-screen pb-12">
+    <!-- Dog Header -->
+    <div class="dog-header text-white py-24">
+        <div class="container mx-auto px-4 dog-header-content">
+            <h1 class="text-5xl font-bold mb-2 shadow-text">{{ dog.name }}</h1>
+            <p class="text-2xl mb-4 shadow-text">{{ dog.breed }}</p>
+            <div class="flex items-center space-x-4">
+                <span class="bg-white text-purple-600 text-sm font-medium px-3 py-1 rounded-full">
                     {{ dog.gender }}
                 </span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h2 class="text-2xl font-semibold mb-4">Details</h2>
-                    <ul class="space-y-2">
-                        <li class="flex items-center">
-                            <span class="font-semibold mr-2">Breed:</span> {{ dog.breed }}
-                        </li>
-                        <li class="flex items-center">
-                            <span class="font-semibold mr-2">Born:</span> {{ dog.date_of_birth.strftime('%B %d, %Y') }}
-                        </li>
-                        <li class="flex items-center">
-                            <span class="font-semibold mr-2">Age:</span> {{ (date.today() - dog.date_of_birth).days // 365 }} years {{ ((date.today() - dog.date_of_birth).days % 365) // 30 }} months
-                        </li>
-                        {% if dog.weight %}
-                        <li class="flex items-center">
-                            <span class="font-semibold mr-2">Weight:</span> {{ dog.weight }} kg
-                        </li>
-                        {% endif %}
-                        {% if dog.color %}
-                        <li class="flex items-center">
-                            <span class="font-semibold mr-2">Color:</span> {{ dog.color }}
-                        </li>
-                        {% endif %}
-                    </ul>
-                </div>
-                <a href="{{ url_for('dog_family_tree', id=dog.id) }}" class="inline-block mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300">View Family Tree</a>
-                <div>
-                    <h2 class="text-2xl font-semibold mb-4">Quick Actions</h2>
-                    <div class="space-y-3">
-                        <a href="{{ url_for('dog_detail', id=dog.id) }}" 
-                           class="block w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
-                            <i class="fas fa-edit mr-2"></i> Edit Details
-                        </a>
-                        <button onclick="confirmDelete()" 
-                                class="block w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-center">
-                            <i class="fas fa-trash mr-2"></i> Delete Profile
-                        </button>
-                    </div>
-                </div>
+                <span class="bg-white text-blue-600 text-sm font-medium px-3 py-1 rounded-full">
+                    {{ (date.today() - dog.date_of_birth).days // 365 }} years old
+                </span>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
-    <div class="bg-white p-6 rounded-lg max-w-md w-full">
-        <h3 class="text-xl font-bold mb-4">Confirm Deletion</h3>
-        <p class="mb-6">Are you sure you want to delete {{ dog.name }}'s profile? This action cannot be undone.</p>
-        <div class="flex justify-end space-x-4">
-            <button onclick="closeDeleteModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-100">
-                Cancel
-            </button>
-            <form action="{{ url_for('delete_dog', id=dog.id) }}" method="POST">
-                <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700">
-                    Delete
-                </button>
-            </form>
+    <div class="container mx-auto px-4 -mt-16">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Image Gallery -->
+            <div class="lg:col-span-2">
+                <div class="image-gallery rounded-lg overflow-hidden shadow-lg bg-white">
+                    <div class="relative aspect-w-16 aspect-h-9">
+                        {% if dog.images and dog.images[0] %}
+                            <img id="mainImage" src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
+                                 alt="{{ dog.name }}" 
+                                 class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                <i class="fas fa-paw text-7xl text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if dog.images|length > 1 %}
+                        <div class="p-4 flex justify-center space-x-2 overflow-x-auto">
+                            {% for image in dog.images %}
+                                <button onclick="changeMainImage('{{ url_for('get_dog_image', image_id=image.id) }}', this)" 
+                                        class="thumbnail flex-shrink-0 w-16 h-16 rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 {% if loop.first %}active{% endif %}">
+                                    <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
+                                         alt="{{ dog.name }}" 
+                                         class="w-full h-full object-cover">
+                                </button>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Dog Info -->
+            <div class="lg:col-span-1 space-y-8">
+                <div class="info-card p-6">
+                    <h2 class="text-2xl font-semibold mb-4">Quick Stats</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="stat-item text-center p-3 bg-blue-50 rounded-lg">
+                            <i class="fas fa-birthday-cake text-2xl text-blue-500 mb-2"></i>
+                            <p class="text-sm text-gray-600">Born</p>
+                            <p class="font-semibold">{{ dog.date_of_birth.strftime('%b %d, %Y') }}</p>
+                        </div>
+                        <div class="stat-item text-center p-3 bg-green-50 rounded-lg">
+                            <i class="fas fa-weight text-2xl text-green-500 mb-2"></i>
+                            <p class="text-sm text-gray-600">Weight</p>
+                            <p class="font-semibold">{{ dog.weight }} kg</p>
+                        </div>
+                        <div class="stat-item text-center p-3 bg-purple-50 rounded-lg">
+                            <i class="fas fa-palette text-2xl text-purple-500 mb-2"></i>
+                            <p class="text-sm text-gray-600">Color</p>
+                            <p class="font-semibold">{{ dog.color }}</p>
+                        </div>
+                        <div class="stat-item text-center p-3 bg-yellow-50 rounded-lg">
+                            <i class="fas fa-venus-mars text-2xl text-yellow-500 mb-2"></i>
+                            <p class="text-sm text-gray-600">Gender</p>
+                            <p class="font-semibold">{{ dog.gender }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card p-6">
+                    <h2 class="text-2xl font-semibold mb-4">About {{ dog.name }}</h2>
+                    <p class="text-gray-600 mb-4">
+                        {{ dog.name }} is a beautiful {{ dog.breed }} born on {{ dog.date_of_birth.strftime('%B %d, %Y') }}. 
+                        {% if dog.color %}
+                        With a stunning {{ dog.color }} coat, 
+                        {% endif %}
+                        {{ dog.name }} has been bringing joy and companionship to our family for 
+                        {{ (date.today() - dog.date_of_birth).days // 365 }} years and 
+                        {{ ((date.today() - dog.date_of_birth).days % 365) // 30 }} months.
+                    </p>
+                </div>
+
+                <div class="info-card p-6">
+                    <h2 class="text-2xl font-semibold mb-4">Family Tree</h2>
+                    <p class="text-gray-600 mb-4">Discover {{ dog.name }}'s lineage and explore the family connections.</p>
+                    <a href="{{ url_for('dog_family_tree', id=dog.id) }}" 
+                       class="family-tree-btn inline-block w-full text-white text-center px-4 py-3 rounded-full transition duration-300 shadow-md hover:shadow-lg">
+                        <i class="fas fa-tree mr-2"></i>Explore Family Tree
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-function changeMainImage(src) {
-    const mainImage = document.querySelector('#mainImage img');
+function changeMainImage(src, thumbnail) {
+    const mainImage = document.getElementById('mainImage');
     mainImage.src = src;
+    document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+    thumbnail.classList.add('active');
 }
-
-function confirmDelete() {
-    const modal = document.getElementById('deleteModal');
-    modal.classList.remove('hidden');
-}
-
-function closeDeleteModal() {
-    const modal = document.getElementById('deleteModal');
-    modal.classList.add('hidden');
-}
-
-// Close modal when clicking outside
-document.getElementById('deleteModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeDeleteModal();
-    }
-});
 </script>
 {% endblock %}
