@@ -557,6 +557,13 @@ def create_app():
     @login_required
     def conversation(user_id):
         other_user = User.query.get_or_404(user_id)
+        
+        # Check if there's an existing conversation
+        conversation = Message.query.filter(
+            ((Message.sender_id == current_user.id) & (Message.recipient_id == user_id)) |
+            ((Message.sender_id == user_id) & (Message.recipient_id == current_user.id))
+        ).first()
+        
         if request.method == 'POST':
             content = request.form.get('content')
             if content:
