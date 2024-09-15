@@ -13,9 +13,8 @@
         background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         position: relative;
         overflow: hidden;
-        z-index: 10; /* Ensure the header is above other content */
+        z-index: 10;
     }
-
     .dog-header::before {
         content: '';
         position: absolute;
@@ -26,21 +25,15 @@
         background: url('https://images.unsplash.com/photo-1568572933382-74d440642117?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
         background-size: cover;
         opacity: 0.2;
-        z-index: -1; /* Place the background image behind the gradient */
+        z-index: -1;
     }
-
     .dog-header-content {
         position: relative;
-        z-index: 2; /* Ensure the content is above the background */
+        z-index: 2;
     }
-
-    .info-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
+    .main-content {
         position: relative;
-        z-index: 20; /* Ensure the info card is above the header */
+        z-index: 20;
     }
     .image-gallery {
         background-color: #000;
@@ -75,13 +68,22 @@
     .family-tree-btn:hover {
         background-image: linear-gradient(135deg, #66c88a 0%, #5cacce 100%);
     }
+    #dogImageSlideshow {
+        height: 600px;
+    }
+    #dogImageSlideshow img {
+        transition: opacity 0.5s ease-in-out;
+    }
+    .image-gallery button {
+        transition: opacity 0.3s ease-in-out;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="min-h-screen pb-12">
     <!-- Dog Header -->
-    <div class="dog-header text-white py-24 relative z-10">
+    <div class="dog-header text-white py-24">
         <div class="container mx-auto px-4 dog-header-content">
             <h1 class="text-5xl font-bold mb-2 shadow-text">{{ dog.name }}</h1>
             <p class="text-2xl mb-4 shadow-text">{{ dog.breed }}</p>
@@ -96,38 +98,41 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 relative z-20 -mt-16">
+    <div class="container mx-auto px-4 -mt-16 main-content">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Image Gallery -->
             <div class="lg:col-span-2">
                 <div class="image-gallery rounded-lg overflow-hidden shadow-lg bg-white">
-                    <div class="relative aspect-w-16 aspect-h-9">
-                        {% if dog.images and dog.images[0] %}
-                            <img id="mainImage" src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
-                                 alt="{{ dog.name }}" 
-                                 class="w-full h-full object-cover">
+                    <div id="dogImageSlideshow" class="relative">
+                        {% if dog.images %}
+                            {% for image in dog.images %}
+                                <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
+                                     alt="{{ dog.name }} - Image {{ loop.index }}" 
+                                     class="w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-500 ease-in-out"
+                                     style="{% if loop.first %}opacity: 1;{% else %}opacity: 0;{% endif %}"
+                                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/default_dog.png') }}'; this.style.opacity=1;">
+                            {% endfor %}
                         {% else %}
                             <div class="w-full h-full flex items-center justify-center bg-gray-200">
                                 <i class="fas fa-paw text-7xl text-gray-400"></i>
+                                <p>No images available</p>
                             </div>
                         {% endif %}
                     </div>
                     {% if dog.images|length > 1 %}
-                        <div class="p-4 flex justify-center space-x-2 overflow-x-auto">
+                        <div class="p-4 flex justify-center space-x-2">
                             {% for image in dog.images %}
-                                <button onclick="changeMainImage('{{ url_for('get_dog_image', image_id=image.id) }}', this)" 
-                                        class="thumbnail flex-shrink-0 w-16 h-16 rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 {% if loop.first %}active{% endif %}">
-                                    <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
-                                         alt="{{ dog.name }}" 
-                                         class="w-full h-full object-cover">
-                                </button>
+                                <button onclick="showSlide({{ loop.index0 }})" 
+                                        class="w-3 h-3 rounded-full bg-blue-500 focus:outline-none transition-opacity duration-300 ease-in-out"
+                                        style="opacity: {% if loop.first %}1{% else %}0.5{% endif %};"
+                                        aria-label="Show image {{ loop.index }}"></button>
                             {% endfor %}
                         </div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Dog Info (Quick Stats) -->
+            <!-- Dog Info -->
             <div class="lg:col-span-1 space-y-8">
                 <div class="info-card p-6">
                     <h2 class="text-2xl font-semibold mb-4">Quick Stats</h2>
@@ -182,11 +187,32 @@
 </div>
 
 <script>
-function changeMainImage(src, thumbnail) {
-    const mainImage = document.getElementById('mainImage');
-    mainImage.src = src;
-    document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
-    thumbnail.classList.add('active');
-}
+document.addEventListener('DOMContentLoaded', function() {
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('#dogImageSlideshow img');
+    const dots = document.querySelectorAll('.image-gallery button');
+
+    function showSlide(n) {
+        slides[currentSlide].style.opacity = '0';
+        if (dots[currentSlide]) dots[currentSlide].style.opacity = '0.5';
+        
+        currentSlide = (n + slides.length) % slides.length;
+        
+        slides[currentSlide].style.opacity = '1';
+        if (dots[currentSlide]) dots[currentSlide].style.opacity = '1';
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    if (slides.length > 1) {
+        setInterval(nextSlide, 5000);
+    }
+
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => showSlide(index));
+    });
+});
 </script>
 {% endblock %}
