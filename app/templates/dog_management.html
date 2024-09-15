@@ -39,7 +39,7 @@
 <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for dog in dogs %}
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="h-48 bg-gray-300 relative">
+        <div class="h-56 md:h-64 lg:h-72 bg-gray-300 relative">
             {% if dog.images and dog.images[0] %}
                 <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
                      alt="{{ dog.name }}" 

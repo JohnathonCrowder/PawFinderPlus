@@ -8,12 +8,6 @@
         background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
         background-color: #f0f4f8;
     }
-    .litter-image {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-radius: 15px 15px 0 0;
-    }
     .litter-card {
         background: white;
         border-radius: 15px;
@@ -107,13 +101,17 @@
             <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for litter in litters %}
                     <div class="litter-card">
-                        {% if litter.images %}
-                            <img src="{{ url_for('get_litter_image', image_id=litter.images[0].id) }}" alt="{{ litter.name }}" class="litter-image">
-                        {% else %}
-                            <div class="litter-image bg-gray-200 flex items-center justify-center">
-                                <i class="fas fa-paw text-gray-400 text-5xl"></i>
-                            </div>
-                        {% endif %}
+                        <div class="h-56 md:h-64 lg:h-72 bg-gray-300 relative overflow-hidden">
+                            {% if litter.images %}
+                                <img src="{{ url_for('get_litter_image', image_id=litter.images[0].id) }}" 
+                                     alt="{{ litter.name }}" 
+                                     class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-gray-500">
+                                    <i class="fas fa-paw text-6xl"></i>
+                                </div>
+                            {% endif %}
+                        </div>
                         <div class="litter-info">
                             <h2 class="text-2xl font-bold mb-2" style="color: #0080ff;">{{ litter.name }}</h2>
                             <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2"></i> Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
