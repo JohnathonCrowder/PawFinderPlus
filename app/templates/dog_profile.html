@@ -13,7 +13,9 @@
         background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         position: relative;
         overflow: hidden;
+        z-index: 10; /* Ensure the header is above other content */
     }
+
     .dog-header::before {
         content: '';
         position: absolute;
@@ -24,11 +26,21 @@
         background: url('https://images.unsplash.com/photo-1568572933382-74d440642117?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
         background-size: cover;
         opacity: 0.2;
-        z-index: 0;
+        z-index: -1; /* Place the background image behind the gradient */
     }
+
     .dog-header-content {
         position: relative;
-        z-index: 1;
+        z-index: 2; /* Ensure the content is above the background */
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 20; /* Ensure the info card is above the header */
     }
     .image-gallery {
         background-color: #000;
@@ -69,7 +81,7 @@
 {% block content %}
 <div class="min-h-screen pb-12">
     <!-- Dog Header -->
-    <div class="dog-header text-white py-24">
+    <div class="dog-header text-white py-24 relative z-10">
         <div class="container mx-auto px-4 dog-header-content">
             <h1 class="text-5xl font-bold mb-2 shadow-text">{{ dog.name }}</h1>
             <p class="text-2xl mb-4 shadow-text">{{ dog.breed }}</p>
@@ -84,7 +96,7 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 -mt-16">
+    <div class="container mx-auto px-4 relative z-20 -mt-16">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Image Gallery -->
             <div class="lg:col-span-2">
@@ -115,7 +127,7 @@
                 </div>
             </div>
 
-            <!-- Dog Info -->
+            <!-- Dog Info (Quick Stats) -->
             <div class="lg:col-span-1 space-y-8">
                 <div class="info-card p-6">
                     <h2 class="text-2xl font-semibold mb-4">Quick Stats</h2>
