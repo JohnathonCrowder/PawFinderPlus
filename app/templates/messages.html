@@ -1,24 +1,95 @@
 {% extends "base.html" %}
 
+{% block title %}Messages - DogBreederPlus{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .messages-container {
+        background-color: #f0f4f8;
+        background-image: url('https://www.transparenttextures.com/patterns/dog-pawprints.png');
+    }
+    .conversation-list {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .conversation-item {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    .conversation-item:hover {
+        background-color: #f0f4f8;
+        border-left-color: #0080ff;
+    }
+    .profile-picture {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #0080ff;
+    }
+    .dog-icon {
+        font-size: 2rem;
+        color: #0080ff;
+    }
+    .paw-button {
+        background-color: #0080ff;
+        color: white;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .paw-button:hover {
+        background-color: #0060c0;
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">Messages</h1>
-    <div class="space-y-4">
-        {% for conversation in conversations %}
-            <a href="{{ url_for('conversation', user_id=conversation.user_id) }}" class="block bg-white shadow rounded-lg p-4 hover:shadow-md transition duration-200">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <img src="{{ url_for('get_profile_picture', user_id=conversation.user_id) }}" alt="{{ conversation.username }}" class="w-12 h-12 rounded-full mr-4">
-                        <div>
-                            <h2 class="text-xl font-semibold">{{ conversation.username }}</h2>
-                        </div>
-                    </div>
-                    <span class="text-sm text-gray-500">{{ conversation.last_message_time.strftime('%b %d, %Y') }}</span>
-                </div>
+<div class="messages-container min-h-screen py-12">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="text-4xl font-bold" style="color: #0080ff;">
+                <i class="fas fa-comments mr-2"></i> Messages
+            </h1>
+            <a href="{{ url_for('dog_management') }}" class="paw-button">
+                <i class="fas fa-paw mr-2"></i> Back to Dogs
             </a>
-        {% else %}
-            <p class="text-gray-600">You have no conversations yet.</p>
-        {% endfor %}
+        </div>
+
+        <div class="conversation-list p-6">
+            {% if conversations %}
+                {% for conversation in conversations %}
+                    <a href="{{ url_for('conversation', user_id=conversation.user_id) }}" 
+                       class="conversation-item block mb-4 p-4 hover:shadow-md rounded-lg transition duration-300">
+                        <div class="flex items-center">
+                            {% if conversation.profile_picture %}
+                                <img src="{{ url_for('get_profile_picture', user_id=conversation.user_id) }}" 
+                                     alt="{{ conversation.username }}" 
+                                     class="profile-picture mr-4">
+                            {% else %}
+                                <div class="profile-picture mr-4 bg-gray-200 flex items-center justify-center">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                            {% endif %}
+                            <div class="flex-grow">
+                                <h2 class="text-xl font-semibold">{{ conversation.username }}</h2>
+                                <p class="text-sm text-gray-600">Last message: {{ conversation.last_message_time.strftime('%b %d, %Y at %I:%M %p') }}</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-12">
+                    <i class="fas fa-dog dog-icon mb-4"></i>
+                    <p class="text-xl text-gray-600">No conversations yet. Start chatting with other dog lovers!</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
