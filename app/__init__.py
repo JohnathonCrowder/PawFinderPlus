@@ -245,6 +245,7 @@ def create_app():
             color = request.form['color']
             father_id = request.form.get('father_id')
             mother_id = request.form.get('mother_id')
+            is_public = 'is_public' in request.form  # Add this line
             
             new_dog = Dog(
                 name=name, 
@@ -255,7 +256,8 @@ def create_app():
                 color=color,
                 father_id=father_id if father_id else None,
                 mother_id=mother_id if mother_id else None,
-                user_id=current_user.id
+                user_id=current_user.id,
+                is_public=is_public  # Add this line
             )
             db.session.add(new_dog)
             db.session.commit()
@@ -273,6 +275,7 @@ def create_app():
             db.session.commit()
             flash('Dog added successfully!', 'success')
             return redirect(url_for('dog_management'))
+
         # Get all dogs for parent selection
         all_dogs = Dog.query.filter_by(user_id=current_user.id).all()
         return render_template('add_dog.html', all_dogs=all_dogs)

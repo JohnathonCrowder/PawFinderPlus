@@ -72,6 +72,15 @@
     input[type="file"]::file-selector-button:hover {
         background-color: #b3d9ff;
     }
+
+    .visibility-toggle {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .visibility-toggle input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
 </style>
 {% endblock %}
 
@@ -156,7 +165,10 @@
                     {% endfor %}
                 </select>
             </div>
-            
+            <div class="visibility-toggle mt-6">
+                <input type="checkbox" id="is_public" name="is_public" checked>
+                <label for="is_public">Make this dog's profile public</label>
+            </div>
             <div class="mb-6">
                 <label for="images" class="block mb-2 font-semibold">Upload Images</label>
                 <div class="input-group">
