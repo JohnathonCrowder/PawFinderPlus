@@ -77,6 +77,34 @@
     .image-gallery button {
         transition: opacity 0.3s ease-in-out;
     }
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+    }
+    .status-available-now {
+        background-color: #10B981;
+        color: white;
+    }
+    .status-available-soon {
+        background-color: #3B82F6;
+        color: white;
+    }
+    .status-reserved {
+        background-color: #F59E0B;
+        color: white;
+    }
+    .status-sold {
+        background-color: #EF4444;
+        color: white;
+    }
+    .status-not-for-sale {
+        background-color: #6B7280;
+        color: white;
+    }
 </style>
 {% endblock %}
 
@@ -93,6 +121,9 @@
                 </span>
                 <span class="bg-white text-blue-600 text-sm font-medium px-3 py-1 rounded-full">
                     {{ (date.today() - dog.date_of_birth).days // 365 }} years old
+                </span>
+                <span class="status-badge status-{{ dog.status.value.lower().replace(' ', '-') }}">
+                    {{ dog.status.value }}
                 </span>
             </div>
         </div>
@@ -156,6 +187,11 @@
                             <i class="fas fa-venus-mars text-2xl text-yellow-500 mb-2"></i>
                             <p class="text-sm text-gray-600">Gender</p>
                             <p class="font-semibold">{{ dog.gender }}</p>
+                        </div>
+                        <div class="stat-item text-center p-3 rounded-lg" style="background-color: rgba({{ {'Available Now': '16, 185, 129', 'Available Soon': '59, 130, 246', 'Reserved': '245, 158, 11', 'Sold': '239, 68, 68', 'Not for Sale': '107, 114, 128'}[dog.status.value] }}, 0.1);">
+                            <i class="fas fa-tag text-2xl mb-2" style="color: rgb({{ {'Available Now': '16, 185, 129', 'Available Soon': '59, 130, 246', 'Reserved': '245, 158, 11', 'Sold': '239, 68, 68', 'Not for Sale': '107, 114, 128'}[dog.status.value] }});"></i>
+                            <p class="text-sm text-gray-600">Status</p>
+                            <p class="font-semibold">{{ dog.status.value }}</p>
                         </div>
                     </div>
                 </div>
