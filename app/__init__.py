@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, url_for, request, redirect, flash, send_file
 from werkzeug.utils import secure_filename
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from .extensions import db
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -236,8 +236,60 @@ def create_app():
     
     @app.route('/public_litters')
     def public_litters():
-        litters = Litter.query.filter_by(is_public=True).order_by(Litter.date_of_birth.desc()).all()
-        return render_template('public_litters.html', litters=litters)
+        page = request.args.get('page', 1, type=int)
+        per_page = 9  # Number of litters per page
+
+        # Get filter parameters
+        breed = request.args.get('breed')
+        age = request.args.get('age')
+        search = request.args.get('search')
+
+        # Start with base query
+        query = Litter.query.filter_by(is_public=True)
+
+        # Apply breed filter
+        if breed and breed != 'All Breeds':
+            query = query.filter(or_(Litter.father.has(breed=breed), Litter.mother.has(breed=breed)))
+
+        # Apply age filter
+        if age:
+            today = datetime.utcnow().date()
+            if age == '0-4 weeks':
+                date_limit = today - timedelta(weeks=4)
+                query = query.filter(Litter.date_of_birth >= date_limit)
+            elif age == '4-8 weeks':
+                start_date = today - timedelta(weeks=8)
+                end_date = today - timedelta(weeks=4)
+                query = query.filter(Litter.date_of_birth.between(start_date, end_date))
+            elif age == '8+ weeks':
+                date_limit = today - timedelta(weeks=8)
+                query = query.filter(Litter.date_of_birth <= date_limit)
+
+        # Apply search
+        if search:
+            search_term = f"%{search}%"
+            query = query.filter(or_(
+                Litter.name.ilike(search_term),
+                Litter.father.has(Dog.name.ilike(search_term)),
+                Litter.mother.has(Dog.name.ilike(search_term)),
+                Litter.father.has(Dog.breed.ilike(search_term)),
+                Litter.mother.has(Dog.breed.ilike(search_term))
+            ))
+
+        # Order by date of birth (newest first) and paginate
+        paginated_litters = query.order_by(Litter.date_of_birth.desc()).paginate(page=page, per_page=per_page, error_out=False)
+
+        # Get unique breeds for the filter dropdown
+        breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
+        breeds = [breed[0] for breed in breeds]
+
+        return render_template('public_litters.html', 
+                            litters=paginated_litters.items,
+                            pagination=paginated_litters,
+                            breeds=breeds,
+                            current_breed=breed,
+                            current_age=age,
+                            search=search)
     
     def load_json_data(filename):
         with open(filename) as f:
