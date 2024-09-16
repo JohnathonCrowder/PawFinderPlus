@@ -154,8 +154,14 @@
                 </div>
                 <div class="input-group">
                     <i class="fas fa-paw icon"></i>
-                    <input type="text" id="breed" name="breed" value="{{ dog.breed }}" 
-                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <select id="breed" name="breed" 
+                            class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            required>
+                        <option value="" disabled>Select Breed</option>
+                        {% for breed in breeds %}
+                            <option value="{{ breed }}" {% if breed == dog.breed %}selected{% endif %}>{{ breed }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="input-group">
                     <i class="fas fa-calendar-alt icon"></i>
@@ -178,9 +184,14 @@
                 </div>
                 <div class="input-group">
                     <i class="fas fa-palette icon"></i>
-                    <input type="text" id="color" name="color" value="{{ dog.color or '' }}" 
-                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                           placeholder="Color">
+                    <select id="color" name="color" 
+                            class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            required>
+                        <option value="" disabled>Select Color</option>
+                        {% for color in colors %}
+                            <option value="{{ color }}" {% if color == dog.color %}selected{% endif %}>{{ color }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
 

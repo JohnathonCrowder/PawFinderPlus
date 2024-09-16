@@ -113,9 +113,14 @@
                 </div>
                 <div class="input-group">
                     <i class="fas fa-paw icon"></i>
-                    <input type="text" id="breed" name="breed" 
-                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                           placeholder="Breed" required>
+                    <select id="breed" name="breed" 
+                            class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            required>
+                        <option value="" disabled selected>Select Breed</option>
+                        {% for breed in breeds %}
+                            <option value="{{ breed }}">{{ breed }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="input-group">
                     <i class="fas fa-calendar-alt icon"></i>
@@ -141,9 +146,14 @@
                 </div>
                 <div class="input-group">
                     <i class="fas fa-palette icon"></i>
-                    <input type="text" id="color" name="color" 
-                           class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                           placeholder="Color">
+                    <select id="color" name="color" 
+                            class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            required>
+                        <option value="" disabled selected>Select Color</option>
+                        {% for color in colors %}
+                            <option value="{{ color }}">{{ color }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
 

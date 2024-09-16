@@ -12,6 +12,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import or_
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask import current_app
+import json
 
 
 
@@ -237,6 +238,11 @@ def create_app():
     def public_litters():
         litters = Litter.query.filter_by(is_public=True).order_by(Litter.date_of_birth.desc()).all()
         return render_template('public_litters.html', litters=litters)
+    
+    def load_json_data(filename):
+        with open(filename) as f:
+            data = json.load(f)
+        return sorted(data['breeds'] if 'breeds' in data else data['colors'])
 
     @app.route('/add_dog', methods=['GET', 'POST'])
     @login_required
@@ -281,9 +287,13 @@ def create_app():
             flash('Dog added successfully!', 'success')
             return redirect(url_for('dog_management'))
 
+        # Load and sort dog breeds and colors from JSON files
+        breeds = load_json_data('dog_breeds.json')
+        colors = load_json_data('dog_colors.json')
+
         # Get all dogs for parent selection
         all_dogs = Dog.query.filter_by(user_id=current_user.id).all()
-        return render_template('add_dog.html', all_dogs=all_dogs)
+        return render_template('add_dog.html', all_dogs=all_dogs, breeds=breeds, colors=colors)
     
     @app.route('/dog/<int:id>/family_tree')
     @login_required
@@ -399,9 +409,13 @@ def create_app():
             flash('Dog updated successfully!', 'success')
             return redirect(url_for('dog_detail', id=dog.id))
 
+        # Load and sort dog breeds and colors from JSON files
+        breeds = load_json_data('dog_breeds.json')
+        colors = load_json_data('dog_colors.json')
+
         # Get all dogs for parent selection, excluding the current dog
         all_dogs = Dog.query.filter(Dog.id != id, Dog.user_id == current_user.id).all()
-        return render_template('dog_detail.html', dog=dog, all_dogs=all_dogs)
+        return render_template('dog_detail.html', dog=dog, all_dogs=all_dogs, breeds=breeds, colors=colors)
     
     @app.route('/change_email', methods=['POST'])
     @login_required
