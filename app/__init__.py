@@ -232,6 +232,11 @@ def create_app():
         else:
             dogs = Dog.query.filter_by(user_id=current_user.id).all()
         return render_template('dog_management.html', dogs=dogs, search=search)
+    
+    @app.route('/public_litters')
+    def public_litters():
+        litters = Litter.query.filter_by(is_public=True).order_by(Litter.date_of_birth.desc()).all()
+        return render_template('public_litters.html', litters=litters)
 
     @app.route('/add_dog', methods=['GET', 'POST'])
     @login_required
@@ -613,9 +618,11 @@ def create_app():
         return render_template('litter_management.html', litters=litters)
 
     @app.route('/litter/<int:id>')
-    @login_required
     def litter_detail(id):
         litter = Litter.query.get_or_404(id)
+        if not litter.is_public and (not current_user.is_authenticated or current_user.id != litter.user_id):
+            flash('This litter is not publicly visible.', 'error')
+            return redirect(url_for('home'))
         return render_template('litter_detail.html', litter=litter)
 
     @app.errorhandler(404)

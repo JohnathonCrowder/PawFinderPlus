@@ -3,111 +3,210 @@
 {% block title %}{{ litter.name }} - Litter Details{% endblock %}
 
 {% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
 <style>
     .litter-bg {
-        background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
         background-color: #f0f4f8;
+        background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
     }
-    .detail-container {
+    .litter-container {
         background: white;
         border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    .image-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+    }
+    .gallery-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+    .gallery-image:hover {
+        transform: scale(1.05);
     }
     .puppy-card {
-        background: #f8f9fa;
+        background: #ffffff;
         border-radius: 10px;
         transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
     }
     .puppy-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
-    .bone-button {
-        background-color: #0080ff;
+    .paw-button {
+        background-color: #4a90e2;
         color: white;
         border-radius: 25px;
-        padding: 10px 25px;
+        padding: 10px 20px;
         font-weight: bold;
         transition: all 0.3s ease;
     }
-    .bone-button:hover {
-        background-color: #0060c0;
-        transform: scale(1.05);
+    .paw-button:hover {
+        background-color: #3a7bc8;
+        transform: translateY(-2px);
     }
+    .parent-card {
+        background: #f8fafc;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    .parent-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .rounded-full {
+    border-radius: 50%;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 litter-bg">
-    <div class="detail-container">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-4xl font-bold" style="color: #0080ff;">{{ litter.name }}</h1>
-            <div>
-                <span class="text-gray-600 mr-4">
-                    <i class="fas fa-eye{% if not litter.is_public %}-slash{% endif %} mr-2"></i>
-                    {{ 'Public' if litter.is_public else 'Private' }}
-                </span>
-                <a href="{{ url_for('litter_management') }}" class="bone-button">
-                    <i class="fas fa-arrow-left mr-2"></i> Back to Litters
-                </a>
+<div class="litter-bg min-h-screen py-12">
+    <div class="container mx-auto px-4">
+        <div class="litter-container p-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-800 mb-2">{{ litter.name }}</h1>
+                    <p class="text-gray-600">
+                        <span class="mr-4">
+                            <i class="fas fa-calendar-alt mr-2"></i>Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}
+                        </span>
+                        <span>
+                            <i class="fas fa-paw mr-2"></i>{{ litter.puppies|length }} puppies
+                        </span>
+                    </p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <span class="text-sm font-semibold px-3 py-1 rounded-full {% if litter.is_public %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %} mr-2">
+                        <i class="fas fa-{% if litter.is_public %}eye{% else %}eye-slash{% endif %} mr-1"></i>
+                        {{ 'Public' if litter.is_public else 'Private' }}
+                    </span>
+                    {% if current_user.is_authenticated and current_user.id == litter.user_id %}
+                        <a href="{{ url_for('edit_litter', id=litter.id) }}" class="paw-button text-sm">
+                            <i class="fas fa-edit mr-2"></i>Edit Litter
+                        </a>
+                    {% endif %}
+                </div>
             </div>
-        </div>
 
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-                <h2 class="text-2xl font-semibold mb-4">Litter Details</h2>
-                <p class="mb-2"><strong>Born:</strong> {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
-                <p class="mb-2"><strong>Father:</strong> <a href="{{ url_for('dog_profile', id=litter.father.id) }}" class="text-blue-500 hover:underline">{{ litter.father.name }}</a></p>
-                <p class="mb-2"><strong>Mother:</strong> <a href="{{ url_for('dog_profile', id=litter.mother.id) }}" class="text-blue-500 hover:underline">{{ litter.mother.name }}</a></p>
-                <p class="mb-2"><strong>Number of Puppies:</strong> {{ litter.puppies|length }}</p>
-            </div>
-            <div class="mb-8">
-                <h2 class="text-2xl font-semibold mb-4">Litter Images</h2>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <!-- Litter Images -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Litter Gallery</h2>
+                <div class="image-gallery">
                     {% for image in litter.images %}
-                    <img src="{{ url_for('get_litter_image', image_id=image.id) }}" alt="Litter Image" class="w-full h-48 object-cover rounded">
+                    <a href="{{ url_for('get_litter_image', image_id=image.id) }}" data-lightbox="litter-gallery">
+                        <img src="{{ url_for('get_litter_image', image_id=image.id) }}" alt="Litter Image" class="gallery-image">
+                    </a>
                     {% endfor %}
                 </div>
             </div>
-            <div>
-                <h2 class="text-2xl font-semibold mb-4">Parents</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="text-center">
-                        <img src="{{ url_for('get_dog_image', image_id=litter.father.images[0].id) if litter.father.images else url_for('static', filename='default_dog.png') }}" 
-                             alt="{{ litter.father.name }}" 
-                             class="w-32 h-32 object-cover rounded-full mx-auto mb-2">
-                        <p>{{ litter.father.name }}</p>
+
+            <!-- Parents Information -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Parents</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="parent-card p-6">
+                        <div class="flex items-center">
+                            <img src="{{ url_for('get_dog_image', image_id=litter.father.images[0].id) if litter.father.images else url_for('static', filename='default_dog.png') }}" 
+                                 alt="{{ litter.father.name }}" 
+                                 class="w-24 h-24 object-cover rounded-full mr-4">
+                            <div>
+                                <h3 class="text-xl font-semibold">{{ litter.father.name }}</h3>
+                                <p class="text-gray-600">Father</p>
+                                <p class="text-sm text-gray-500">{{ litter.father.breed }}</p>
+                                <a href="{{ url_for('dog_profile', id=litter.father.id) }}" class="text-blue-500 hover:underline text-sm">View Profile</a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-center">
-                        <img src="{{ url_for('get_dog_image', image_id=litter.mother.images[0].id) if litter.mother.images else url_for('static', filename='default_dog.png') }}" 
-                             alt="{{ litter.mother.name }}" 
-                             class="w-32 h-32 object-cover rounded-full mx-auto mb-2">
-                        <p>{{ litter.mother.name }}</p>
+                    <div class="parent-card p-6">
+                        <div class="flex items-center">
+                            <img src="{{ url_for('get_dog_image', image_id=litter.mother.images[0].id) if litter.mother.images else url_for('static', filename='default_dog.png') }}" 
+                                 alt="{{ litter.mother.name }}" 
+                                 class="w-24 h-24 object-cover rounded-full mr-4">
+                            <div>
+                                <h3 class="text-xl font-semibold">{{ litter.mother.name }}</h3>
+                                <p class="text-gray-600">Mother</p>
+                                <p class="text-sm text-gray-500">{{ litter.mother.breed }}</p>
+                                <a href="{{ url_for('dog_profile', id=litter.mother.id) }}" class="text-blue-500 hover:underline text-sm">View Profile</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <h2 class="text-3xl font-semibold mb-4">Puppies</h2>
-        {% if litter.puppies %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for puppy in litter.puppies %}
-                    <div class="puppy-card p-4">
-                        <img src="{{ url_for('get_dog_image', image_id=puppy.images[0].id) if puppy.images else url_for('static', filename='default_dog.png') }}" 
-                             alt="{{ puppy.name }}" 
-                             class="w-full h-48 object-cover rounded-lg mb-4">
-                        <h3 class="text-xl font-semibold mb-2">{{ puppy.name }}</h3>
-                        <p class="mb-1"><strong>Gender:</strong> {{ puppy.gender }}</p>
-                        <p class="mb-1"><strong>Color:</strong> {{ puppy.color }}</p>
-                        <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="text-blue-500 hover:underline">View Profile</a>
+            <!-- Puppies -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Puppies</h2>
+                {% if litter.puppies %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for puppy in litter.puppies %}
+                            <div class="puppy-card p-6">
+                                <img src="{{ url_for('get_dog_image', image_id=puppy.images[0].id) if puppy.images else url_for('static', filename='default_dog.png') }}" 
+                                     alt="{{ puppy.name }}" 
+                                     class="w-full h-48 object-cover rounded-lg mb-4">
+                                <h3 class="text-xl font-semibold mb-2">{{ puppy.name }}</h3>
+                                <p class="text-gray-600 mb-1"><i class="fas fa-venus-mars mr-2"></i>{{ puppy.gender }}</p>
+                                <p class="text-gray-600 mb-1"><i class="fas fa-palette mr-2"></i>{{ puppy.color }}</p>
+                                <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="paw-button mt-4 inline-block text-sm">View Profile</a>
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
+                {% else %}
+                    <p class="text-gray-600">No puppies have been added to this litter yet.</p>
+                {% endif %}
             </div>
+
+            <!-- Breeder Information and Contact -->
+<div class="bg-blue-50 p-6 rounded-lg">
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Breeder Information</h2>
+    <div class="flex items-center mb-6">
+        {% if litter.user.profile_picture_data %}
+            <img src="{{ url_for('get_profile_picture', user_id=litter.user.id) }}" 
+                 alt="{{ litter.user.username }}" 
+                 class="w-16 h-16 rounded-full object-cover mr-4">
         {% else %}
-            <p class="text-gray-600">No puppies have been added to this litter yet.</p>
+            <div class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center mr-4">
+                <i class="fas fa-user text-gray-600 text-2xl"></i>
+            </div>
         {% endif %}
+        <div>
+            <h3 class="text-xl font-bold text-gray-800">
+                {% if current_user.is_authenticated and current_user.id == litter.user_id %}
+                    You
+                {% else %}
+                    <a href="{{ url_for('user_profile', username=litter.user.username) }}" class="text-blue-600 hover:underline">
+                        {{ litter.user.username }}
+                    </a>
+                {% endif %}
+            </h3>
+            <p class="text-gray-600">Breeder</p>
+        </div>
+    </div>
+    {% if not current_user.is_authenticated or current_user.id != litter.user_id %}
+        <p class="mb-4 text-gray-700">
+            If you're interested in this litter or have any questions, please don't hesitate to contact the breeder.
+        </p>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('conversation', user_id=litter.user_id) }}" class="paw-button inline-block">
+                <i class="fas fa-comments mr-2"></i>Message Breeder
+            </a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="paw-button inline-block">
+                <i class="fas fa-sign-in-alt mr-2"></i>Log in to Contact Breeder
+            </a>
+        {% endif %}
+    {% endif %}
+</div>
+        </div>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 {% endblock %}

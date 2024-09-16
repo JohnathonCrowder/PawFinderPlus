@@ -51,6 +51,7 @@
 <ul class="hidden md:flex space-x-4 items-center">
     <li><a href="/" class="hover:underline">Home</a></li>
     {% if current_user.is_authenticated %}
+    <li><a href="{{ url_for('public_litters') }}" class="hover:underline">Public Litters</a></li>
         <li class="dropdown relative">
             <a href="#" class="hover:underline flex items-center">
                 Management <i class="fas fa-chevron-down ml-1"></i>
@@ -62,6 +63,7 @@
                 <li><a href="{{ url_for('add_litter') }}" class="rounded-b hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Add Litter</a></li>
             </ul>
         </li>
+        
         <li class="dropdown relative">
             <a href="#" class="hover:underline flex items-center">
                 <i class="fas fa-user-circle mr-1"></i> {{ current_user.username }} <i class="fas fa-chevron-down ml-1"></i>
@@ -109,8 +111,10 @@
             </svg>
         </button>
     </div>
+    
     <ul class="text-gray-800 text-lg">
         <li><a href="/" class="block py-2 px-4 hover:bg-gray-100">Home</a></li>
+        <li><a href="{{ url_for('public_litters') }}" class="block py-2 px-4 hover:bg-gray-100">Public Litters</a></li>
         {% if current_user.is_authenticated %}
             <li><a href="{{ url_for('dog_management') }}" class="block py-2 px-4 hover:bg-gray-100">Dog Management</a></li>
             <li><a href="{{ url_for('litter_management') }}" class="block py-2 px-4 hover:bg-gray-100">Litter Management</a></li>
