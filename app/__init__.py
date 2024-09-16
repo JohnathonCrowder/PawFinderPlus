@@ -330,6 +330,7 @@ def create_app():
             litter.date_of_birth = datetime.strptime(request.form['date_of_birth'], '%Y-%m-%d')
             litter.father_id = request.form['father_id']
             litter.mother_id = request.form['mother_id']
+            litter.is_public = 'is_public' in request.form  # Add this line
             puppy_ids = request.form.getlist('puppies')
             
             # Clear existing puppies and add new ones
