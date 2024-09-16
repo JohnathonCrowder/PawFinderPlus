@@ -51,6 +51,7 @@ class Dog(db.Model):
     mother_id = db.Column(db.Integer, db.ForeignKey('dog.id'))
     father = db.relationship('Dog', remote_side=[id], backref='offspring_as_father', foreign_keys=[father_id])
     mother = db.relationship('Dog', remote_side=[id], backref='offspring_as_mother', foreign_keys=[mother_id])
+    is_public = db.Column(db.Boolean, default=True)
 
     # Add a property to easily access the dog's litter
     @property

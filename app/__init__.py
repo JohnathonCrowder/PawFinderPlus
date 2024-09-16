@@ -143,8 +143,11 @@ def create_app():
     def user_profile(username):
         user = User.query.filter_by(username=username).first_or_404()
         
-        # Get user's dogs
-        dogs = Dog.query.filter_by(user_id=user.id).all()
+        # Get user's public dogs
+        if current_user.is_authenticated and current_user.id == user.id:
+            dogs = Dog.query.filter_by(user_id=user.id).all()
+        else:
+            dogs = Dog.query.filter_by(user_id=user.id, is_public=True).all()
         
         # Get user's litters
         litters = Litter.query.filter_by(user_id=user.id).all()
@@ -366,6 +369,7 @@ def create_app():
             dog.gender = request.form['gender']
             dog.weight = float(request.form['weight']) if request.form['weight'] else None
             dog.color = request.form['color']
+            dog.is_public = 'is_public' in request.form
             
             # Handle father and mother updates
             father_id = request.form.get('father_id')
@@ -449,6 +453,9 @@ def create_app():
     @app.route('/dog/<int:id>/profile')
     def dog_profile(id):
         dog = Dog.query.get_or_404(id)
+        if not dog.is_public and (not current_user.is_authenticated or current_user.id != dog.user_id):
+            flash('This dog profile is not publicly visible.', 'error')
+            return redirect(url_for('home'))
         return render_template('dog_profile.html', dog=dog, date=date)
     
     @app.route('/dog_image/<int:image_id>')

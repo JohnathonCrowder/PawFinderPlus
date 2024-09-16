@@ -195,8 +195,9 @@
                 <div class="card p-8">
                     <h2 class="text-2xl font-semibold mb-6">Dogs</h2>
                     {% if dogs %}
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            {% for dog in dogs %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {% for dog in dogs %}
+            {% if dog.is_public or (current_user.is_authenticated and current_user.id == user.id) %}
                                 <div class="dog-card flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
                                     {% if dog.images %}
                                         <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
@@ -214,11 +215,12 @@
                                         <a href="{{ url_for('dog_profile', id=dog.id) }}" class="text-blue-600 hover:underline text-sm font-medium">View Profile</a>
                                     </div>
                                 </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-gray-500 italic">No dogs added yet</p>
-                    {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-gray-500 italic">No public dogs added yet</p>
+                        {% endif %}
                 </div>
 
                 <!-- Litters Section -->

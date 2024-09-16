@@ -217,6 +217,12 @@
                            class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
+            <div class="mb-4">
+                <label class="flex items-center">
+                    <input type="checkbox" name="is_public" class="form-checkbox" {% if dog.is_public %}checked{% endif %}>
+                    <span class="ml-2">Publicly Visible</span>
+                </label>
+            </div>
 
             <div class="flex justify-center space-x-4">
                 <button type="submit" class="bone-button">
