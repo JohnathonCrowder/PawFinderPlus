@@ -142,28 +142,27 @@ def create_app():
     @app.route('/profile/<username>')
     def user_profile(username):
         user = User.query.filter_by(username=username).first_or_404()
-        
-        # Get user's public dogs
-        if current_user.is_authenticated and current_user.id == user.id:
+        is_own_profile = current_user.is_authenticated and current_user.id == user.id
+
+        if is_own_profile:
             dogs = Dog.query.filter_by(user_id=user.id).all()
+            litters = Litter.query.filter_by(user_id=user.id).all()
         else:
             dogs = Dog.query.filter_by(user_id=user.id, is_public=True).all()
-        
-        # Get user's litters
-        litters = Litter.query.filter_by(user_id=user.id).all()
-        
-        # Calculate some stats
-        total_dogs = len(dogs)
+            litters = Litter.query.filter_by(user_id=user.id, is_public=True).all()
+
+        total_dogs = len(dogs) if is_own_profile else len([dog for dog in dogs if dog.is_public])
         total_litters = len(litters)
-        dog_breeds = list(set(dog.breed for dog in dogs))
-        
+        dog_breeds = list(set(dog.breed for dog in dogs if is_own_profile or dog.is_public))
+
         return render_template('user_profile.html', 
                             user=user, 
-                            dogs=dogs, 
+                            dogs=dogs,
                             litters=litters,
                             total_dogs=total_dogs, 
                             total_litters=total_litters,
-                            dog_breeds=dog_breeds)
+                            dog_breeds=dog_breeds,
+                            is_own_profile=is_own_profile)
 
     # Existing Routes
     @app.route('/register', methods=['GET', 'POST'])
@@ -510,13 +509,15 @@ def create_app():
             father_id = request.form['father_id']
             mother_id = request.form['mother_id']
             puppy_ids = request.form.getlist('puppies')
+            is_public = 'is_public' in request.form
 
             new_litter = Litter(
                 name=name,
                 date_of_birth=date_of_birth,
                 father_id=father_id,
                 mother_id=mother_id,
-                user_id=current_user.id
+                user_id=current_user.id,
+                is_public=is_public
             )
             db.session.add(new_litter)
             db.session.commit()
@@ -524,16 +525,6 @@ def create_app():
             for puppy_id in puppy_ids:
                 puppy = Dog.query.get(puppy_id)
                 new_litter.puppies.append(puppy)
-
-            new_litter = Litter(
-                name=name,
-                date_of_birth=date_of_birth,
-                father_id=father_id,
-                mother_id=mother_id,
-                user_id=current_user.id
-            )
-            db.session.add(new_litter)
-            db.session.commit()
 
             # Handle image uploads
             if 'images' in request.files:

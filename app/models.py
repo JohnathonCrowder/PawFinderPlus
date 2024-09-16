@@ -94,6 +94,7 @@ class Litter(db.Model):
     images = db.relationship('LitterImage', backref='litter', lazy=True, cascade="all, delete-orphan")
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref='litters')
+    is_public = db.Column(db.Boolean, default=True)
 
     # Ensure puppies relationship is properly defined
     puppies = db.relationship('Dog', 

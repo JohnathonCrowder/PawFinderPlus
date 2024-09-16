@@ -103,6 +103,14 @@
     .puppy-checkbox {
         margin-right: 0.75rem;
     }
+    .visibility-toggle {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .visibility-toggle input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
 </style>
 {% endblock %}
 
@@ -161,6 +169,10 @@
                         {% endfor %}
                     </select>
                 </div>
+            </div>
+            <div class="visibility-toggle">
+                <input type="checkbox" id="is_public" name="is_public" checked>
+                <label for="is_public">Make this litter public</label>
             </div>
             
             <div class="mt-6">
