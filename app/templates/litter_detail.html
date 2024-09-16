@@ -99,9 +99,9 @@
             <!-- Litter Images -->
 <div class="mb-12">
     <h2 class="text-2xl font-semibold mb-4 text-gray-800">Litter Gallery</h2>
-    <div class="relative w-full" style="padding-top: 66.67%;"> <!-- 2:3 aspect ratio -->
+    <div class="relative w-full" style="padding-top: 50%;"> <!-- 2:1 aspect ratio, adjust as needed -->
         <div id="imageCarousel" class="absolute inset-0 overflow-hidden">
-            <div class="flex h-full transition-transform duration-300 ease-in-out">
+            <div class="flex h-full transition-transform duration-500 ease-in-out">
                 {% for image in litter.images %}
                 <div class="w-full flex-shrink-0 h-full">
                     <img src="{{ url_for('get_litter_image', image_id=image.id) }}" 
@@ -237,31 +237,57 @@
     const nextBtn = document.getElementById('nextBtn');
     const images = carouselInner.querySelectorAll('img');
     let currentIndex = 0;
+    let intervalId;
     
     function showImage(index) {
         carouselInner.style.transform = `translateX(-${index * 100}%)`;
     }
     
-    prevBtn.addEventListener('click', () => {
+    function nextImage() {
+        currentIndex = (currentIndex + 1) % images.length;
+        showImage(currentIndex);
+    }
+    
+    function prevImage() {
         currentIndex = (currentIndex - 1 + images.length) % images.length;
         showImage(currentIndex);
+    }
+    
+    function startAutoScroll() {
+        intervalId = setInterval(nextImage, 5000); // Change image every 5 seconds
+    }
+    
+    function stopAutoScroll() {
+        clearInterval(intervalId);
+    }
+    
+    prevBtn.addEventListener('click', () => {
+        prevImage();
+        stopAutoScroll();
+        startAutoScroll();
     });
     
     nextBtn.addEventListener('click', () => {
-        currentIndex = (currentIndex + 1) % images.length;
-        showImage(currentIndex);
+        nextImage();
+        stopAutoScroll();
+        startAutoScroll();
     });
+    
+    carousel.addEventListener('mouseenter', stopAutoScroll);
+    carousel.addEventListener('mouseleave', startAutoScroll);
     
     function openModal(imageSrc) {
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalImage');
         modal.classList.remove('hidden');
         modalImg.src = imageSrc;
+        stopAutoScroll();
     }
     
     function closeModal() {
         const modal = document.getElementById('imageModal');
         modal.classList.add('hidden');
+        startAutoScroll();
     }
     
     // Close modal when clicking outside the image
@@ -270,5 +296,8 @@
             closeModal();
         }
     });
+    
+    // Start auto-scrolling when the page loads
+    startAutoScroll();
     </script>
 {% endblock %}
