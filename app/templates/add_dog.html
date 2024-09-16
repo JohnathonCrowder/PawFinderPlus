@@ -155,6 +155,17 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="input-group">
+                    <i class="fas fa-tag icon"></i>
+                    <select id="status" name="status" 
+                            class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            required>
+                        <option value="" disabled selected>Select Status</option>
+                        {% for status in statuses %}
+                            <option value="{{ status }}">{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
 
             <div class="input-group">

@@ -4,6 +4,14 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from sqlalchemy import LargeBinary
+from enum import Enum
+
+class DogStatus(Enum):
+    AVAILABLE_NOW = "Available Now"
+    AVAILABLE_SOON = "Available Soon"
+    RESERVED = "Reserved"
+    SOLD = "Sold"
+    NOT_FOR_SALE = "Not for Sale"
 
 # Add User model
 class User(UserMixin, db.Model):
@@ -52,6 +60,7 @@ class Dog(db.Model):
     father = db.relationship('Dog', remote_side=[id], backref='offspring_as_father', foreign_keys=[father_id])
     mother = db.relationship('Dog', remote_side=[id], backref='offspring_as_mother', foreign_keys=[mother_id])
     is_public = db.Column(db.Boolean, default=True)
+    status = db.Column(db.Enum(DogStatus), default=DogStatus.AVAILABLE_NOW)
 
     # Add a property to easily access the dog's litter
     @property

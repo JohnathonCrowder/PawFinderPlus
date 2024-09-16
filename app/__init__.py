@@ -5,7 +5,7 @@ from datetime import datetime, date, timedelta
 from .extensions import db
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User, Dog, DogImage, Litter, LitterImage, Message
+from .models import User, Dog, DogImage, Litter, LitterImage, Message, DogStatus
 from io import BytesIO
 from flask_migrate import Migrate
 from sqlalchemy.orm import joinedload
@@ -308,7 +308,8 @@ def create_app():
             color = request.form['color']
             father_id = request.form.get('father_id')
             mother_id = request.form.get('mother_id')
-            is_public = 'is_public' in request.form  # Add this line
+            is_public = 'is_public' in request.form  
+            status = DogStatus(request.form['status'])
             
             new_dog = Dog(
                 name=name, 
@@ -319,8 +320,9 @@ def create_app():
                 color=color,
                 father_id=father_id if father_id else None,
                 mother_id=mother_id if mother_id else None,
+                status=status,
                 user_id=current_user.id,
-                is_public=is_public  # Add this line
+                is_public=is_public  
             )
             db.session.add(new_dog)
             db.session.commit()
@@ -342,10 +344,11 @@ def create_app():
         # Load and sort dog breeds and colors from JSON files
         breeds = load_json_data('dog_breeds.json')
         colors = load_json_data('dog_colors.json')
+        statuses = [status.value for status in DogStatus]
 
         # Get all dogs for parent selection
         all_dogs = Dog.query.filter_by(user_id=current_user.id).all()
-        return render_template('add_dog.html', all_dogs=all_dogs, breeds=breeds, colors=colors)
+        return render_template('add_dog.html', all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses)
     
     @app.route('/dog/<int:id>/family_tree')
     @login_required
@@ -440,6 +443,7 @@ def create_app():
             dog.weight = float(request.form['weight']) if request.form['weight'] else None
             dog.color = request.form['color']
             dog.is_public = 'is_public' in request.form
+            dog.status = DogStatus(request.form['status'])
             
             # Handle father and mother updates
             father_id = request.form.get('father_id')
@@ -464,10 +468,11 @@ def create_app():
         # Load and sort dog breeds and colors from JSON files
         breeds = load_json_data('dog_breeds.json')
         colors = load_json_data('dog_colors.json')
+        statuses = [status.value for status in DogStatus]
 
         # Get all dogs for parent selection, excluding the current dog
         all_dogs = Dog.query.filter(Dog.id != id, Dog.user_id == current_user.id).all()
-        return render_template('dog_detail.html', dog=dog, all_dogs=all_dogs, breeds=breeds, colors=colors)
+        return render_template('dog_detail.html', dog=dog, all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses)
     
     @app.route('/change_email', methods=['POST'])
     @login_required
