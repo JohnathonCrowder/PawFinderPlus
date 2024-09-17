@@ -310,6 +310,7 @@ def create_app():
             mother_id = request.form.get('mother_id')
             is_public = 'is_public' in request.form  
             status = DogStatus(request.form['status'])
+            price = float(request.form['price']) if request.form['price'] else None
             
             new_dog = Dog(
                 name=name, 
@@ -321,6 +322,7 @@ def create_app():
                 father_id=father_id if father_id else None,
                 mother_id=mother_id if mother_id else None,
                 status=status,
+                price=price,
                 user_id=current_user.id,
                 is_public=is_public  
             )
@@ -444,6 +446,7 @@ def create_app():
             dog.color = request.form['color']
             dog.is_public = 'is_public' in request.form
             dog.status = DogStatus(request.form['status'])
+            dog.price = float(request.form['price']) if request.form['price'] else None
             
             # Handle father and mother updates
             father_id = request.form.get('father_id')

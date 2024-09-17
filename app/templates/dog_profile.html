@@ -208,6 +208,13 @@
                         {{ ((date.today() - dog.date_of_birth).days % 365) // 30 }} months.
                     </p>
                 </div>
+                {% if dog.price %}
+<div class="stat-item text-center p-3 bg-green-50 rounded-lg">
+    <i class="fas fa-tag text-2xl text-green-500 mb-2"></i>
+    <p class="text-sm text-gray-600">Price</p>
+    <p class="font-semibold">${{ "%.2f"|format(dog.price) }}</p>
+</div>
+{% endif %}
 
                 <div class="info-card p-6">
                     <h2 class="text-2xl font-semibold mb-4">Family Tree</h2>

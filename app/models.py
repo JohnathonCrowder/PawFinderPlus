@@ -61,6 +61,7 @@ class Dog(db.Model):
     mother = db.relationship('Dog', remote_side=[id], backref='offspring_as_mother', foreign_keys=[mother_id])
     is_public = db.Column(db.Boolean, default=True)
     status = db.Column(db.Enum(DogStatus), default=DogStatus.AVAILABLE_NOW)
+    price = db.Column(db.Float)
 
     # Add a property to easily access the dog's litter
     @property
