@@ -1,8 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}DogBreederPlus - Home{% endblock %}
+{% block title %}DogBreederPlus - Dog Management{% endblock %}
 
 {% block content %}
+<style>
+    .transition {
+        transition: all 0.3s ease;
+    }
+    .hover\:scale-105:hover {
+        transform: scale(1.05);
+    }
+</style>
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-4xl font-bold" style="color: #0080ff;">Our Dogs</h1>
@@ -37,49 +45,53 @@
 
     {% if dogs %}
     <!-- Card View -->
-    <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for dog in dogs %}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="h-56 md:h-64 lg:h-72 bg-gray-300 relative">
-                {% if dog.images and dog.images[0] %}
-                    <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
-                         alt="{{ dog.name }}" 
-                         class="w-full h-full object-cover">
-                {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-gray-500">
-                        <i class="fas fa-paw text-5xl"></i>
-                    </div>
+<div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for dog in dogs %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="h-48 bg-gray-300 relative">
+            {% if dog.images and dog.images[0] %}
+                <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
+                     alt="{{ dog.name }}" 
+                     class="w-full h-full object-cover">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center text-gray-500">
+                    <i class="fas fa-paw text-5xl"></i>
+                </div>
+            {% endif %}
+        </div>
+        <div class="p-4">
+            <h2 class="text-xl font-bold mb-2">{{ dog.name }}</h2>
+            <p class="text-gray-600 mb-1">{{ dog.breed }}</p>
+            <p class="text-sm text-gray-500 mb-1">Born: {{ dog.date_of_birth.strftime('%Y-%m-%d') }}</p>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm px-2 py-1 rounded-full {% if dog.status.value == 'Available Now' %}bg-green-200 text-green-800{% elif dog.status.value == 'Sold' %}bg-red-200 text-red-800{% else %}bg-yellow-200 text-yellow-800{% endif %}">
+                    {{ dog.status.value }}
+                </span>
+                {% if dog.price %}
+                <span class="text-sm font-semibold text-gray-700">
+                    ${{ "%.2f"|format(dog.price) }}
+                </span>
                 {% endif %}
             </div>
-            <div class="p-4">
-                <h2 class="text-xl font-bold mb-2">{{ dog.name }}</h2>
-                <p class="text-gray-600 mb-2">{{ dog.breed }}</p>
-                <p class="text-sm text-gray-500 mb-2">Born: {{ dog.date_of_birth.strftime('%Y-%m-%d') }}</p>
-                <p class="text-sm {% if dog.status.value == 'Available Now' %}text-green-600{% elif dog.status.value == 'Sold' %}text-red-600{% else %}text-yellow-600{% endif %} mb-4">
-                    <i class="fas fa-tag mr-2"></i>
-                    {{ dog.status.value }}
-                </p>
-                {% if dog.price %}
-<p class="text-sm text-gray-600 mb-2">
-    <i class="fas fa-tag mr-2"></i> ${{ "%.2f"|format(dog.price) }}
-</p>
-{% endif %}
-                <p class="text-sm {% if dog.is_public %}text-green-600{% else %}text-red-600{% endif %} mb-4">
-                    <i class="fas fa-{% if dog.is_public %}eye{% else %}eye-slash{% endif %} mr-2"></i>
-                    {{ 'Public' if dog.is_public else 'Private' }}
-                </p>
-                <div class="flex justify-between items-center">
-                    <a href="{{ url_for('dog_profile', id=dog.id) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        View Profile
-                    </a>
-                    <a href="{{ url_for('dog_detail', id=dog.id) }}" class="text-blue-500 hover:text-blue-700">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                </div>
+            <p class="text-sm {% if dog.is_public %}text-green-600{% else %}text-red-600{% endif %} mb-3">
+                <i class="fas fa-{% if dog.is_public %}eye{% else %}eye-slash{% endif %} mr-1"></i>
+                {{ 'Public' if dog.is_public else 'Private' }}
+            </p>
+            <div class="flex space-x-2">
+                <a href="{{ url_for('dog_profile', id=dog.id) }}" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-3 rounded-md transition duration-300 ease-in-out flex items-center justify-center">
+                    <i class="fas fa-eye mr-1"></i> Profile
+                </a>
+                <a href="{{ url_for('dog_detail', id=dog.id) }}" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-2 px-3 rounded-md transition duration-300 ease-in-out flex items-center justify-center">
+                    <i class="fas fa-edit mr-1"></i> Edit
+                </a>
+                <a href="{{ url_for('dog_appointments', dog_id=dog.id) }}" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium py-2 px-3 rounded-md transition duration-300 ease-in-out flex items-center justify-center">
+                    <i class="fas fa-calendar-alt mr-1"></i> Appts
+                </a>
             </div>
         </div>
-        {% endfor %}
     </div>
+    {% endfor %}
+</div>
 
     <!-- Table View -->
     <div id="tableView" class="hidden overflow-x-auto">
@@ -97,24 +109,22 @@
             </thead>
             <tbody>
                 {% for dog in dogs %}
-                <tr>
-                    <td class="border border-gray-300 px-4 py-2 w-20">
+                <tr class="table-row">
+                    <td class="border px-4 py-2 w-20">
                         {% if dog.images and dog.images[0] %}
-                            <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" 
-                                 alt="{{ dog.name }}" 
-                                 class="w-16 h-16 object-cover rounded">
+                            <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) }}" alt="{{ dog.name }}" class="w-16 h-16 object-cover rounded">
                         {% else %}
                             <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
-                                <i class="fas fa-paw text-gray-400"></i>
+                                <i class="fas fa-paw text-gray-400 text-2xl"></i>
                             </div>
                         {% endif %}
                     </td>
-                    <td class="border border-gray-300 px-4 py-2">{{ dog.name }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ dog.breed }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ dog.date_of_birth.strftime('%Y-%m-%d') }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ dog.gender }}</td>
-                    <th class="border border-gray-300 px-4 py-2 text-left">Price</th>
-                    <td class="border border-gray-300 px-4 py-2">
+                    <td class="border px-4 py-2">{{ dog.name }}</td>
+                    <td class="border px-4 py-2">{{ dog.breed }}</td>
+                    <td class="border px-4 py-2">{{ dog.date_of_birth.strftime('%Y-%m-%d') }}</td>
+                    <td class="border px-4 py-2">{{ dog.gender }}</td>
+                    <td class="border px-4 py-2">Price</td>
+                    <td class="border px-4 py-2">
                         {% if dog.price %}
                         ${{ "%.2f"|format(dog.price) }}
                         {% else %}
@@ -127,19 +137,22 @@
                             {{ dog.status.value }}
                         </span>
                     </td>
-                    <td class="border border-gray-300 px-4 py-2">
+                    <td class="border px-4 py-2">
                         <span class="{% if dog.is_public %}text-green-600{% else %}text-red-600{% endif %}">
                             <i class="fas fa-{% if dog.is_public %}eye{% else %}eye-slash{% endif %} mr-2"></i>
                             {{ 'Public' if dog.is_public else 'Private' }}
                         </span>
                     </td>
-                    <td class="border border-gray-300 px-4 py-2">
+                    <td class="border px-4 py-2">
                         <div class="flex space-x-2">
                             <a href="{{ url_for('dog_profile', id=dog.id) }}" class="text-blue-500 hover:text-blue-700" title="View Profile">
                                 <i class="fas fa-eye"></i>
                             </a>
                             <a href="{{ url_for('dog_detail', id=dog.id) }}" class="text-green-500 hover:text-green-700" title="Edit">
                                 <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ url_for('dog_appointments', dog_id=dog.id) }}" class="text-purple-500 hover:text-purple-700" title="Appointments">
+                                <i class="fas fa-calendar-alt"></i>
                             </a>
                             <button onclick="confirmDelete({{ dog.id }}, '{{ dog.name }}')" class="text-red-500 hover:text-red-700" title="Delete">
                                 <i class="fas fa-trash"></i>
@@ -176,6 +189,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
 // View toggling
