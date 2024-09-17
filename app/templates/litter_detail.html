@@ -8,7 +8,7 @@
 <style>
     .litter-bg {
         background-color: #f0f4f8;
-        background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
+        background-image: url('https://www.transparenttextures.com/patterns/dog-pawprints.png');
     }
     .litter-container {
         background: white;
@@ -62,8 +62,52 @@
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
     .rounded-full {
-    border-radius: 50%;
-}
+        border-radius: 50%;
+    }
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        flex: 1;
+    }
+    .status-available-now {
+        background-color: #10B981;
+        color: white;
+    }
+    .status-available-soon {
+        background-color: #3B82F6;
+        color: white;
+    }
+    .status-reserved {
+        background-color: #F59E0B;
+        color: white;
+    }
+    .status-sold {
+        background-color: #EF4444;
+        color: white;
+    }
+    .status-not-for-sale {
+        background-color: #6B7280;
+        color: white;
+    }
+    .puppy-card-footer {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    .paw-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        flex: 1;
+    }
 </style>
 {% endblock %}
 
@@ -97,37 +141,37 @@
             </div>
 
             <!-- Litter Images -->
-<div class="mb-12">
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Litter Gallery</h2>
-    <div class="relative w-full" style="padding-top: 50%;"> <!-- 2:1 aspect ratio, adjust as needed -->
-        <div id="imageCarousel" class="absolute inset-0 overflow-hidden">
-            <div class="flex h-full transition-transform duration-500 ease-in-out">
-                {% for image in litter.images %}
-                <div class="w-full flex-shrink-0 h-full">
-                    <img src="{{ url_for('get_litter_image', image_id=image.id) }}" 
-                         alt="Litter Image" 
-                         class="w-full h-full object-cover cursor-pointer" 
-                         onclick="openModal('{{ url_for('get_litter_image', image_id=image.id) }}')">
+            <div class="mb-12">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Litter Gallery</h2>
+                <div class="relative w-full" style="padding-top: 50%;">
+                    <div id="imageCarousel" class="absolute inset-0 overflow-hidden">
+                        <div class="flex h-full transition-transform duration-500 ease-in-out">
+                            {% for image in litter.images %}
+                            <div class="w-full flex-shrink-0 h-full">
+                                <img src="{{ url_for('get_litter_image', image_id=image.id) }}" 
+                                     alt="Litter Image" 
+                                     class="w-full h-full object-cover cursor-pointer" 
+                                     onclick="openModal('{{ url_for('get_litter_image', image_id=image.id) }}')">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <button id="prevBtn" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-r">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button id="nextBtn" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-l">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
-                {% endfor %}
             </div>
-        </div>
-        <button id="prevBtn" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-r">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <button id="nextBtn" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-l">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-    </div>
-</div>
 
-<!-- Image Modal -->
-<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
-    <div class="max-w-4xl w-full">
-        <img id="modalImage" src="" alt="Full size image" class="max-h-screen max-w-full">
-        <button onclick="closeModal()" class="absolute top-4 right-4 text-white text-2xl">&times;</button>
-    </div>
-</div>
+            <!-- Image Modal -->
+            <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+                <div class="max-w-4xl w-full">
+                    <img id="modalImage" src="" alt="Full size image" class="max-h-screen max-w-full">
+                    <button onclick="closeModal()" class="absolute top-4 right-4 text-white text-2xl">&times;</button>
+                </div>
+            </div>
 
             <!-- Parents Information -->
             <div class="mb-12">
@@ -175,7 +219,12 @@
                                 <h3 class="text-xl font-semibold mb-2">{{ puppy.name }}</h3>
                                 <p class="text-gray-600 mb-1"><i class="fas fa-venus-mars mr-2"></i>{{ puppy.gender }}</p>
                                 <p class="text-gray-600 mb-1"><i class="fas fa-palette mr-2"></i>{{ puppy.color }}</p>
-                                <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="paw-button mt-4 inline-block text-sm">View Profile</a>
+                                <div class="puppy-card-footer">
+                                    <div class="status-badge status-{{ puppy.status.value.lower().replace(' ', '-') }}">
+                                        {{ puppy.status.value }}
+                                    </div>
+                                    <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="paw-button text-sm">View Profile</a>
+                                </div>
                             </div>
                         {% endfor %}
                     </div>
@@ -185,46 +234,46 @@
             </div>
 
             <!-- Breeder Information and Contact -->
-<div class="bg-blue-50 p-6 rounded-lg">
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Breeder Information</h2>
-    <div class="flex items-center mb-6">
-        {% if litter.user.profile_picture_data %}
-            <img src="{{ url_for('get_profile_picture', user_id=litter.user.id) }}" 
-                 alt="{{ litter.user.username }}" 
-                 class="w-16 h-16 rounded-full object-cover mr-4">
-        {% else %}
-            <div class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center mr-4">
-                <i class="fas fa-user text-gray-600 text-2xl"></i>
-            </div>
-        {% endif %}
-        <div>
-            <h3 class="text-xl font-bold text-gray-800">
-                {% if current_user.is_authenticated and current_user.id == litter.user_id %}
-                    You
-                {% else %}
-                    <a href="{{ url_for('user_profile', username=litter.user.username) }}" class="text-blue-600 hover:underline">
-                        {{ litter.user.username }}
-                    </a>
+            <div class="bg-blue-50 p-6 rounded-lg">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Breeder Information</h2>
+                <div class="flex items-center mb-6">
+                    {% if litter.user.profile_picture_data %}
+                        <img src="{{ url_for('get_profile_picture', user_id=litter.user.id) }}" 
+                             alt="{{ litter.user.username }}" 
+                             class="w-16 h-16 rounded-full object-cover mr-4">
+                    {% else %}
+                        <div class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-gray-600 text-2xl"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">
+                            {% if current_user.is_authenticated and current_user.id == litter.user_id %}
+                                You
+                            {% else %}
+                                <a href="{{ url_for('user_profile', username=litter.user.username) }}" class="text-blue-600 hover:underline">
+                                    {{ litter.user.username }}
+                                </a>
+                            {% endif %}
+                        </h3>
+                        <p class="text-gray-600">Breeder</p>
+                    </div>
+                </div>
+                {% if not current_user.is_authenticated or current_user.id != litter.user_id %}
+                    <p class="mb-4 text-gray-700">
+                        If you're interested in this litter or have any questions, please don't hesitate to contact the breeder.
+                    </p>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('conversation', user_id=litter.user_id) }}" class="paw-button inline-block">
+                            <i class="fas fa-comments mr-2"></i>Message Breeder
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="paw-button inline-block">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Log in to Contact Breeder
+                        </a>
+                    {% endif %}
                 {% endif %}
-            </h3>
-            <p class="text-gray-600">Breeder</p>
-        </div>
-    </div>
-    {% if not current_user.is_authenticated or current_user.id != litter.user_id %}
-        <p class="mb-4 text-gray-700">
-            If you're interested in this litter or have any questions, please don't hesitate to contact the breeder.
-        </p>
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('conversation', user_id=litter.user_id) }}" class="paw-button inline-block">
-                <i class="fas fa-comments mr-2"></i>Message Breeder
-            </a>
-        {% else %}
-            <a href="{{ url_for('login') }}" class="paw-button inline-block">
-                <i class="fas fa-sign-in-alt mr-2"></i>Log in to Contact Breeder
-            </a>
-        {% endif %}
-    {% endif %}
-</div>
+            </div>
         </div>
     </div>
 </div>
@@ -299,5 +348,5 @@
     
     // Start auto-scrolling when the page loads
     startAutoScroll();
-    </script>
+</script>
 {% endblock %}
