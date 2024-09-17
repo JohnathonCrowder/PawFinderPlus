@@ -13,6 +13,12 @@ class DogStatus(Enum):
     SOLD = "Sold"
     NOT_FOR_SALE = "Not for Sale"
 
+class AppointmentCategory(Enum):
+    CHECKUP = "Check-up"
+    VACCINATION = "Vaccination"
+    SURGERY = "Surgery"
+    OTHER = "Other"
+
 # Add User model
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -101,6 +107,7 @@ class VetAppointment(db.Model):
     location = db.Column(db.String(200))
     completed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    category = db.Column(db.Enum(AppointmentCategory), default=AppointmentCategory.OTHER)
 
     dog = db.relationship('Dog', back_populates='vet_appointments')
 

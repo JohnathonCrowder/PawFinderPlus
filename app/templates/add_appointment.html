@@ -8,6 +8,14 @@
     
     <form action="{{ url_for('add_appointment', dog_id=dog.id) }}" method="POST" class="max-w-lg">
         <div class="mb-4">
+            <label for="category" class="block text-gray-700 text-sm font-bold mb-2">Category</label>
+            <select id="category" name="category" class="w-full px-3 py-2 border rounded-lg" required>
+                {% for category in categories %}
+                    <option value="{{ category.name }}">{{ category.value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-4">
             <label for="date" class="block text-gray-700 font-bold mb-2">Date and Time</label>
             <input type="datetime-local" id="date" name="date" required class="w-full px-3 py-2 border rounded-lg">
         </div>

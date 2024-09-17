@@ -5,7 +5,7 @@ from datetime import datetime, date, timedelta
 from .extensions import db
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User, Dog, DogImage, Litter, LitterImage, Message, DogStatus, VetAppointment
+from .models import User, Dog, DogImage, Litter, LitterImage, Message, DogStatus, VetAppointment, AppointmentCategory
 from io import BytesIO
 from flask_migrate import Migrate
 from sqlalchemy.orm import joinedload
@@ -776,11 +776,13 @@ def create_app():
             dog_id = request.form['dog_id']
             date = datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M')
             description = request.form['description']
+            category = AppointmentCategory(request.form['category'])
             
             new_appointment = VetAppointment(
                 dog_id=dog_id,
                 date=date,
-                description=description
+                description=description,
+                category=category
             )
             db.session.add(new_appointment)
             db.session.commit()
@@ -788,9 +790,8 @@ def create_app():
             flash('Appointment added successfully!', 'success')
             return redirect(url_for('vet_appointments'))
         
-        # If it's a GET request, render the full add_appointment form
         dogs = Dog.query.filter_by(user_id=current_user.id).all()
-        return render_template('add_appointment.html', dogs=dogs)
+        return render_template('add_appointment.html', dogs=dogs, categories=AppointmentCategory)
 
     @app.route('/appointment/<int:appointment_id>/edit', methods=['GET', 'POST'])
     @login_required
@@ -829,31 +830,37 @@ def create_app():
     @app.route('/vet_appointments')
     @login_required
     def vet_appointments():
-        # Get all dogs owned by the current user
         user_dogs = Dog.query.filter_by(user_id=current_user.id).all()
         
-        # Get the filter parameter
         filter_type = request.args.get('filter', 'upcoming')
+        category_filter = request.args.get('category')
         
-        # Base query for appointments
         base_query = VetAppointment.query.join(Dog).filter(Dog.user_id == current_user.id)
         
-        # Apply filter
         now = datetime.utcnow()
         if filter_type == 'upcoming':
-            appointments = base_query.filter(VetAppointment.date >= now).order_by(VetAppointment.date).all()
+            base_query = base_query.filter(VetAppointment.date >= now)
         elif filter_type == 'past':
-            appointments = base_query.filter(VetAppointment.date < now).order_by(VetAppointment.date.desc()).all()
+            base_query = base_query.filter(VetAppointment.date < now)
         elif filter_type == 'this_week':
             week_end = now + timedelta(days=7)
-            appointments = base_query.filter(VetAppointment.date.between(now, week_end)).order_by(VetAppointment.date).all()
+            base_query = base_query.filter(VetAppointment.date.between(now, week_end))
         elif filter_type == 'this_month':
             month_end = now + timedelta(days=30)
-            appointments = base_query.filter(VetAppointment.date.between(now, month_end)).order_by(VetAppointment.date).all()
-        else:
-            appointments = base_query.order_by(VetAppointment.date).all()
+            base_query = base_query.filter(VetAppointment.date.between(now, month_end))
+
+        if category_filter:
+            base_query = base_query.filter(VetAppointment.category == AppointmentCategory(category_filter))
         
-        return render_template('vet_appointments.html', user_dogs=user_dogs, appointments=appointments, now=now, filter_type=filter_type)
+        appointments = base_query.order_by(VetAppointment.date).all()
+        
+        return render_template('vet_appointments.html', 
+                            user_dogs=user_dogs, 
+                            appointments=appointments, 
+                            now=now, 
+                            filter_type=filter_type, 
+                            category_filter=category_filter,
+                            categories=AppointmentCategory)
 
 
     return app
