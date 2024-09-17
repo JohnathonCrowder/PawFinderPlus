@@ -766,7 +766,8 @@ def create_app():
             flash('You do not have permission to view this dog\'s appointments.', 'error')
             return redirect(url_for('dog_management'))
         appointments = VetAppointment.query.filter_by(dog_id=dog_id).order_by(VetAppointment.date).all()
-        return render_template('dog_appointments.html', dog=dog, appointments=appointments)
+        now = datetime.utcnow()
+        return render_template('dog_appointments.html', dog=dog, appointments=appointments, now=now)
 
     @app.route('/dog/<int:dog_id>/add_appointment', methods=['GET', 'POST'])
     @login_required
