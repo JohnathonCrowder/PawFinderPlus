@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Vet Appointments - DogBreederPlus{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js'></script>
+<style>
+    .appointment-card {
+        transition: all 0.3s ease;
+    }
+    .appointment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Vet Appointments</h1>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('vet_appointments', filter='upcoming') }}" class="px-4 py-2 rounded {% if filter_type == 'upcoming' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">Upcoming</a>
+            <a href="{{ url_for('vet_appointments', filter='past') }}" class="px-4 py-2 rounded {% if filter_type == 'past' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">Past</a>
+            <a href="{{ url_for('vet_appointments', filter='this_week') }}" class="px-4 py-2 rounded {% if filter_type == 'this_week' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">This Week</a>
+            <a href="{{ url_for('vet_appointments', filter='this_month') }}" class="px-4 py-2 rounded {% if filter_type == 'this_month' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">This Month</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Appointments List -->
+        <div class="lg:col-span-2">
+            {% if appointments %}
+                {% for appointment in appointments %}
+                    <div class="appointment-card bg-white p-4 rounded-lg shadow mb-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-lg">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</h3>
+                                <p class="text-blue-600 font-medium">{{ appointment.dog.name }}</p>
+                                <p class="text-gray-600">{{ appointment.description }}</p>
+                                <p class="text-sm text-gray-500 mt-2">
+                                    <i class="fas fa-user-md mr-2"></i>{{ appointment.veterinarian or 'Not specified' }}
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>{{ appointment.location or 'Not specified' }}
+                                </p>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="status-badge {% if appointment.date >= now %}bg-yellow-100 text-yellow-800{% elif appointment.completed %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %} mb-2">
+                                    {% if appointment.date >= now %}
+                                        Upcoming
+                                    {% elif appointment.completed %}
+                                        Completed
+                                    {% else %}
+                                        Missed
+                                    {% endif %}
+                                </span>
+                                <div class="flex space-x-2">
+                                    <a href="{{ url_for('edit_appointment', appointment_id=appointment.id) }}" class="text-blue-500 hover:text-blue-600">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ url_for('delete_appointment', appointment_id=appointment.id) }}" method="POST" class="inline">
+                                        <button type="submit" class="text-red-500 hover:text-red-600" onclick="return confirm('Are you sure you want to delete this appointment?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-600">No appointments found.</p>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Quick Add Appointment -->
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Quick Add Appointment</h2>
+                <form action="{{ url_for('add_appointment') }}" method="POST">
+                    <div class="mb-4">
+                        <label for="dog_id" class="block text-sm font-medium text-gray-700">Dog</label>
+                        <select id="dog_id" name="dog_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            {% for dog in user_dogs %}
+                                <option value="{{ dog.id }}">{{ dog.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="date" class="block text-sm font-medium text-gray-700">Date and Time</label>
+                        <input type="datetime-local" id="date" name="date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+                    <div class="mb-4">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <input type="text" id="description" name="description" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                        Add Appointment
+                    </button>
+                </form>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Appointment Calendar</h2>
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: [
+            {% for appointment in appointments %}
+            {
+                title: '{{ appointment.dog.name }}: {{ appointment.description|truncate(20) }}',
+                start: '{{ appointment.date.isoformat() }}',
+                url: '{{ url_for("edit_appointment", appointment_id=appointment.id) }}',
+                backgroundColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}'
+            },
+            {% endfor %}
+        ],
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+            if (info.event.url) {
+                window.location.href = info.event.url;
+            }
+        }
+    });
+    calendar.render();
+});
+</script>
+{% endblock %}

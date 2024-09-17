@@ -59,6 +59,7 @@
             <ul class="dropdown-menu absolute hidden text-gray-700 pt-1 bg-white rounded-md shadow-xl" style="min-width: 150px;">
                 <li><a href="{{ url_for('dog_management') }}" class="rounded-t hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Dog Management</a></li>
                 <li><a href="{{ url_for('litter_management') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Litter Management</a></li>
+                <li><a href="{{ url_for('vet_appointments') }}" class="hover:underline">Vet Appointments</a></li>
                 <li><a href="{{ url_for('add_dog') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Add Dog</a></li>
                 <li><a href="{{ url_for('add_litter') }}" class="rounded-b hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Add Litter</a></li>
             </ul>
@@ -118,6 +119,7 @@
         {% if current_user.is_authenticated %}
             <li><a href="{{ url_for('dog_management') }}" class="block py-2 px-4 hover:bg-gray-100">Dog Management</a></li>
             <li><a href="{{ url_for('litter_management') }}" class="block py-2 px-4 hover:bg-gray-100">Litter Management</a></li>
+            <li><a href="{{ url_for('vet_appointments') }}" class="hover:underline">Vet Appointments</a></li>
             <li><a href="{{ url_for('add_dog') }}" class="block py-2 px-4 hover:bg-gray-100">Add Dog</a></li>
             <li><a href="{{ url_for('add_litter') }}" class="block py-2 px-4 hover:bg-gray-100">Add Litter</a></li>
             <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="block py-2 px-4 hover:bg-gray-100">My Profile</a></li>

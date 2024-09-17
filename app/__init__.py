@@ -769,28 +769,28 @@ def create_app():
         now = datetime.utcnow()
         return render_template('dog_appointments.html', dog=dog, appointments=appointments, now=now)
 
-    @app.route('/dog/<int:dog_id>/add_appointment', methods=['GET', 'POST'])
+    @app.route('/add_appointment', methods=['GET', 'POST'])
     @login_required
-    def add_appointment(dog_id):
-        dog = Dog.query.get_or_404(dog_id)
-        if dog.user_id != current_user.id:
-            flash('You do not have permission to add appointments for this dog.', 'error')
-            return redirect(url_for('dog_management'))
-        
+    def add_appointment():
         if request.method == 'POST':
+            dog_id = request.form['dog_id']
+            date = datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M')
+            description = request.form['description']
+            
             new_appointment = VetAppointment(
                 dog_id=dog_id,
-                date=datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M'),
-                description=request.form['description'],
-                veterinarian=request.form['veterinarian'],
-                location=request.form['location']
+                date=date,
+                description=description
             )
             db.session.add(new_appointment)
             db.session.commit()
+            
             flash('Appointment added successfully!', 'success')
-            return redirect(url_for('dog_appointments', dog_id=dog_id))
+            return redirect(url_for('vet_appointments'))
         
-        return render_template('add_appointment.html', dog=dog)
+        # If it's a GET request, render the full add_appointment form
+        dogs = Dog.query.filter_by(user_id=current_user.id).all()
+        return render_template('add_appointment.html', dogs=dogs)
 
     @app.route('/appointment/<int:appointment_id>/edit', methods=['GET', 'POST'])
     @login_required
@@ -826,4 +826,36 @@ def create_app():
         return redirect(url_for('dog_appointments', dog_id=appointment.dog_id))
     
 
+    @app.route('/vet_appointments')
+    @login_required
+    def vet_appointments():
+        # Get all dogs owned by the current user
+        user_dogs = Dog.query.filter_by(user_id=current_user.id).all()
+        
+        # Get the filter parameter
+        filter_type = request.args.get('filter', 'upcoming')
+        
+        # Base query for appointments
+        base_query = VetAppointment.query.join(Dog).filter(Dog.user_id == current_user.id)
+        
+        # Apply filter
+        now = datetime.utcnow()
+        if filter_type == 'upcoming':
+            appointments = base_query.filter(VetAppointment.date >= now).order_by(VetAppointment.date).all()
+        elif filter_type == 'past':
+            appointments = base_query.filter(VetAppointment.date < now).order_by(VetAppointment.date.desc()).all()
+        elif filter_type == 'this_week':
+            week_end = now + timedelta(days=7)
+            appointments = base_query.filter(VetAppointment.date.between(now, week_end)).order_by(VetAppointment.date).all()
+        elif filter_type == 'this_month':
+            month_end = now + timedelta(days=30)
+            appointments = base_query.filter(VetAppointment.date.between(now, month_end)).order_by(VetAppointment.date).all()
+        else:
+            appointments = base_query.order_by(VetAppointment.date).all()
+        
+        return render_template('vet_appointments.html', user_dogs=user_dogs, appointments=appointments, now=now, filter_type=filter_type)
+
+
     return app
+
+
