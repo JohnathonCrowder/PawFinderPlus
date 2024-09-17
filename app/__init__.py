@@ -697,7 +697,7 @@ def create_app():
         if not litter.is_public and (not current_user.is_authenticated or current_user.id != litter.user_id):
             flash('This litter is not publicly visible.', 'error')
             return redirect(url_for('home'))
-        return render_template('litter_detail.html', litter=litter)
+        return render_template('litter_detail.html', litter=litter, DogStatus=DogStatus)
 
     @app.errorhandler(404)
     def not_found_error(error):

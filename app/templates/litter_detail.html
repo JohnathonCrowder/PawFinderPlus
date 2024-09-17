@@ -207,31 +207,36 @@
             </div>
 
             <!-- Puppies -->
-            <div class="mb-12">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Puppies</h2>
-                {% if litter.puppies %}
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {% for puppy in litter.puppies %}
-                            <div class="puppy-card p-6">
-                                <img src="{{ url_for('get_dog_image', image_id=puppy.images[0].id) if puppy.images else url_for('static', filename='default_dog.png') }}" 
-                                     alt="{{ puppy.name }}" 
-                                     class="w-full h-48 object-cover rounded-lg mb-4">
-                                <h3 class="text-xl font-semibold mb-2">{{ puppy.name }}</h3>
-                                <p class="text-gray-600 mb-1"><i class="fas fa-venus-mars mr-2"></i>{{ puppy.gender }}</p>
-                                <p class="text-gray-600 mb-1"><i class="fas fa-palette mr-2"></i>{{ puppy.color }}</p>
-                                <div class="puppy-card-footer">
-                                    <div class="status-badge status-{{ puppy.status.value.lower().replace(' ', '-') }}">
-                                        {{ puppy.status.value }}
-                                    </div>
-                                    <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="paw-button text-sm">View Profile</a>
-                                </div>
-                            </div>
-                        {% endfor %}
+<div class="mb-12">
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Puppies</h2>
+    {% if litter.puppies %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for puppy in litter.puppies %}
+                <div class="puppy-card p-6">
+                    <img src="{{ url_for('get_dog_image', image_id=puppy.images[0].id) if puppy.images else url_for('static', filename='default_dog.png') }}" 
+                         alt="{{ puppy.name }}" 
+                         class="w-full h-48 object-cover rounded-lg mb-4">
+                    <h3 class="text-xl font-semibold mb-2">{{ puppy.name }}</h3>
+                    <p class="text-gray-600 mb-1"><i class="fas fa-venus-mars mr-2"></i>{{ puppy.gender }}</p>
+                    <p class="text-gray-600 mb-1"><i class="fas fa-palette mr-2"></i>{{ puppy.color }}</p>
+                    {% if puppy.price and puppy.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
+                        <p class="text-green-600 font-semibold mb-2">
+                            <i class="fas fa-tag mr-2"></i>${{ "%.2f"|format(puppy.price) }}
+                        </p>
+                    {% endif %}
+                    <div class="puppy-card-footer">
+                        <div class="status-badge status-{{ puppy.status.value.lower().replace(' ', '-') }}">
+                            {{ puppy.status.value }}
+                        </div>
+                        <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="paw-button text-sm">View Profile</a>
                     </div>
-                {% else %}
-                    <p class="text-gray-600">No puppies have been added to this litter yet.</p>
-                {% endif %}
-            </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-600">No puppies have been added to this litter yet.</p>
+    {% endif %}
+</div>
 
             <!-- Breeder Information and Contact -->
             <div class="bg-blue-50 p-6 rounded-lg">
