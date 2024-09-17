@@ -69,12 +69,34 @@
                         </a>
                     </div>
                 </div>
+                <div class="relative filter-dropdown">
+                    <button class="filter-dropdown-toggle bg-white px-4 py-2 rounded-md shadow text-gray-700 hover:bg-gray-50">
+                        Max Price <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                    <div class="filter-dropdown-menu absolute hidden bg-white mt-2 py-2 w-48 rounded-md shadow-xl z-10">
+                        <a href="{{ url_for('public_litters', breed=current_breed, age=current_age, max_price='Any', search=search) }}" 
+                           class="block px-4 py-2 text-gray-700 hover:bg-gray-100 {% if not current_max_price %}font-bold{% endif %}">
+                            Any
+                        </a>
+                        {% for price in [500, 1000, 2000, 3000, 5000] %}
+                        <a href="{{ url_for('public_litters', breed=current_breed, age=current_age, max_price=price, search=search) }}" 
+                           class="block px-4 py-2 text-gray-700 hover:bg-gray-100 {% if current_max_price == price|string %}font-bold{% endif %}">
+                            Up to ${{ price }}
+                        </a>
+                        {% endfor %}
+                        <a href="{{ url_for('public_litters', breed=current_breed, age=current_age, max_price='5000+', search=search) }}" 
+                           class="block px-4 py-2 text-gray-700 hover:bg-gray-100 {% if current_max_price == '5000+' %}font-bold{% endif %}">
+                            $5000+
+                        </a>
+                    </div>
+                </div>
             </div>
             <form action="{{ url_for('public_litters') }}" method="get" class="relative">
-                <input type="hidden" name="breed" value="{{ current_breed }}">
-                <input type="hidden" name="age" value="{{ current_age }}">
+                <input type="hidden" name="breed" value="{{ current_breed or '' }}">
+                <input type="hidden" name="age" value="{{ current_age or '' }}">
+                <input type="hidden" name="max_price" value="{{ current_max_price or '' }}">
                 <input type="text" name="search" placeholder="Search litters..." 
-                       value="{{ search }}" class="w-full md:w-64 px-4 py-2 rounded-md shadow">
+                       value="{{ search or '' }}" class="w-full md:w-64 px-4 py-2 rounded-md shadow">
                 <button type="submit" class="absolute right-0 top-0 mt-2 mr-2 text-gray-600 hover:text-gray-800">
                     <i class="fas fa-search"></i>
                 </button>
@@ -96,12 +118,40 @@
                         <i class="fas fa-paw text-gray-400 text-4xl"></i>
                     </div>
                     {% endif %}
+
                     <div class="absolute top-0 right-0 bg-blue-500 text-white px-2 py-1 m-2 rounded-md text-sm">
                         {{ litter.puppies|length }} puppies
                     </div>
                 </div>
+
+                
+                
                 <div class="p-4">
                     <h2 class="text-xl font-semibold mb-2">{{ litter.name }}</h2>
+                    {% if litter.puppies %}
+        {% set min_price = namespace(value=None) %}
+        {% set max_price = namespace(value=None) %}
+        {% for puppy in litter.puppies %}
+            {% if puppy.price and puppy.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
+                {% if min_price.value is none or puppy.price < min_price.value %}
+                    {% set min_price.value = puppy.price %}
+                {% endif %}
+                {% if max_price.value is none or puppy.price > max_price.value %}
+                    {% set max_price.value = puppy.price %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if min_price.value is not none %}
+            <p class="text-green-600 font-semibold mb-2">
+                <i class="fas fa-tag mr-2"></i>
+                {% if min_price.value == max_price.value %}
+                    ${{ "%.2f"|format(min_price.value) }}
+                {% else %}
+                    ${{ "%.2f"|format(min_price.value) }} - ${{ "%.2f"|format(max_price.value) }}
+                {% endif %}
+            </p>
+        {% endif %}
+    {% endif %}
                     <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i>{{ litter.father.breed }}</p>
                     <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2"></i>Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
                     <p class="text-gray-600 mb-4"><i class="fas fa-map-marker-alt mr-2"></i>{{ litter.user.location or 'Location not specified' }}</p>

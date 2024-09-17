@@ -9,7 +9,7 @@ from .models import User, Dog, DogImage, Litter, LitterImage, Message, DogStatus
 from io import BytesIO
 from flask_migrate import Migrate
 from sqlalchemy.orm import joinedload
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask import current_app
 import json
@@ -243,6 +243,7 @@ def create_app():
         # Get filter parameters
         breed = request.args.get('breed')
         age = request.args.get('age')
+        max_price = request.args.get('max_price')
         search = request.args.get('search')
 
         # Start with base query
@@ -265,6 +266,20 @@ def create_app():
             elif age == '8+ weeks':
                 date_limit = today - timedelta(weeks=8)
                 query = query.filter(Litter.date_of_birth <= date_limit)
+
+        # Apply max price filter
+        if max_price and max_price != 'Any':
+            if max_price == '5000+':
+                query = query.filter(Litter.puppies.any(and_(
+                    Dog.price >= 5000,
+                    Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])
+                )))
+            else:
+                max_price = float(max_price)
+                query = query.filter(Litter.puppies.any(and_(
+                    Dog.price <= max_price,
+                    Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])
+                )))
 
         # Apply search
         if search:
@@ -290,7 +305,9 @@ def create_app():
                             breeds=breeds,
                             current_breed=breed,
                             current_age=age,
-                            search=search)
+                            current_max_price=max_price,
+                            search=search,
+                            DogStatus=DogStatus)
     
     def load_json_data(filename):
         with open(filename) as f:
