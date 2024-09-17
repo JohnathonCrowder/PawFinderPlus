@@ -163,7 +163,8 @@ def create_app():
                             total_dogs=total_dogs, 
                             total_litters=total_litters,
                             dog_breeds=dog_breeds,
-                            is_own_profile=is_own_profile)
+                            is_own_profile=is_own_profile,
+                            DogStatus=DogStatus)
 
     # Existing Routes
     @app.route('/register', methods=['GET', 'POST'])
