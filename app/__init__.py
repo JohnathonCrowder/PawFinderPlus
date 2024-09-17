@@ -775,14 +775,18 @@ def create_app():
         if request.method == 'POST':
             dog_id = request.form['dog_id']
             date = datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M')
-            description = request.form['description']
             category = AppointmentCategory[request.form['category']]
+            description = request.form['description']
+            veterinarian = request.form['veterinarian']
+            location = request.form['location']
             
             new_appointment = VetAppointment(
                 dog_id=dog_id,
                 date=date,
+                category=category,
                 description=description,
-                category=category
+                veterinarian=veterinarian,
+                location=location
             )
             db.session.add(new_appointment)
             db.session.commit()

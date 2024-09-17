@@ -96,30 +96,46 @@
         <!-- Sidebar -->
         <div class="space-y-6">
             <!-- Quick Add Appointment -->
-            <div class="bg-white p-4 rounded-lg shadow">
-                <h2 class="text-xl font-semibold mb-4">Quick Add Appointment</h2>
-                <form action="{{ url_for('add_appointment') }}" method="POST">
-                    <div class="mb-4">
-                        <label for="dog_id" class="block text-sm font-medium text-gray-700">Dog</label>
-                        <select id="dog_id" name="dog_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            {% for dog in user_dogs %}
-                                <option value="{{ dog.id }}">{{ dog.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label for="date" class="block text-sm font-medium text-gray-700">Date and Time</label>
-                        <input type="datetime-local" id="date" name="date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                    </div>
-                    <div class="mb-4">
-                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                        <input type="text" id="description" name="description" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                    </div>
-                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                        Add Appointment
-                    </button>
-                </form>
-            </div>
+<div class="bg-white p-4 rounded-lg shadow">
+    <h2 class="text-xl font-semibold mb-4">Quick Add Appointment</h2>
+    <form action="{{ url_for('add_appointment') }}" method="POST">
+        <div class="mb-4">
+            <label for="dog_id" class="block text-sm font-medium text-gray-700">Dog</label>
+            <select id="dog_id" name="dog_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                {% for dog in user_dogs %}
+                    <option value="{{ dog.id }}">{{ dog.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="date" class="block text-sm font-medium text-gray-700">Date and Time</label>
+            <input type="datetime-local" id="date" name="date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+        </div>
+        <div class="mb-4">
+            <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+            <select id="category" name="category" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                {% for category in categories %}
+                    <option value="{{ category.name }}">{{ category.value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+            <textarea id="description" name="description" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" rows="3"></textarea>
+        </div>
+        <div class="mb-4">
+            <label for="veterinarian" class="block text-sm font-medium text-gray-700">Veterinarian</label>
+            <input type="text" id="veterinarian" name="veterinarian" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+        </div>
+        <div class="mb-4">
+            <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+            <input type="text" id="location" name="location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+        </div>
+        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+            Add Appointment
+        </button>
+    </form>
+</div>
 
             <!-- Calendar View -->
             <div class="bg-white p-4 rounded-lg shadow">
