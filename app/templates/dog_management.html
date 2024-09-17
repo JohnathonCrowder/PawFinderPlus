@@ -14,11 +14,14 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-4xl font-bold" style="color: #0080ff;">Our Dogs</h1>
-        <div class="flex items-center">
-            <button id="viewToggle" class="mr-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+        <div class="flex items-center space-x-4">
+            <button id="viewToggle" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-300">
                 <i class="fas fa-th mr-2"></i> <span id="viewToggleText">Switch to Table View</span>
             </button>
-            <a href="{{ url_for('add_dog') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+            <a href="{{ url_for('vet_appointments') }}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-300">
+                <i class="fas fa-calendar-alt mr-2"></i> Vet Appointments
+            </a>
+            <a href="{{ url_for('add_dog') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition duration-300">
                 <i class="fas fa-plus mr-2"></i> Add New Dog
             </a>
         </div>
