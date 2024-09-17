@@ -62,6 +62,7 @@ class Dog(db.Model):
     is_public = db.Column(db.Boolean, default=True)
     status = db.Column(db.Enum(DogStatus), default=DogStatus.AVAILABLE_NOW)
     price = db.Column(db.Float)
+    vet_appointments = db.relationship('VetAppointment', back_populates='dog', lazy=True, cascade="all, delete-orphan")
 
     # Add a property to easily access the dog's litter
     @property
@@ -91,6 +92,17 @@ class Message(db.Model):
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
     recipient = db.relationship('User', foreign_keys=[recipient_id], backref='received_messages')
     
+class VetAppointment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    dog_id = db.Column(db.Integer, db.ForeignKey('dog.id'), nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    veterinarian = db.Column(db.String(100))
+    location = db.Column(db.String(200))
+    completed = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    dog = db.relationship('Dog', back_populates='vet_appointments')
 
 class Litter(db.Model):
     id = db.Column(db.Integer, primary_key=True)

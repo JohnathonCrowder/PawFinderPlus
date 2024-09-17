@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Add Vet Appointment for {{ dog.name }} - DogBreederPlus{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Add Vet Appointment for {{ dog.name }}</h1>
+    
+    <form action="{{ url_for('add_appointment', dog_id=dog.id) }}" method="POST" class="max-w-lg">
+        <div class="mb-4">
+            <label for="date" class="block text-gray-700 font-bold mb-2">Date and Time</label>
+            <input type="datetime-local" id="date" name="date" required class="w-full px-3 py-2 border rounded-lg">
+        </div>
+        <div class="mb-4">
+            <label for="description" class="block text-gray-700 font-bold mb-2">Description</label>
+            <textarea id="description" name="description" required class="w-full px-3 py-2 border rounded-lg" rows="3"></textarea>
+        </div>
+        <div class="mb-4">
+            <label for="veterinarian" class="block text-gray-700 font-bold mb-2">Veterinarian</label>
+            <input type="text" id="veterinarian" name="veterinarian" class="w-full px-3 py-2 border rounded-lg">
+        </div>
+        <div class="mb-4">
+            <label for="location" class="block text-gray-700 font-bold mb-2">Location</label>
+            <input type="text" id="location" name="location" class="w-full px-3 py-2 border rounded-lg">
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Add Appointment</button>
+    </form>
+</div>
+{% endblock %}

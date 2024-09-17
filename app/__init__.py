@@ -5,7 +5,7 @@ from datetime import datetime, date, timedelta
 from .extensions import db
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User, Dog, DogImage, Litter, LitterImage, Message, DogStatus
+from .models import User, Dog, DogImage, Litter, LitterImage, Message, DogStatus, VetAppointment
 from io import BytesIO
 from flask_migrate import Migrate
 from sqlalchemy.orm import joinedload
@@ -750,5 +750,79 @@ def create_app():
     def internal_error(error):
         db.session.rollback()
         return render_template('500.html'), 500
+
+    
+
+
+
+##########################    Vet Routes    #######################
+
+
+    @app.route('/dog/<int:dog_id>/appointments')
+    @login_required
+    def dog_appointments(dog_id):
+        dog = Dog.query.get_or_404(dog_id)
+        if dog.user_id != current_user.id:
+            flash('You do not have permission to view this dog\'s appointments.', 'error')
+            return redirect(url_for('dog_management'))
+        appointments = VetAppointment.query.filter_by(dog_id=dog_id).order_by(VetAppointment.date).all()
+        return render_template('dog_appointments.html', dog=dog, appointments=appointments)
+
+    @app.route('/dog/<int:dog_id>/add_appointment', methods=['GET', 'POST'])
+    @login_required
+    def add_appointment(dog_id):
+        dog = Dog.query.get_or_404(dog_id)
+        if dog.user_id != current_user.id:
+            flash('You do not have permission to add appointments for this dog.', 'error')
+            return redirect(url_for('dog_management'))
+        
+        if request.method == 'POST':
+            new_appointment = VetAppointment(
+                dog_id=dog_id,
+                date=datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M'),
+                description=request.form['description'],
+                veterinarian=request.form['veterinarian'],
+                location=request.form['location']
+            )
+            db.session.add(new_appointment)
+            db.session.commit()
+            flash('Appointment added successfully!', 'success')
+            return redirect(url_for('dog_appointments', dog_id=dog_id))
+        
+        return render_template('add_appointment.html', dog=dog)
+
+    @app.route('/appointment/<int:appointment_id>/edit', methods=['GET', 'POST'])
+    @login_required
+    def edit_appointment(appointment_id):
+        appointment = VetAppointment.query.get_or_404(appointment_id)
+        if appointment.dog.user_id != current_user.id:
+            flash('You do not have permission to edit this appointment.', 'error')
+            return redirect(url_for('dog_management'))
+        
+        if request.method == 'POST':
+            appointment.date = datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M')
+            appointment.description = request.form['description']
+            appointment.veterinarian = request.form['veterinarian']
+            appointment.location = request.form['location']
+            appointment.completed = 'completed' in request.form
+            db.session.commit()
+            flash('Appointment updated successfully!', 'success')
+            return redirect(url_for('dog_appointments', dog_id=appointment.dog_id))
+        
+        return render_template('edit_appointment.html', appointment=appointment)
+
+    @app.route('/appointment/<int:appointment_id>/delete', methods=['POST'])
+    @login_required
+    def delete_appointment(appointment_id):
+        appointment = VetAppointment.query.get_or_404(appointment_id)
+        if appointment.dog.user_id != current_user.id:
+            flash('You do not have permission to delete this appointment.', 'error')
+            return redirect(url_for('dog_management'))
+        
+        db.session.delete(appointment)
+        db.session.commit()
+        flash('Appointment deleted successfully!', 'success')
+        return redirect(url_for('dog_appointments', dog_id=appointment.dog_id))
+    
 
     return app
