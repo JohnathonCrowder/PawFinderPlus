@@ -370,6 +370,37 @@ def create_app():
         all_dogs = Dog.query.filter_by(user_id=current_user.id).all()
         return render_template('add_dog.html', all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses)
     
+
+    @app.route('/contact_owner/<int:dog_id>')
+    @login_required
+    def contact_owner(dog_id):
+        dog = Dog.query.get_or_404(dog_id)
+        if dog.user_id == current_user.id:
+            flash('You cannot contact yourself.', 'error')
+            return redirect(url_for('dog_profile', id=dog_id))
+
+        # Create a unique conversation ID
+        conversation_id = f"{min(current_user.id, dog.user_id)}_{max(current_user.id, dog.user_id)}"
+
+        # Check if a conversation already exists
+        existing_message = Message.query.filter_by(conversation_id=conversation_id).first()
+
+        if existing_message:
+            # If a conversation exists, redirect to it
+            return redirect(url_for('conversation', user_id=dog.user_id))
+        else:
+            # If no conversation exists, create a new one with an initial message
+            new_message = Message(
+                conversation_id=conversation_id,
+                sender_id=current_user.id,
+                recipient_id=dog.user_id,
+                content=f"Hello, I'm interested in your dog {dog.name}."
+            )
+            db.session.add(new_message)
+            db.session.commit()
+            flash('Your message has been sent to the owner.', 'success')
+            return redirect(url_for('conversation', user_id=dog.user_id))
+    
     @app.route('/dog/<int:id>/family_tree')
     @login_required
     def dog_family_tree(id):
@@ -556,7 +587,7 @@ def create_app():
         if not dog.is_public and (not current_user.is_authenticated or current_user.id != dog.user_id):
             flash('This dog profile is not publicly visible.', 'error')
             return redirect(url_for('home'))
-        return render_template('dog_profile.html', dog=dog, date=date)
+        return render_template('dog_profile.html', dog=dog, date=date, DogStatus=DogStatus)
     
     @app.route('/dog_image/<int:image_id>')
     def get_dog_image(image_id):
@@ -678,7 +709,7 @@ def create_app():
         other_user = User.query.get_or_404(user_id)
         
         # Create a unique conversation ID
-        conversation_id = '_'.join(sorted([str(current_user.id), str(user_id)]))
+        conversation_id = f"{min(current_user.id, user_id)}_{max(current_user.id, user_id)}"
         
         if request.method == 'POST':
             content = request.form.get('content')
@@ -690,16 +721,10 @@ def create_app():
                     content=content
                 )
                 db.session.add(new_message)
-                try:
-                    db.session.commit()
-                    current_app.logger.info(f"Message saved: {new_message.id}")
-                except Exception as e:
-                    db.session.rollback()
-                    current_app.logger.error(f"Error saving message: {str(e)}")
-                return redirect(url_for('conversation', user_id=user_id))
+                db.session.commit()
+            return redirect(url_for('conversation', user_id=user_id))
         
         messages = Message.query.filter_by(conversation_id=conversation_id).order_by(Message.timestamp).all()
-        current_app.logger.info(f"Retrieved {len(messages)} messages for conversation {conversation_id}")
         
         return render_template('conversation.html', messages=messages, other_user=other_user)
 
