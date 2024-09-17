@@ -765,9 +765,27 @@ def create_app():
         if dog.user_id != current_user.id:
             flash('You do not have permission to view this dog\'s appointments.', 'error')
             return redirect(url_for('dog_management'))
-        appointments = VetAppointment.query.filter_by(dog_id=dog_id).order_by(VetAppointment.date).all()
+        
+        # Get the selected category from query parameters
+        selected_category = request.args.get('category', 'all')
+        
+        # Base query
+        appointments_query = VetAppointment.query.filter_by(dog_id=dog_id)
+        
+        # Apply category filter if a specific category is selected
+        if selected_category != 'all':
+            appointments_query = appointments_query.filter(VetAppointment.category == AppointmentCategory[selected_category])
+        
+        # Order appointments by date
+        appointments = appointments_query.order_by(VetAppointment.date).all()
+        
         now = datetime.utcnow()
-        return render_template('dog_appointments.html', dog=dog, appointments=appointments, now=now)
+        return render_template('dog_appointments.html', 
+                            dog=dog, 
+                            appointments=appointments, 
+                            now=now,
+                            categories=AppointmentCategory,
+                            selected_category=selected_category)
 
     @app.route('/add_appointment', methods=['GET', 'POST'])
     @login_required
@@ -792,7 +810,7 @@ def create_app():
             db.session.commit()
             
             flash('Appointment added successfully!', 'success')
-            return redirect(url_for('vet_appointments'))
+            return redirect(url_for('dog_appointments', dog_id=dog_id))
         
         dogs = Dog.query.filter_by(user_id=current_user.id).all()
         return render_template('add_appointment.html', dogs=dogs, categories=AppointmentCategory)
@@ -807,6 +825,7 @@ def create_app():
         
         if request.method == 'POST':
             appointment.date = datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M')
+            appointment.category = AppointmentCategory[request.form['category']]
             appointment.description = request.form['description']
             appointment.veterinarian = request.form['veterinarian']
             appointment.location = request.form['location']
@@ -815,7 +834,7 @@ def create_app():
             flash('Appointment updated successfully!', 'success')
             return redirect(url_for('dog_appointments', dog_id=appointment.dog_id))
         
-        return render_template('edit_appointment.html', appointment=appointment)
+        return render_template('edit_appointment.html', appointment=appointment, categories=AppointmentCategory)
 
     @app.route('/appointment/<int:appointment_id>/delete', methods=['POST'])
     @login_required

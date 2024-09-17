@@ -31,6 +31,23 @@
         </a>
     </div>
 
+    <!-- Category Filter -->
+    <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-2">Filter by Category</h2>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ url_for('dog_appointments', dog_id=dog.id, category='all') }}" 
+               class="px-4 py-2 rounded {% if selected_category == 'all' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                All
+            </a>
+            {% for category in categories %}
+                <a href="{{ url_for('dog_appointments', dog_id=dog.id, category=category.name) }}" 
+                   class="px-4 py-2 rounded {% if selected_category == category.name %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+                    {{ category.value }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Appointments List -->
         <div class="lg:col-span-2">
@@ -44,6 +61,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <h3 class="font-semibold text-lg">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</h3>
+                                    <p class="text-blue-600 font-medium">Category: {{ appointment.category.value }}</p>
                                     <p class="text-gray-600">{{ appointment.description }}</p>
                                     <p class="text-sm text-gray-500 mt-2">
                                         <i class="fas fa-user-md mr-2"></i>{{ appointment.veterinarian or 'Not specified' }}
@@ -83,6 +101,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <h3 class="font-semibold text-lg">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</h3>
+                                    <p class="text-blue-600 font-medium">Category: {{ appointment.category.value }}</p>
                                     <p class="text-gray-600">{{ appointment.description }}</p>
                                     <p class="text-sm text-gray-500 mt-2">
                                         <i class="fas fa-user-md mr-2"></i>{{ appointment.veterinarian or 'Not specified' }}
@@ -115,10 +134,48 @@
             </div>
         </div>
 
-        <!-- Calendar View -->
-        <div class="bg-white p-4 rounded-lg shadow">
-            <h2 class="text-2xl font-semibold mb-4">Appointment Calendar</h2>
-            <div id="calendar"></div>
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Quick Add Appointment -->
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Quick Add Appointment</h2>
+                <form action="{{ url_for('add_appointment') }}" method="POST">
+                    <input type="hidden" name="dog_id" value="{{ dog.id }}">
+                    <div class="mb-4">
+                        <label for="date" class="block text-sm font-medium text-gray-700">Date and Time</label>
+                        <input type="datetime-local" id="date" name="date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+                    <div class="mb-4">
+                        <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                        <select id="category" name="category" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            {% for category in categories %}
+                                <option value="{{ category.name }}">{{ category.value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="description" name="description" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" rows="3"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="veterinarian" class="block text-sm font-medium text-gray-700">Veterinarian</label>
+                        <input type="text" id="veterinarian" name="veterinarian" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+                    <div class="mb-4">
+                        <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                        <input type="text" id="location" name="location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                        Add Appointment
+                    </button>
+                </form>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Appointment Calendar</h2>
+                <div id="calendar"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -131,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
         events: [
             {% for appointment in appointments %}
             {
-                title: '{{ appointment.description|truncate(20) }}',
+                title: '{{ appointment.category.value }}: {{ appointment.description|truncate(20) }}',
                 start: '{{ appointment.date.isoformat() }}',
                 url: '{{ url_for("edit_appointment", appointment_id=appointment.id) }}',
                 backgroundColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}'
