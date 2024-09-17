@@ -776,7 +776,7 @@ def create_app():
             dog_id = request.form['dog_id']
             date = datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M')
             description = request.form['description']
-            category = AppointmentCategory(request.form['category'])
+            category = AppointmentCategory[request.form['category']]
             
             new_appointment = VetAppointment(
                 dog_id=dog_id,
@@ -850,7 +850,11 @@ def create_app():
             base_query = base_query.filter(VetAppointment.date.between(now, month_end))
 
         if category_filter:
-            base_query = base_query.filter(VetAppointment.category == AppointmentCategory(category_filter))
+            try:
+                category_enum = AppointmentCategory[category_filter.upper()]
+                base_query = base_query.filter(VetAppointment.category == category_enum)
+            except KeyError:
+                flash(f"Invalid category filter: {category_filter}", "error")
         
         appointments = base_query.order_by(VetAppointment.date).all()
         
