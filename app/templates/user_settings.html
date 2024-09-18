@@ -226,18 +226,23 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiZGVmdGVybGFtYjYzIiwiYSI6ImNtMTg0b29kNTBzMnEya
 
 var geocoder = new MapboxGeocoder({
     accessToken: mapboxgl.accessToken,
-    types: 'address'
+    types: 'address',
+    countries: 'us',   // Limit to US addresses. Remove or change if you want to allow other countries
+    placeholder: 'Search for an address',
+    minLength: 3 // Minimum number of characters to trigger autocomplete
 });
 
 geocoder.addTo('#geocoder');
 
-geocoder.on('result', function(e) {
-    var result = e.result;
-    document.getElementById('address').value = result.place_name;
-    document.getElementById('latitude').value = result.center[1];
-    document.getElementById('longitude').value = result.center[0];
+var selectedPlace = null;
 
-    result.context.forEach(function(context) {
+geocoder.on('result', function(e) {
+    selectedPlace = e.result;
+    document.getElementById('address').value = selectedPlace.place_name;
+    document.getElementById('latitude').value = selectedPlace.center[1];
+    document.getElementById('longitude').value = selectedPlace.center[0];
+
+    selectedPlace.context.forEach(function(context) {
         if (context.id.startsWith('place')) {
             document.getElementById('city').value = context.text;
         } else if (context.id.startsWith('region')) {
@@ -248,9 +253,42 @@ geocoder.on('result', function(e) {
     });
 });
 
+geocoder.on('clear', function() {
+    selectedPlace = null;
+    document.getElementById('address').value = '';
+    document.getElementById('city').value = '';
+    document.getElementById('state').value = '';
+    document.getElementById('country').value = '';
+    document.getElementById('latitude').value = '';
+    document.getElementById('longitude').value = '';
+});
+
 // Set initial value if available
-if ("{{ user_data.address }}" !== "") {
+{% if user_data and user_data.address %}
     geocoder.setInput("{{ user_data.address }}");
-}
+{% endif %}
+
+// Prevent form submission if a valid place hasn't been selected
+document.querySelector('form').addEventListener('submit', function(e) {
+    var geocoderInput = document.querySelector('.mapboxgl-ctrl-geocoder--input');
+    if (!selectedPlace || geocoderInput.value !== selectedPlace.place_name) {
+        e.preventDefault();
+        alert('Please select a valid location from the dropdown list.');
+    }
+});
+
+// Prevent manual input
+document.querySelector('.mapboxgl-ctrl-geocoder--input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+    }
+});
+
+// Clear selection when input is cleared
+document.querySelector('.mapboxgl-ctrl-geocoder--input').addEventListener('input', function(e) {
+    if (e.target.value === '') {
+        selectedPlace = null;
+    }
+});
 </script>
 {% endblock %}

@@ -305,25 +305,25 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const carousels = document.querySelectorAll('.carousel');
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZGVmdGVybGFtYjYzIiwiYSI6ImNtMTg0b29kNTBzMnEyanB3YTl4bjl4eGQifQ.tjgnZiJbwQxeccVfe3oCKw';
     
-    carousels.forEach(carousel => {
-        const images = carousel.querySelectorAll('img');
-        let currentIndex = 0;
-        
-        function showNextImage() {
-            images[currentIndex].style.opacity = '0';
-            currentIndex = (currentIndex + 1) % images.length;
-            images[currentIndex].style.opacity = '1';
-        }
-        
-        if (images.length > 1) {
-            setInterval(showNextImage, 5000); // Change image every 5 seconds
-        }
+    var geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        types: 'address',
+        countries: 'us',
+        placeholder: 'Search for an address',
     });
-});
-</script>
+    
+    geocoder.addTo('#geocoder');
+    
+    // Set initial value if available
+    {% if user_data and user_data.address %}
+        geocoder.setInput("{{ user_data.address }}");
+    {% endif %}
+    
+    // Disable the input to prevent manual editing
+    document.querySelector('.mapboxgl-ctrl-geocoder--input').setAttribute('readonly', true);
+    </script>
             </div>
         </div>
     </div>

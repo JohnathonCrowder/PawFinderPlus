@@ -164,6 +164,13 @@ def create_app():
         total_litters = len(litters)
         dog_breeds = list(set(dog.breed for dog in dogs if is_own_profile or dog.is_public))
 
+        user_data = {
+            'address': user.address,
+            'city': user.city,
+            'state': user.state,
+            'country': user.country
+        }
+
         return render_template('user_profile.html', 
                             user=user, 
                             dogs=dogs,
@@ -172,7 +179,8 @@ def create_app():
                             total_litters=total_litters,
                             dog_breeds=dog_breeds,
                             is_own_profile=is_own_profile,
-                            DogStatus=DogStatus)
+                            DogStatus=DogStatus,
+                            user_data=user_data)
 
     # Existing Routes
     @app.route('/register', methods=['GET', 'POST'])
