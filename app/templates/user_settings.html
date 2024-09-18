@@ -3,6 +3,10 @@
 {% block title %}User Settings - DogBreederPlus{% endblock %}
 
 {% block head %}
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
 <style>
     .settings-bg {
         background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
@@ -56,6 +60,13 @@
     .danger-button:hover {
         background-color: #e60000;
     }
+    .mapboxgl-ctrl-geocoder {
+        width: 100%;
+        max-width: none;
+        font-size: 15px;
+        line-height: 20px;
+        font-family: inherit;
+    }
 </style>
 {% endblock %}
 
@@ -104,9 +115,14 @@
                                    id="full_name" name="full_name" type="text" value="{{ user_data.full_name }}">
                         </div>
                         <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2" for="location">Location</label>
-                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                                   id="location" name="location" type="text" value="{{ user_data.location }}">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="address">Location</label>
+                            <div id="geocoder" class="geocoder"></div>
+                            <input type="hidden" id="address" name="address">
+                            <input type="hidden" id="city" name="city">
+                            <input type="hidden" id="state" name="state">
+                            <input type="hidden" id="country" name="country">
+                            <input type="hidden" id="latitude" name="latitude">
+                            <input type="hidden" id="longitude" name="longitude">
                         </div>
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2" for="phone_number">Phone Number</label>
@@ -204,4 +220,37 @@
 </div>
 
 <form id="remove_picture_form" action="{{ url_for('remove_profile_picture') }}" method="POST"></form>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZGVmdGVybGFtYjYzIiwiYSI6ImNtMTg0b29kNTBzMnEyanB3YTl4bjl4eGQifQ.tjgnZiJbwQxeccVfe3oCKw';
+
+var geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    types: 'address'
+});
+
+geocoder.addTo('#geocoder');
+
+geocoder.on('result', function(e) {
+    var result = e.result;
+    document.getElementById('address').value = result.place_name;
+    document.getElementById('latitude').value = result.center[1];
+    document.getElementById('longitude').value = result.center[0];
+
+    result.context.forEach(function(context) {
+        if (context.id.startsWith('place')) {
+            document.getElementById('city').value = context.text;
+        } else if (context.id.startsWith('region')) {
+            document.getElementById('state').value = context.text;
+        } else if (context.id.startsWith('country')) {
+            document.getElementById('country').value = context.text;
+        }
+    });
+});
+
+// Set initial value if available
+if ("{{ user_data.address }}" !== "") {
+    geocoder.setInput("{{ user_data.address }}");
+}
+</script>
 {% endblock %}

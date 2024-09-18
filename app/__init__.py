@@ -99,7 +99,14 @@ def create_app():
         current_user.location = request.form.get('location', '').strip() or None
         current_user.phone_number = request.form.get('phone_number', '').strip() or None
         current_user.bio = request.form.get('bio', '').strip() or None
-        
+
+
+        current_user.address = request.form.get('address')
+        current_user.city = request.form.get('city')
+        current_user.state = request.form.get('state')
+        current_user.country = request.form.get('country')
+        current_user.latitude = float(request.form.get('latitude')) if request.form.get('latitude') else None
+        current_user.longitude = float(request.form.get('longitude')) if request.form.get('longitude') else None
 
         def format_url(url):
             if url and not url.startswith(('http://', 'https://')):

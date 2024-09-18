@@ -44,6 +44,14 @@ class User(UserMixin, db.Model):
     profile_picture_filename = db.Column(db.String(255))
     profile_picture_mimetype = db.Column(db.String(50))
 
+    #Location
+    address = db.Column(db.String(255))
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(100))
+    country = db.Column(db.String(100))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     
