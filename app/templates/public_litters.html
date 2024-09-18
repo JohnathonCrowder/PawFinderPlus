@@ -15,14 +15,6 @@
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
-    .filter-dropdown-menu {
-        display: none;
-        max-height: 200px;
-        overflow-y: auto;
-    }
-    .filter-dropdown-menu.show {
-        display: block;
-    }
     .badge {
         font-size: 0.75rem;
         padding: 0.25em 0.4em;
@@ -32,6 +24,30 @@
     .available-soon { background-color: #3B82F6; color: white; }
     .reserved { background-color: #F59E0B; color: white; }
     .sold { background-color: #EF4444; color: white; }
+    .hidden {
+        display: none;
+    }
+    #filterSection {
+        transition: all 0.3s ease-in-out;
+    }
+    #toggleIcon {
+        transition: transform 0.3s ease-in-out;
+    }
+    .rotate-180 {
+        transform: rotate(180deg);
+    }
+    .noUi-connect {
+        background: #3B82F6;
+    }
+    .noUi-handle {
+        background: #2563EB;
+        border: 2px solid #FFFFFF;
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px #93C5FD;
+    }
+    .noUi-handle:before, .noUi-handle:after {
+        display: none;
+    }
 </style>
 {% endblock %}
 
@@ -41,74 +57,103 @@
         <h1 class="text-4xl font-bold mb-8 text-center text-gray-800">Puppy Litters Marketplace</h1>
 
         <!-- Filters Section -->
-        <div class="mb-8 bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-2xl font-semibold mb-4">Refine Your Search</h2>
-            <form id="filterForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                    <label for="breed" class="block text-sm font-medium text-gray-700 mb-1">Breed</label>
-                    <select id="breed" name="breed" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                        <option value="">All Breeds</option>
-                        {% for breed in breeds %}
-                        <option value="{{ breed }}" {% if current_breed == breed %}selected{% endif %}>{{ breed }}</option>
-                        {% endfor %}
-                    </select>
+        <div class="mb-8">
+            <button id="toggleFilters" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-t-lg focus:outline-none focus:shadow-outline transition duration-300 flex items-center justify-between">
+                <span><i class="fas fa-filter mr-2"></i>Filter Options</span>
+                <i id="toggleIcon" class="fas fa-chevron-down transition-transform duration-300"></i>
+            </button>
+            <div id="filterSection" class="bg-blue-50 p-6 rounded-b-lg shadow-md border-4 border-t-0 border-blue-200 relative overflow-hidden hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 transform translate-x-16 -translate-y-16">
+                    <div class="w-full h-full bg-yellow-300 rounded-full opacity-50"></div>
                 </div>
+                <h2 class="text-3xl font-bold mb-6 text-blue-800 relative z-10">
+                    <i class="fas fa-paw mr-2"></i>Fetch Your Perfect Pup
+                </h2>
+                <form id="filterForm" class="space-y-6 relative z-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-2 border-blue-200 hover:border-blue-400 transition-colors duration-300">
+                            <label for="breed" class="block text-lg font-semibold text-blue-800 mb-2">
+                                <i class="fas fa-dog mr-2"></i>Breed
+                            </label>
+                            <select id="breed" name="breed" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                <option value="">All Breeds</option>
+                                {% for breed in breeds %}
+                                <option value="{{ breed }}" {% if current_breed == breed %}selected{% endif %}>{{ breed }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
-                <div>
-                    <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
-                    <select id="age" name="age" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                        <option value="">All Ages</option>
-                        <option value="0-4 weeks" {% if current_age == '0-4 weeks' %}selected{% endif %}>0-4 weeks</option>
-                        <option value="4-8 weeks" {% if current_age == '4-8 weeks' %}selected{% endif %}>4-8 weeks</option>
-                        <option value="8+ weeks" {% if current_age == '8+ weeks' %}selected{% endif %}>8+ weeks</option>
-                    </select>
-                </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-2 border-blue-200 hover:border-blue-400 transition-colors duration-300">
+                            <label for="age" class="block text-lg font-semibold text-blue-800 mb-2">
+                                <i class="fas fa-birthday-cake mr-2"></i>Age
+                            </label>
+                            <select id="age" name="age" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                <option value="">All Ages</option>
+                                <option value="0-4 weeks" {% if current_age == '0-4 weeks' %}selected{% endif %}>0-4 weeks</option>
+                                <option value="4-8 weeks" {% if current_age == '4-8 weeks' %}selected{% endif %}>4-8 weeks</option>
+                                <option value="8+ weeks" {% if current_age == '8+ weeks' %}selected{% endif %}>8+ weeks</option>
+                            </select>
+                        </div>
 
-                <div>
-                    <label for="priceRange" class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
-                    <div id="priceRange"></div>
-                    <div class="flex justify-between mt-2">
-                        <span id="priceMin"></span>
-                        <span id="priceMax"></span>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-2 border-blue-200 hover:border-blue-400 transition-colors duration-300">
+                            <label for="status" class="block text-lg font-semibold text-blue-800 mb-2">
+                                <i class="fas fa-heart mr-2"></i>Status
+                            </label>
+                            <select id="status" name="status" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                <option value="">All Statuses</option>
+                                <option value="AVAILABLE_NOW">Available Now</option>
+                                <option value="AVAILABLE_SOON">Available Soon</option>
+                                <option value="RESERVED">Reserved</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-2 border-blue-200 hover:border-blue-400 transition-colors duration-300">
+                            <label for="sort" class="block text-lg font-semibold text-blue-800 mb-2">
+                                <i class="fas fa-sort mr-2"></i>Sort By
+                            </label>
+                            <select id="sort" name="sort" class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="price_low">Price: Low to High</option>
+                                <option value="price_high">Price: High to Low</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-lg shadow-sm border-2 border-blue-200 hover:border-blue-400 transition-colors duration-300">
+                            <label for="search" class="block text-lg font-semibold text-blue-800 mb-2">
+                                <i class="fas fa-search mr-2"></i>Search
+                            </label>
+                            <input type="text" id="search" name="search" placeholder="Search litters..." 
+                                class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                value="{{ search or '' }}">
+                        </div>
                     </div>
-                    <input type="hidden" id="minPrice" name="minPrice">
-                    <input type="hidden" id="maxPrice" name="maxPrice">
-                </div>
 
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select id="status" name="status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                        <option value="">All Statuses</option>
-                        <option value="AVAILABLE_NOW">Available Now</option>
-                        <option value="AVAILABLE_SOON">Available Soon</option>
-                        <option value="RESERVED">Reserved</option>
-                    </select>
-                </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border-2 border-blue-200 hover:border-blue-400 transition-colors duration-300">
+                        <label for="priceRange" class="block text-lg font-semibold text-blue-800 mb-2">
+                            <i class="fas fa-tag mr-2"></i>Price Range
+                        </label>
+                        <div id="priceRange" class="mb-4"></div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span id="priceMin"></span>
+                            <span id="priceMax"></span>
+                        </div>
+                        <input type="hidden" id="minPrice" name="minPrice">
+                        <input type="hidden" id="maxPrice" name="maxPrice">
+                    </div>
 
-                <div>
-                    <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-                    <select id="sort" name="sort" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
-                        <option value="price_low">Price: Low to High</option>
-                        <option value="price_high">Price: High to Low</option>
-                    </select>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" id="clearFilters" class="px-6 py-3 rounded-full text-blue-600 bg-white border-2 border-blue-600 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
+                            <i class="fas fa-eraser mr-2"></i>Clear Filters
+                        </button>
+                        <button type="submit" class="px-6 py-3 rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg transition-colors duration-300">
+                            <i class="fas fa-paw mr-2"></i>Fetch Results
+                        </button>
+                    </div>
+                </form>
+                <div class="absolute bottom-0 left-0 w-32 h-32 transform -translate-x-16 translate-y-16">
+                    <div class="w-full h-full bg-red-300 rounded-full opacity-50"></div>
                 </div>
-
-                <div>
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                    <input type="text" id="search" name="search" placeholder="Search litters..." 
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                        value="{{ search or '' }}">
-                </div>
-            </form>
-            <div class="mt-4">
-                <button type="submit" form="filterForm" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                    Apply Filters
-                </button>
-                <button id="clearFilters" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded ml-2">
-                    Clear Filters
-                </button>
             </div>
         </div>
 
@@ -227,107 +272,124 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Price range slider
-        var priceRange = document.getElementById('priceRange');
-        var minPrice = {{ min_price|default(0) }};
-        var maxPrice = {{ max_price|default(10000) }};
-    
-        noUiSlider.create(priceRange, {
-            start: [minPrice, maxPrice],
-            connect: true,
-            range: {
-                'min': minPrice,
-                'max': maxPrice
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleFilters = document.getElementById('toggleFilters');
+    const filterSection = document.getElementById('filterSection');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    toggleFilters.addEventListener('click', function() {
+        filterSection.classList.toggle('hidden');
+        toggleIcon.classList.toggle('rotate-180');
+    });
+
+    // Price range slider
+    var priceRange = document.getElementById('priceRange');
+    var minPrice = {{ min_price|default(0) }};
+    var maxPrice = {{ max_price|default(10000) }};
+
+    noUiSlider.create(priceRange, {
+        start: [minPrice, maxPrice],
+        connect: true,
+        range: {
+            'min': minPrice,
+            'max': maxPrice
+        },
+        format: {
+            to: function (value) {
+                return Math.round(value);
             },
-            format: {
-                to: function (value) {
-                    return Math.round(value);
-                },
-                from: function (value) {
-                    return Number(value);
-                }
+            from: function (value) {
+                return Number(value);
             }
-        });
-    
-        var priceMin = document.getElementById('priceMin');
-        var priceMax = document.getElementById('priceMax');
-        var minPriceInput = document.getElementById('minPrice');
-        var maxPriceInput = document.getElementById('maxPrice');
-    
-        priceRange.noUiSlider.on('update', function (values, handle) {
-            var value = values[handle];
-            if (handle) {
-                priceMax.innerHTML = '$' + value;
-                maxPriceInput.value = value;
-            } else {
-                priceMin.innerHTML = '$' + value;
-                minPriceInput.value = value;
-            }
-        });
-    
-        // Clear filters
-        document.getElementById('clearFilters').addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Reset form fields
-            document.getElementById('filterForm').reset();
-            
-            // Reset price range slider
-            priceRange.noUiSlider.set([minPrice, maxPrice]);
-            
-            // Clear hidden price inputs
-            minPriceInput.value = '';
-            maxPriceInput.value = '';
-            
-            // Trigger form submission to reload results without filters
-            submitForm();
-        });
-    
-        // AJAX filter update
-        document.getElementById('filterForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            submitForm();
-        });
-    
-        function submitForm() {
-            var formData = new FormData(document.getElementById('filterForm'));
-            var searchParams = new URLSearchParams(formData);
-    
-            fetch('{{ url_for("public_litters") }}?' + searchParams.toString(), {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.text())
-            .then(html => {
-                var parser = new DOMParser();
-                var doc = parser.parseFromString(html, 'text/html');
-                var newLitters = doc.getElementById('littersContainer');
-                var currentLitters = document.getElementById('littersContainer');
-                currentLitters.innerHTML = newLitters.innerHTML;
-    
-                var noResults = doc.getElementById('noResults');
-                var currentNoResults = document.getElementById('noResults');
-                if (noResults) {
-                    if (!currentNoResults) {
-                        currentLitters.insertAdjacentHTML('afterend', noResults.outerHTML);
-                    }
-                } else if (currentNoResults) {
-                    currentNoResults.remove();
-                }
-    
-                // Update pagination if it exists
-                var newPagination = doc.querySelector('.pagination');
-                var currentPagination = document.querySelector('.pagination');
-                if (newPagination && currentPagination) {
-                    currentPagination.innerHTML = newPagination.innerHTML;
-                }
-    
-                history.pushState(null, '', '{{ url_for("public_litters") }}?' + searchParams.toString());
-            });
         }
     });
-    </script>
+
+    var priceMin = document.getElementById('priceMin');
+    var priceMax = document.getElementById('priceMax');
+    var minPriceInput = document.getElementById('minPrice');
+    var maxPriceInput = document.getElementById('maxPrice');
+
+    priceRange.noUiSlider.on('update', function (values, handle) {
+        var value = values[handle];
+        if (handle) {
+            priceMax.textContent = '$' + value;
+            maxPriceInput.value = value;
+        } else {
+            priceMin.textContent = '$' + value;
+            minPriceInput.value = value;
+        }
+    });
+
+    // Clear filters
+    document.getElementById('clearFilters').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Reset form fields
+        document.getElementById('filterForm').reset();
+        
+        // Reset price range slider
+        priceRange.noUiSlider.set([minPrice, maxPrice]);
+        
+        // Clear hidden price inputs
+        minPriceInput.value = '';
+        maxPriceInput.value = '';
+        
+        // Trigger form submission to reload results without filters
+        submitForm();
+
+        // Keep the filter section open
+        filterSection.classList.remove('hidden');
+        toggleIcon.classList.add('rotate-180');
+    });
+
+    // AJAX filter update
+    document.getElementById('filterForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitForm();
+
+        // Close the filter section
+        filterSection.classList.add('hidden');
+        toggleIcon.classList.remove('rotate-180');
+    });
+
+    function submitForm() {
+        var formData = new FormData(document.getElementById('filterForm'));
+        var searchParams = new URLSearchParams(formData);
+
+        fetch('{{ url_for("public_litters") }}?' + searchParams.toString(), {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+            var newLitters = doc.getElementById('littersContainer');
+            var currentLitters = document.getElementById('littersContainer');
+            currentLitters.innerHTML = newLitters.innerHTML;
+
+            var noResults = doc.getElementById('noResults');
+            var currentNoResults = document.getElementById('noResults');
+            if (noResults) {
+                if (!currentNoResults) {
+                    currentLitters.insertAdjacentHTML('afterend', noResults.outerHTML);
+                }
+            } else if (currentNoResults) {
+                currentNoResults.remove();
+            }
+
+            // Update pagination if it exists
+            var newPagination = doc.querySelector('.pagination');
+            var currentPagination = document.querySelector('.pagination');
+            if (newPagination && currentPagination) {
+                currentPagination.innerHTML = newPagination.innerHTML;
+            }
+
+            history.pushState(null, '', '{{ url_for("public_litters") }}?' + searchParams.toString());
+        });
+    }
+});
+</script>
 {% endblock %}
