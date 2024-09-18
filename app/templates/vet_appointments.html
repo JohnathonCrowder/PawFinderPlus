@@ -40,6 +40,73 @@
         border-left: 4px solid #3B82F6;
         padding-left: 10px;
     }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 600px;
+        border-radius: 10px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 600px;
+        border-radius: 10px;
+    }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 </style>
 {% endblock %}
 
@@ -125,12 +192,12 @@
     </div>
 
     <!-- Appointments List -->
-    <div class="mt-8 bg-white p-6 rounded-lg shadow-md border-t-4 border-yellow-500">
-        <h2 class="text-2xl font-semibold mb-4 section-header">Appointment List</h2>
-        {% if appointments %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for appointment in appointments %}
-                    <div class="appointment-card bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+<div class="mt-8 bg-white p-6 rounded-lg shadow-md border-t-4 border-yellow-500">
+    <h2 class="text-2xl font-semibold mb-4 section-header">Appointment List</h2>
+    {% if appointments %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for appointment in appointments %}
+                <div class="appointment-card bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200 cursor-pointer" data-appointment-id="{{ appointment.id }}">
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="font-semibold text-lg text-gray-800">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</h3>
@@ -177,36 +244,99 @@
     </div>
 </div>
 
+<!-- Appointment Modal -->
+<div id="appointmentModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle" class="text-2xl font-semibold mb-4"></h2>
+        <p id="modalDogName" class="text-lg font-medium text-blue-600 mb-2"></p>
+        <p id="modalCategory" class="text-sm text-gray-500 mb-2"></p>
+        <p id="modalDescription" class="text-gray-600 mb-4"></p>
+        <p id="modalVeterinarian" class="text-sm text-gray-500 mb-2"></p>
+        <p id="modalLocation" class="text-sm text-gray-500 mb-2"></p>
+        <div id="modalActions" class="mt-4 flex justify-end space-x-2">
+            <a id="modalEditLink" href="#" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Edit</a>
+            <form id="modalDeleteForm" method="POST" class="inline">
+                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded" onclick="return confirm('Are you sure you want to delete this appointment?')">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            },
-            events: [
-                {% for appointment in appointments %}
-                {
-                    title: '{{ appointment.dog.name }}: {{ appointment.category.value }}',
-                    start: '{{ appointment.date.isoformat() }}',
-                    url: '{{ url_for("edit_appointment", appointment_id=appointment.id) }}',
-                    backgroundColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}',
-                    borderColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}',
-                    textColor: 'white'
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: [
+            {% for appointment in appointments %}
+            {
+                id: '{{ appointment.id }}',
+                title: '{{ appointment.dog.name }}: {{ appointment.category.value }}',
+                start: '{{ appointment.date.isoformat() }}',
+                extendedProps: {
+                    dogName: '{{ appointment.dog.name }}',
+                    category: '{{ appointment.category.value }}',
+                    description: '{{ appointment.description }}',
+                    veterinarian: '{{ appointment.veterinarian or "Not specified" }}',
+                    location: '{{ appointment.location or "Not specified" }}',
+                    editUrl: '{{ url_for("edit_appointment", appointment_id=appointment.id) }}',
+                    deleteUrl: '{{ url_for("delete_appointment", appointment_id=appointment.id) }}'
                 },
-                {% endfor %}
-            ],
-            eventClick: function(info) {
-                info.jsEvent.preventDefault();
-                if (info.event.url) {
-                    window.location.href = info.event.url;
-                }
+                backgroundColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}',
+                borderColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}',
+                textColor: 'white'
+            },
+            {% endfor %}
+        ],
+        eventClick: function(info) {
+            openModal(info.event);
+        }
+    });
+    calendar.render();
+
+    // Modal functionality
+    var modal = document.getElementById("appointmentModal");
+    var span = document.getElementsByClassName("close")[0];
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    function openModal(event) {
+        document.getElementById("modalTitle").textContent = event.start.toLocaleString();
+        document.getElementById("modalDogName").textContent = event.extendedProps.dogName;
+        document.getElementById("modalCategory").textContent = event.extendedProps.category;
+        document.getElementById("modalDescription").textContent = event.extendedProps.description;
+        document.getElementById("modalVeterinarian").textContent = "Veterinarian: " + event.extendedProps.veterinarian;
+        document.getElementById("modalLocation").textContent = "Location: " + event.extendedProps.location;
+        document.getElementById("modalEditLink").href = event.extendedProps.editUrl;
+        document.getElementById("modalDeleteForm").action = event.extendedProps.deleteUrl;
+        modal.style.display = "block";
+    }
+
+    // Add click event listeners to appointment cards
+    var appointmentCards = document.querySelectorAll('.appointment-card');
+    appointmentCards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            var appointmentId = this.dataset.appointmentId;
+            var event = calendar.getEventById(appointmentId);
+            if (event) {
+                openModal(event);
             }
         });
-        calendar.render();
     });
+});
 </script>
 {% endblock %}
