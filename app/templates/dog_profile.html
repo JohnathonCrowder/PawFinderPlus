@@ -137,7 +137,7 @@
                     <div id="dogImageSlideshow" class="relative">
                         {% if dog.images %}
                             {% for image in dog.images %}
-                                <img src="{{ url_for('get_dog_image', image_id=image.id) }}" 
+                                <img src="{{ url_for('dog.get_dog_image', image_id=image.id) }}" 
                                      alt="{{ dog.name }} - Image {{ loop.index }}" 
                                      class="w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-500 ease-in-out"
                                      style="{% if loop.first %}opacity: 1;{% else %}opacity: 0;{% endif %}"
@@ -203,7 +203,7 @@
                     </div>
                 </div>
 
-                <a href="{{ url_for('dog_appointments', dog_id=dog.id) }}" class="bg-blue-500 text-white px-4 py-2 rounded">
+                <a href="{{ url_for('vet.dog_appointments', dog_id=dog.id) }}" class="bg-blue-500 text-white px-4 py-2 rounded">
                     View Vet Appointments
                 </a>
 
@@ -223,7 +223,7 @@
                 <div class="info-card p-6">
                     <h2 class="text-2xl font-semibold mb-4">Family Tree</h2>
                     <p class="text-gray-600 mb-4">Discover {{ dog.name }}'s lineage and explore the family connections.</p>
-                    <a href="{{ url_for('dog_family_tree', id=dog.id) }}" 
+                    <a href="{{ url_for('dog.dog_family_tree', id=dog.id) }}" 
                        class="family-tree-btn inline-block w-full text-white text-center px-4 py-3 rounded-full transition duration-300 shadow-md hover:shadow-lg">
                         <i class="fas fa-tree mr-2"></i>Explore Family Tree
                     </a>
@@ -234,7 +234,7 @@
                 <div class="info-card p-6">
                     <h2 class="text-2xl font-semibold mb-4">Interested in {{ dog.name }}?</h2>
                     <p class="text-gray-600 mb-4">Get in touch with {{ dog.name }}'s owner to learn more or schedule a visit.</p>
-                    <a href="{{ url_for('contact_owner', dog_id=dog.id) }}" 
+                    <a href="{{ url_for('message.contact_owner', dog_id=dog.id) }}" 
                        class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-full transition duration-300">
                         <i class="fas fa-envelope mr-2"></i>Contact Owner
                     </a>
@@ -243,7 +243,7 @@
                 <div class="info-card p-6">
                     <h2 class="text-2xl font-semibold mb-4">Interested in {{ dog.name }}?</h2>
                     <p class="text-gray-600 mb-4">Log in to contact {{ dog.name }}'s owner and learn more.</p>
-                    <a href="{{ url_for('login') }}" 
+                    <a href="{{ url_for('auth.login') }}" 
                        class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-full transition duration-300">
                         <i class="fas fa-sign-in-alt mr-2"></i>Login to Contact Owner
                     </a>

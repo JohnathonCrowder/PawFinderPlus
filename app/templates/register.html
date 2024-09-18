@@ -59,7 +59,7 @@
             {% endif %}
         {% endwith %}
         
-        <form action="{{ url_for('register') }}" method="POST">
+        <form action="{{ url_for('auth.register') }}" method="POST">
             <div class="mb-4 input-group">
                 <i class="fas fa-user icon"></i>
                 <input type="text" id="username" name="username" 
@@ -83,7 +83,7 @@
             </button>
             <div class="text-center">
                 <span class="text-gray-600">Already have an account? </span>
-                <a href="{{ url_for('login') }}" class="text-blue-500 hover:underline">Login here</a>
+                <a href="{{ url_for('auth.login') }}" class="text-blue-500 hover:underline">Login here</a>
             </div>
         </form>
     </div>

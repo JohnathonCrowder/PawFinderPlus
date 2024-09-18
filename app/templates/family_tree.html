@@ -410,14 +410,14 @@
                 <div class="grandparents">
                     {% if dog.father and dog.father.father %}
                     <div class="grandparent-card">
-                        <img src="{{ url_for('get_dog_image', image_id=dog.father.father.images[0].id) if dog.father.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.father.name }}">
+                        <img src="{{ url_for('dog.get_dog_image', image_id=dog.father.father.images[0].id) if dog.father.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.father.name }}">
                         <h3>{{ dog.father.father.name }}</h3>
                         <p>Paternal Grandfather</p>
                     </div>
                     {% endif %}
                     {% if dog.father and dog.father.mother %}
                     <div class="grandparent-card">
-                        <img src="{{ url_for('get_dog_image', image_id=dog.father.mother.images[0].id) if dog.father.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.mother.name }}">
+                        <img src="{{ url_for('dog.get_dog_image', image_id=dog.father.mother.images[0].id) if dog.father.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.mother.name }}">
                         <h3>{{ dog.father.mother.name }}</h3>
                         <p>Paternal Grandmother</p>
                     </div>
@@ -426,7 +426,7 @@
                 <div class="parent-connection"></div>
                 {% if dog.father %}
                 <div class="parent-card">
-                    <img src="{{ url_for('get_dog_image', image_id=dog.father.images[0].id) if dog.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.name }}">
+                    <img src="{{ url_for('dog.get_dog_image', image_id=dog.father.images[0].id) if dog.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.father.name }}">
                     <h3>{{ dog.father.name }}</h3>
                     <p>Father</p>
                 </div>
@@ -439,14 +439,14 @@
                 <div class="grandparents">
                     {% if dog.mother and dog.mother.father %}
                     <div class="grandparent-card">
-                        <img src="{{ url_for('get_dog_image', image_id=dog.mother.father.images[0].id) if dog.mother.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.father.name }}">
+                        <img src="{{ url_for('dog.get_dog_image', image_id=dog.mother.father.images[0].id) if dog.mother.father.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.father.name }}">
                         <h3>{{ dog.mother.father.name }}</h3>
                         <p>Maternal Grandfather</p>
                     </div>
                     {% endif %}
                     {% if dog.mother and dog.mother.mother %}
                     <div class="grandparent-card">
-                        <img src="{{ url_for('get_dog_image', image_id=dog.mother.mother.images[0].id) if dog.mother.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.mother.name }}">
+                        <img src="{{ url_for('dog.get_dog_image', image_id=dog.mother.mother.images[0].id) if dog.mother.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.mother.name }}">
                         <h3>{{ dog.mother.mother.name }}</h3>
                         <p>Maternal Grandmother</p>
                     </div>
@@ -455,7 +455,7 @@
                 <div class="parent-connection"></div>
                 {% if dog.mother %}
                 <div class="parent-card">
-                    <img src="{{ url_for('get_dog_image', image_id=dog.mother.images[0].id) if dog.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.name }}">
+                    <img src="{{ url_for('dog.get_dog_image', image_id=dog.mother.images[0].id) if dog.mother.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.mother.name }}">
                     <h3>{{ dog.mother.name }}</h3>
                     <p>Mother</p>
                 </div>
@@ -471,7 +471,7 @@
         <!-- Current Dog -->
         <div class="generation" id="current-dog">
             <div class="dog-card" style="border-color: #e74c3c;">
-                <img src="{{ url_for('get_dog_image', image_id=dog.images[0].id) if dog.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.name }}">
+                <img src="{{ url_for('dog.get_dog_image', image_id=dog.images[0].id) if dog.images else url_for('static', filename='default_dog.png') }}" alt="{{ dog.name }}">
                 <h3>{{ dog.name }}</h3>
                 <p>{{ dog.breed }}</p>
                 <p>{{ dog.date_of_birth.strftime('%Y-%m-%d') }}</p>
@@ -488,10 +488,10 @@
     <div class="litter-mates-container">
         {% for puppy in dog.litter.puppies if puppy.id != dog.id %}
         <div class="litter-mate-card">
-            <img src="{{ url_for('get_dog_image', image_id=puppy.images[0].id) if puppy.images else url_for('static', filename='default_dog.png') }}" alt="{{ puppy.name }}">
+            <img src="{{ url_for('dog.get_dog_image', image_id=puppy.images[0].id) if puppy.images else url_for('static', filename='default_dog.png') }}" alt="{{ puppy.name }}">
             <h5>{{ puppy.name }}</h5>
             <p>{{ puppy.gender }}</p>
-            <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="view-profile-btn">View Profile</a>
+            <a href="{{ url_for('dog.dog_profile', id=puppy.id) }}" class="view-profile-btn">View Profile</a>
         </div>
         {% endfor %}
     </div>

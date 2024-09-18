@@ -103,7 +103,7 @@
             {% endif %}
         {% endwith %}
         
-        <form action="{{ url_for('add_dog') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ url_for('dog.add_dog') }}" method="POST" enctype="multipart/form-data">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="input-group">
                     <i class="fas fa-dog icon"></i>
@@ -213,7 +213,7 @@
                 <button type="submit" class="bone-button">
                     <i class="fas fa-plus mr-2"></i> Add Dog
                 </button>
-                <a href="{{ url_for('home') }}" class="bone-button cancel-button">
+                <a href="{{ url_for('main.home') }}" class="bone-button cancel-button">
                     <i class="fas fa-times mr-2"></i> Cancel
                 </a>
             </div>

@@ -55,7 +55,7 @@
                     Edit Appointment for {{ appointment.dog.name }}
                 </h1>
                 
-                <form action="{{ url_for('edit_appointment', appointment_id=appointment.id) }}" method="POST">
+                <form action="{{ url_for('vet.edit_appointment', appointment_id=appointment.id) }}" method="POST">
                     <div class="mb-6 input-group">
                         <i class="fas fa-calendar-alt icon"></i>
                         <input type="datetime-local" id="date" name="date" required 
@@ -107,7 +107,7 @@
                         <button type="submit" class="paw-button px-6 py-2 rounded-full font-bold">
                             <i class="fas fa-check mr-2"></i>Update Appointment
                         </button>
-                        <a href="{{ url_for('dog_appointments', dog_id=appointment.dog_id) }}" 
+                        <a href="{{ url_for('vet.dog_appointments', dog_id=appointment.dog_id) }}" 
                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-full">
                             <i class="fas fa-times mr-2"></i>Cancel
                         </a>

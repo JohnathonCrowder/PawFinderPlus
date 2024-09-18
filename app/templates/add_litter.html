@@ -133,7 +133,7 @@
             {% endif %}
         {% endwith %}
         
-        <form id="litterForm" action="{{ url_for('add_litter') }}" method="POST" enctype="multipart/form-data">
+        <form id="litterForm" action="{{ url_for('litter.add_litter') }}" method="POST" enctype="multipart/form-data">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="input-group">
                     <i class="fas fa-tag icon"></i>
@@ -197,7 +197,7 @@
                 <button type="submit" class="bone-button">
                     <i class="fas fa-plus mr-2"></i> Add Litter
                 </button>
-                <a href="{{ url_for('litter_management') }}" class="cancel-button">
+                <a href="{{ url_for('litter.litter_management') }}" class="cancel-button">
                     <i class="fas fa-times mr-2"></i> Cancel
                 </a>
             </div>

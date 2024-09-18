@@ -36,7 +36,7 @@ def upgrade():
     sa.UniqueConstraint('username')
     )
     op.create_table('dog',
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user.user_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('breed', sa.String(length=100), nullable=False),
@@ -49,7 +49,7 @@ def upgrade():
     sa.Column('mother_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['father_id'], ['dog.id'], ),
     sa.ForeignKeyConstraint(['mother_id'], ['dog.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['user.user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('dog_image',
@@ -68,10 +68,10 @@ def upgrade():
     sa.Column('date_of_birth', sa.Date(), nullable=False),
     sa.Column('father_id', sa.Integer(), nullable=False),
     sa.Column('mother_id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user.user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['father_id'], ['dog.id'], ),
     sa.ForeignKeyConstraint(['mother_id'], ['dog.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['user.user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('litter_puppy',

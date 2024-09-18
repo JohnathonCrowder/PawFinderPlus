@@ -186,7 +186,7 @@
                 <h1 class="card-title">{{ dog.name }}'s Vet Appointments</h1>
             </div>
             <div class="mb-4">
-                <a href="{{ url_for('add_appointment', dog_id=dog.id) }}" class="dog-appointments-btn dog-appointments-btn-primary">
+                <a href="{{ url_for('vet.add_appointment', dog_id=dog.id) }}" class="dog-appointments-btn dog-appointments-btn-primary">
                     Add New Appointment
                 </a>
             </div>
@@ -197,9 +197,9 @@
                 <h2 class="card-title">Filter by Category</h2>
             </div>
             <div class="flex flex-wrap gap-2">
-                <a href="{{ url_for('dog_appointments', dog_id=dog.id) }}" class="dog-appointments-btn {% if not selected_category %}dog-appointments-btn-primary{% endif %}">All</a>
+                <a href="{{ url_for('vet.dog_appointments', dog_id=dog.id) }}" class="dog-appointments-btn {% if not selected_category %}dog-appointments-btn-primary{% endif %}">All</a>
                 {% for category in categories %}
-                    <a href="{{ url_for('dog_appointments', dog_id=dog.id, category=category.name) }}" class="dog-appointments-btn {% if selected_category == category.name %}dog-appointments-btn-primary{% endif %}">{{ category.value }}</a>
+                    <a href="{{ url_for('vet.dog_appointments', dog_id=dog.id, category=category.name) }}" class="dog-appointments-btn {% if selected_category == category.name %}dog-appointments-btn-primary{% endif %}">{{ category.value }}</a>
                 {% endfor %}
             </div>
         </div>
@@ -341,8 +341,8 @@
                         description: '{{ appointment.description }}',
                         veterinarian: '{{ appointment.veterinarian or "Not specified" }}',
                         location: '{{ appointment.location or "Not specified" }}',
-                        editUrl: '{{ url_for("edit_appointment", appointment_id=appointment.id) }}',
-                        deleteUrl: '{{ url_for("delete_appointment", appointment_id=appointment.id) }}'
+                        editUrl: '{{ url_for('vet.edit_appointment', appointment_id=appointment.id) }}',
+                        deleteUrl: '{{ url_for('vet.delete_appointment', appointment_id=appointment.id) }}'
                     },
                     backgroundColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}'
                 },

@@ -149,7 +149,7 @@
             <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-500 hover:scale-105">
                 <div class="relative">
                     {% if litter.images %}
-                    <img src="{{ url_for('get_litter_image', image_id=litter.images[0].id) }}" 
+                    <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
                          alt="{{ litter.name }}" 
                          class="w-full h-48 object-cover">
                     {% else %}
@@ -190,7 +190,7 @@
                             </p>
                         {% endif %}
                     {% endif %}
-                    <a href="{{ url_for('litter_detail', id=litter.id) }}" 
+                    <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" 
                        class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
                         View Litter
                     </a>
@@ -309,7 +309,7 @@
             <div class="litter-card bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="relative h-64">
                     {% if litter.images %}
-                    <img src="{{ url_for('get_litter_image', image_id=litter.images[0].id) }}" 
+                    <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
                          alt="{{ litter.name }}" 
                          class="w-full h-full object-cover">
                     {% else %}
@@ -357,7 +357,7 @@
                             </span>
                         {% endfor %}
                     </div>
-                    <a href="{{ url_for('litter_detail', id=litter.id) }}" 
+                    <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" 
                        class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
                         View Litter
                     </a>
@@ -378,7 +378,7 @@
         <div class="mt-12 flex justify-center">
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                 {% if pagination.has_prev %}
-                <a href="{{ url_for('public_litters', page=pagination.prev_num, **request.args) }}" 
+                <a href="{{ url_for('litter.public_litters', page=pagination.prev_num, **request.args) }}" 
                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                     <span class="sr-only">Previous</span>
                     <i class="fas fa-chevron-left"></i>
@@ -388,7 +388,7 @@
                 {% for page_num in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
                     {% if page_num %}
                         {% if pagination.page != page_num %}
-                        <a href="{{ url_for('public_litters', page=page_num, **request.args) }}" 
+                        <a href="{{ url_for('litter.public_litters', page=page_num, **request.args) }}" 
                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
                             {{ page_num }}
                         </a>
@@ -405,7 +405,7 @@
                 {% endfor %}
 
                 {% if pagination.has_next %}
-                <a href="{{ url_for('public_litters', page=pagination.next_num, **request.args) }}" 
+                <a href="{{ url_for('litter.public_litters', page=pagination.next_num, **request.args) }}" 
                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                     <span class="sr-only">Next</span>
                     <i class="fas fa-chevron-right"></i>
@@ -502,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var formData = new FormData(document.getElementById('filterForm'));
         var searchParams = new URLSearchParams(formData);
 
-        fetch('{{ url_for("public_litters") }}?' + searchParams.toString(), {
+        fetch('{{ url_for('litter.public_litters') }}?' + searchParams.toString(), {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -533,7 +533,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPagination.innerHTML = newPagination.innerHTML;
             }
 
-            history.pushState(null, '', '{{ url_for("public_litters") }}?' + searchParams.toString());
+            history.pushState(null, '', '{{ url_for('litter.public_litters') }}?' + searchParams.toString());
         });
     }
 });

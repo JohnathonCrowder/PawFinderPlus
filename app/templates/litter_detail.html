@@ -133,7 +133,7 @@
                         {{ 'Public' if litter.is_public else 'Private' }}
                     </span>
                     {% if current_user.is_authenticated and current_user.id == litter.user_id %}
-                        <a href="{{ url_for('edit_litter', id=litter.id) }}" class="paw-button text-sm">
+                        <a href="{{ url_for('litter.edit_litter', id=litter.id) }}" class="paw-button text-sm">
                             <i class="fas fa-edit mr-2"></i>Edit Litter
                         </a>
                     {% endif %}
@@ -148,10 +148,10 @@
                         <div class="flex h-full transition-transform duration-500 ease-in-out">
                             {% for image in litter.images %}
                             <div class="w-full flex-shrink-0 h-full">
-                                <img src="{{ url_for('get_litter_image', image_id=image.id) }}" 
+                                <img src="{{ url_for('litter.get_litter_image', image_id=image.id) }}" 
                                      alt="Litter Image" 
                                      class="w-full h-full object-cover cursor-pointer" 
-                                     onclick="openModal('{{ url_for('get_litter_image', image_id=image.id) }}')">
+                                     onclick="openModal('{{ url_for('litter.get_litter_image', image_id=image.id) }}')">
                             </div>
                             {% endfor %}
                         </div>
@@ -179,27 +179,27 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="parent-card p-6">
                         <div class="flex items-center">
-                            <img src="{{ url_for('get_dog_image', image_id=litter.father.images[0].id) if litter.father.images else url_for('static', filename='default_dog.png') }}" 
+                            <img src="{{ url_for('dog.get_dog_image', image_id=litter.father.images[0].id) if litter.father.images else url_for('static', filename='default_dog.png') }}" 
                                  alt="{{ litter.father.name }}" 
                                  class="w-24 h-24 object-cover rounded-full mr-4">
                             <div>
                                 <h3 class="text-xl font-semibold">{{ litter.father.name }}</h3>
                                 <p class="text-gray-600">Father</p>
                                 <p class="text-sm text-gray-500">{{ litter.father.breed }}</p>
-                                <a href="{{ url_for('dog_profile', id=litter.father.id) }}" class="text-blue-500 hover:underline text-sm">View Profile</a>
+                                <a href="{{ url_for('dog.dog_profile', id=litter.father.id) }}" class="text-blue-500 hover:underline text-sm">View Profile</a>
                             </div>
                         </div>
                     </div>
                     <div class="parent-card p-6">
                         <div class="flex items-center">
-                            <img src="{{ url_for('get_dog_image', image_id=litter.mother.images[0].id) if litter.mother.images else url_for('static', filename='default_dog.png') }}" 
+                            <img src="{{ url_for('dog.get_dog_image', image_id=litter.mother.images[0].id) if litter.mother.images else url_for('static', filename='default_dog.png') }}" 
                                  alt="{{ litter.mother.name }}" 
                                  class="w-24 h-24 object-cover rounded-full mr-4">
                             <div>
                                 <h3 class="text-xl font-semibold">{{ litter.mother.name }}</h3>
                                 <p class="text-gray-600">Mother</p>
                                 <p class="text-sm text-gray-500">{{ litter.mother.breed }}</p>
-                                <a href="{{ url_for('dog_profile', id=litter.mother.id) }}" class="text-blue-500 hover:underline text-sm">View Profile</a>
+                                <a href="{{ url_for('dog.dog_profile', id=litter.mother.id) }}" class="text-blue-500 hover:underline text-sm">View Profile</a>
                             </div>
                         </div>
                     </div>
@@ -213,7 +213,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for puppy in litter.puppies %}
                 <div class="puppy-card p-6">
-                    <img src="{{ url_for('get_dog_image', image_id=puppy.images[0].id) if puppy.images else url_for('static', filename='default_dog.png') }}" 
+                    <img src="{{ url_for('dog.get_dog_image', image_id=puppy.images[0].id) if puppy.images else url_for('static', filename='default_dog.png') }}" 
                          alt="{{ puppy.name }}" 
                          class="w-full h-48 object-cover rounded-lg mb-4">
                     <h3 class="text-xl font-semibold mb-2">{{ puppy.name }}</h3>
@@ -228,7 +228,7 @@
                         <div class="status-badge status-{{ puppy.status.value.lower().replace(' ', '-') }}">
                             {{ puppy.status.value }}
                         </div>
-                        <a href="{{ url_for('dog_profile', id=puppy.id) }}" class="paw-button text-sm">View Profile</a>
+                        <a href="{{ url_for('dog.dog_profile', id=puppy.id) }}" class="paw-button text-sm">View Profile</a>
                     </div>
                 </div>
             {% endfor %}
@@ -243,7 +243,7 @@
                 <h2 class="text-2xl font-semibold mb-4 text-gray-800">Breeder Information</h2>
                 <div class="flex items-center mb-6">
                     {% if litter.user.profile_picture_data %}
-                        <img src="{{ url_for('get_profile_picture', user_id=litter.user.id) }}" 
+                        <img src="{{ url_for('user.get_profile_picture', user_id=litter.user.id) }}" 
                              alt="{{ litter.user.username }}" 
                              class="w-16 h-16 rounded-full object-cover mr-4">
                     {% else %}
@@ -256,7 +256,7 @@
                             {% if current_user.is_authenticated and current_user.id == litter.user_id %}
                                 You
                             {% else %}
-                                <a href="{{ url_for('user_profile', username=litter.user.username) }}" class="text-blue-600 hover:underline">
+                                <a href="{{ url_for('user.user_profile', username=litter.user.username) }}" class="text-blue-600 hover:underline">
                                     {{ litter.user.username }}
                                 </a>
                             {% endif %}
@@ -269,11 +269,11 @@
                         If you're interested in this litter or have any questions, please don't hesitate to contact the breeder.
                     </p>
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('conversation', user_id=litter.user_id) }}" class="paw-button inline-block">
+                        <a href="{{ url_for('message.conversation', user_id=litter.user_id) }}" class="paw-button inline-block">
                             <i class="fas fa-comments mr-2"></i>Message Breeder
                         </a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="paw-button inline-block">
+                        <a href="{{ url_for('auth.login') }}" class="paw-button inline-block">
                             <i class="fas fa-sign-in-alt mr-2"></i>Log in to Contact Breeder
                         </a>
                     {% endif %}

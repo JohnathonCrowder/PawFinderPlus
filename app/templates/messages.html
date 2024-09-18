@@ -55,34 +55,34 @@
             <h1 class="text-4xl font-bold" style="color: #0080ff;">
                 <i class="fas fa-comments mr-2"></i> Messages
             </h1>
-            <a href="{{ url_for('dog_management') }}" class="paw-button">
+            <a href="{{ url_for('dog.dog_management') }}" class="paw-button">
                 <i class="fas fa-paw mr-2"></i> Back to Dogs
             </a>
         </div>
 
         <div class="conversation-list p-6">
             {% if conversations %}
-                {% for conversation in conversations %}
-                    <a href="{{ url_for('conversation', user_id=conversation.user_id) }}" 
-                       class="conversation-item block mb-4 p-4 hover:shadow-md rounded-lg transition duration-300">
-                        <div class="flex items-center">
-                            {% if conversation.profile_picture %}
-                                <img src="{{ url_for('get_profile_picture', user_id=conversation.user_id) }}" 
-                                     alt="{{ conversation.username }}" 
-                                     class="profile-picture mr-4">
-                            {% else %}
-                                <div class="profile-picture mr-4 bg-gray-200 flex items-center justify-center">
-                                    <i class="fas fa-user text-gray-400"></i>
-                                </div>
-                            {% endif %}
-                            <div class="flex-grow">
-                                <h2 class="text-xl font-semibold">{{ conversation.username }}</h2>
-                                <p class="text-sm text-gray-600">Last message: {{ conversation.last_message_time.strftime('%b %d, %Y at %I:%M %p') }}</p>
-                            </div>
-                            <i class="fas fa-chevron-right text-gray-400"></i>
+            {% for conversation in conversations %}
+            <a href="{{ url_for('message.conversation', user_id=conversation.user_id) }}" 
+               class="conversation-item block mb-4 p-4 hover:shadow-md rounded-lg transition duration-300">
+                <div class="flex items-center">
+                    {% if conversation.profile_picture %}
+                        <img src="{{ url_for('user.get_profile_picture', user_id=conversation.user_id) }}" 
+                             alt="{{ conversation.username }}" 
+                             class="profile-picture mr-4">
+                    {% else %}
+                        <div class="profile-picture mr-4 bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-user text-gray-400"></i>
                         </div>
-                    </a>
-                {% endfor %}
+                    {% endif %}
+                    <div class="flex-grow">
+                        <h2 class="text-xl font-semibold">{{ conversation.username }}</h2>
+                        <p class="text-sm text-gray-600">Last message: {{ conversation.last_message_time.strftime('%b %d, %Y at %I:%M %p') }}</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </a>
+        {% endfor %}
             {% else %}
                 <div class="text-center py-12">
                     <i class="fas fa-dog dog-icon mb-4"></i>

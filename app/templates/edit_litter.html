@@ -133,7 +133,7 @@
             {% endif %}
         {% endwith %}
         
-        <form id="litterForm" action="{{ url_for('edit_litter', id=litter.id) }}" method="POST" enctype="multipart/form-data">
+        <form id="litterForm" action="{{ url_for('litter.edit_litter', id=litter.id) }}" method="POST" enctype="multipart/form-data">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="input-group">
                     <i class="fas fa-tag icon"></i>
@@ -188,7 +188,7 @@
                 <div class="image-preview-container mb-4">
                     {% for image in litter.images %}
                         <div class="existing-image">
-                            <img src="{{ url_for('get_litter_image', image_id=image.id) }}" alt="Litter Image" class="image-preview">
+                            <img src="{{ url_for('litter.get_litter_image', image_id=image.id) }}" alt="Litter Image" class="image-preview">
                             <button type="button" class="delete-image" onclick="deleteLitterImage({{ litter.id }}, {{ image.id }})">×</button>
                         </div>
                     {% endfor %}
@@ -205,7 +205,7 @@
                 <button type="submit" class="bone-button">
                     <i class="fas fa-save mr-2"></i> Update Litter
                 </button>
-                <a href="{{ url_for('litter_management') }}" class="cancel-button">
+                <a href="{{ url_for('litter.litter_management') }}" class="cancel-button">
                     <i class="fas fa-times mr-2"></i> Cancel
                 </a>
             </div>
