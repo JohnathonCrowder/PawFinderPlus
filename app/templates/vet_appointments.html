@@ -7,6 +7,9 @@
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css' rel='stylesheet' />
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js'></script>
 <style>
+    body {
+        background-color: #f3f4f6;
+    }
     .appointment-card {
         transition: all 0.3s ease;
     }
@@ -20,69 +23,117 @@
         border-radius: 9999px;
     }
     #calendar {
-        max-width: 900px;
-        margin: 0 auto;
+        height: 600px;
         background-color: white;
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    .fc-event {
-        cursor: pointer;
+    .filter-button {
         transition: all 0.3s ease;
     }
-    .fc-event:hover {
-        transform: scale(1.05);
+    .filter-button:hover, .filter-button.active {
+        background-color: #3B82F6;
+        color: white;
     }
-    .fc-toolbar-title {
-        font-size: 1.5em !important;
-        font-weight: bold;
-        color: #333;
-    }
-    .fc-button-primary {
-        background-color: #3498db !important;
-        border-color: #3498db !important;
-    }
-    .fc-button-primary:hover {
-        background-color: #2980b9 !important;
-        border-color: #2980b9 !important;
-    }
-    .fc-day-today {
-        background-color: #f1f8ff !important;
+    .section-header {
+        border-left: 4px solid #3B82F6;
+        padding-left: 10px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Vet Appointments</h1>
-        <div class="flex space-x-2">
-            <a href="{{ url_for('vet_appointments', filter='upcoming') }}" class="px-4 py-2 rounded {% if filter_type == 'upcoming' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">Upcoming</a>
-            <a href="{{ url_for('vet_appointments', filter='past') }}" class="px-4 py-2 rounded {% if filter_type == 'past' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">Past</a>
-            <a href="{{ url_for('vet_appointments', filter='this_week') }}" class="px-4 py-2 rounded {% if filter_type == 'this_week' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">This Week</a>
-            <a href="{{ url_for('vet_appointments', filter='this_month') }}" class="px-4 py-2 rounded {% if filter_type == 'this_month' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">This Month</a>
-        </div>
-    </div>
-    <div class="mb-4">
-        <h2 class="text-xl font-semibold mb-2">Filter by Category</h2>
-        <div class="flex space-x-2">
-            <a href="{{ url_for('vet_appointments', filter=filter_type) }}" class="px-4 py-2 rounded {% if not category_filter %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">All</a>
-            {% for category in categories %}
-                <a href="{{ url_for('vet_appointments', filter=filter_type, category=category.name) }}" class="px-4 py-2 rounded {% if category_filter == category.name %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">{{ category.value }}</a>
-            {% endfor %}
+    <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Vet Appointments</h1>
+
+    <!-- Filters -->
+    <div class="mb-8 bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
+        <h2 class="text-xl font-semibold mb-4 section-header">Filter Appointments</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h3 class="text-lg font-medium mb-2 text-gray-700">Time Period</h3>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ url_for('vet_appointments', filter='upcoming') }}" class="filter-button px-4 py-2 rounded-full text-sm {% if filter_type == 'upcoming' %}active bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">Upcoming</a>
+                    <a href="{{ url_for('vet_appointments', filter='past') }}" class="filter-button px-4 py-2 rounded-full text-sm {% if filter_type == 'past' %}active bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">Past</a>
+                    <a href="{{ url_for('vet_appointments', filter='this_week') }}" class="filter-button px-4 py-2 rounded-full text-sm {% if filter_type == 'this_week' %}active bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">This Week</a>
+                    <a href="{{ url_for('vet_appointments', filter='this_month') }}" class="filter-button px-4 py-2 rounded-full text-sm {% if filter_type == 'this_month' %}active bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">This Month</a>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium mb-2 text-gray-700">Category</h3>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ url_for('vet_appointments', filter=filter_type) }}" class="filter-button px-3 py-1 rounded-full text-sm {% if not category_filter %}active bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">All</a>
+                    {% for category in categories %}
+                        <a href="{{ url_for('vet_appointments', filter=filter_type, category=category.name) }}" class="filter-button px-3 py-1 rounded-full text-sm {% if category_filter == category.name %}active bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">{{ category.value }}</a>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Appointments List -->
-        <div class="lg:col-span-1">
-            {% if appointments %}
+        <!-- Calendar View -->
+        <div class="lg:col-span-2">
+            <div id="calendar" class="mb-8 shadow-md"></div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Quick Add Appointment -->
+            <div class="bg-white p-4 rounded-lg shadow-md border-t-4 border-green-500" style="height: 600px; overflow-y: auto;">
+                <h2 class="text-xl font-semibold mb-4 section-header">Quick Add Appointment</h2>
+                <form action="{{ url_for('add_appointment') }}" method="POST">
+                    <div class="mb-4">
+                        <label for="dog_id" class="block text-sm font-medium text-gray-700">Dog</label>
+                        <select id="dog_id" name="dog_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            {% for dog in user_dogs %}
+                                <option value="{{ dog.id }}">{{ dog.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="date" class="block text-sm font-medium text-gray-700">Date and Time</label>
+                        <input type="datetime-local" id="date" name="date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+                    <div class="mb-4">
+                        <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                        <select id="category" name="category" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            {% for category in categories %}
+                                <option value="{{ category.name }}">{{ category.value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="description" name="description" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" rows="3"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="veterinarian" class="block text-sm font-medium text-gray-700">Veterinarian</label>
+                        <input type="text" id="veterinarian" name="veterinarian" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+                    <div class="mb-4">
+                        <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                        <input type="text" id="location" name="location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        Add Appointment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments List -->
+    <div class="mt-8 bg-white p-6 rounded-lg shadow-md border-t-4 border-yellow-500">
+        <h2 class="text-2xl font-semibold mb-4 section-header">Appointment List</h2>
+        {% if appointments %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for appointment in appointments %}
-                    <div class="appointment-card bg-white p-4 rounded-lg shadow mb-4">
+                    <div class="appointment-card bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
                         <div class="flex justify-between items-start">
                             <div>
-                                <h3 class="font-semibold text-lg">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</h3>
+                                <h3 class="font-semibold text-lg text-gray-800">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</h3>
                                 <p class="text-blue-600 font-medium">{{ appointment.dog.name }}</p>
                                 <p class="text-sm text-gray-500">
                                     <i class="fas fa-tag mr-2"></i>{{ appointment.category.value }}
@@ -105,12 +156,12 @@
                                         Missed
                                     {% endif %}
                                 </span>
-                                <div class="flex space-x-2">
-                                    <a href="{{ url_for('edit_appointment', appointment_id=appointment.id) }}" class="text-blue-500 hover:text-blue-600">
+                                <div class="flex space-x-2 mt-2">
+                                    <a href="{{ url_for('edit_appointment', appointment_id=appointment.id) }}" class="text-blue-500 hover:text-blue-600 transition duration-300">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <form action="{{ url_for('delete_appointment', appointment_id=appointment.id) }}" method="POST" class="inline">
-                                        <button type="submit" class="text-red-500 hover:text-red-600" onclick="return confirm('Are you sure you want to delete this appointment?')">
+                                        <button type="submit" class="text-red-500 hover:text-red-600 transition duration-300" onclick="return confirm('Are you sure you want to delete this appointment?')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -119,36 +170,16 @@
                         </div>
                     </div>
                 {% endfor %}
-            {% else %}
-                <p class="text-gray-600">No appointments found.</p>
-            {% endif %}
-        </div>
-
-        <!-- Calendar View -->
-        <div class="lg:col-span-2">
-            <div id="calendar"></div>
-        </div>
+            </div>
+        {% else %}
+            <p class="text-gray-600">No appointments found.</p>
+        {% endif %}
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
-        
-        // Log the appointments data to the console for debugging
-        console.log("Appointments data:", [
-            {% for appointment in appointments %}
-            {
-                title: '{{ appointment.dog.name }}: {{ appointment.category.value }}',
-                start: '{{ appointment.date.isoformat() }}',
-                url: '{{ url_for("edit_appointment", appointment_id=appointment.id) }}',
-                backgroundColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}',
-                borderColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}',
-                textColor: 'white'
-            },
-            {% endfor %}
-        ]);
-    
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             headerToolbar: {
@@ -173,19 +204,9 @@
                 if (info.event.url) {
                     window.location.href = info.event.url;
                 }
-            },
-            eventDidMount: function(info) {
-                // Add tooltip functionality if needed
             }
         });
-        
         calendar.render();
-        
-        // Log any errors that occur during calendar initialization
-        console.log("Calendar object:", calendar);
-        if (calendar.getEventSources().length === 0) {
-            console.error("No event sources found. Check if events array is empty.");
-        }
     });
-    </script>
+</script>
 {% endblock %}

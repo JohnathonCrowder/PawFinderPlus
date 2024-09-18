@@ -2,44 +2,119 @@
 
 {% block title %}Edit Vet Appointment for {{ appointment.dog.name }} - DogBreederPlus{% endblock %}
 
+{% block head %}
+{{ super() }}
+<style>
+    .paw-bg {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 100 100"><path fill="%23f3f4f6" d="M30 50 A20 20 0 0 1 50 30 A20 20 0 0 1 70 50 A20 20 0 0 1 50 70 A20 20 0 0 1 30 50 M30 30 A10 10 0 0 1 40 20 A10 10 0 0 1 50 30 M50 30 A10 10 0 0 1 60 20 A10 10 0 0 1 70 30 M30 70 A10 10 0 0 1 40 80 A10 10 0 0 1 50 70 M50 70 A10 10 0 0 1 60 80 A10 10 0 0 1 70 70"/></svg>');
+    }
+    .dog-card {
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .dog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    .paw-button {
+        background-color: #4a5568;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .paw-button:hover {
+        background-color: #2d3748;
+        transform: scale(1.05);
+    }
+    .input-group {
+        position: relative;
+    }
+    .input-group .icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #4a5568;
+    }
+    .input-group input,
+    .input-group select,
+    .input-group textarea {
+        padding-left: 40px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">Edit Vet Appointment for {{ appointment.dog.name }}</h1>
-    
-    <form action="{{ url_for('edit_appointment', appointment_id=appointment.id) }}" method="POST" class="max-w-lg">
-        <div class="mb-4">
-            <label for="date" class="block text-gray-700 font-bold mb-2">Date and Time</label>
-            <input type="datetime-local" id="date" name="date" required class="w-full px-3 py-2 border rounded-lg" value="{{ appointment.date.strftime('%Y-%m-%dT%H:%M') }}">
+<div class="min-h-screen paw-bg py-12">
+    <div class="container mx-auto px-4">
+        <div class="max-w-2xl mx-auto">
+            <div class="dog-card p-8">
+                <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">
+                    <i class="fas fa-paw mr-2 text-blue-500"></i>
+                    Edit Appointment for {{ appointment.dog.name }}
+                </h1>
+                
+                <form action="{{ url_for('edit_appointment', appointment_id=appointment.id) }}" method="POST">
+                    <div class="mb-6 input-group">
+                        <i class="fas fa-calendar-alt icon"></i>
+                        <input type="datetime-local" id="date" name="date" required 
+                               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                               value="{{ appointment.date.strftime('%Y-%m-%dT%H:%M') }}">
+                    </div>
+                    
+                    <div class="mb-6 input-group">
+                        <i class="fas fa-tag icon"></i>
+                        <select id="category" name="category" required 
+                                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            {% for category in categories %}
+                                <option value="{{ category.name }}" {% if category == appointment.category %}selected{% endif %}>
+                                    {{ category.value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-6 input-group">
+                        <i class="fas fa-comment icon"></i>
+                        <textarea id="description" name="description" required 
+                                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                  rows="3">{{ appointment.description }}</textarea>
+                    </div>
+                    
+                    <div class="mb-6 input-group">
+                        <i class="fas fa-user-md icon"></i>
+                        <input type="text" id="veterinarian" name="veterinarian" 
+                               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                               value="{{ appointment.veterinarian }}">
+                    </div>
+                    
+                    <div class="mb-6 input-group">
+                        <i class="fas fa-map-marker-alt icon"></i>
+                        <input type="text" id="location" name="location" 
+                               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                               value="{{ appointment.location }}">
+                    </div>
+                    
+                    <div class="mb-6 flex items-center">
+                        <input type="checkbox" id="completed" name="completed" 
+                               {% if appointment.completed %}checked{% endif %} 
+                               class="mr-2 form-checkbox h-5 w-5 text-blue-500">
+                        <label for="completed" class="text-gray-700 font-medium">Completed</label>
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button type="submit" class="paw-button px-6 py-2 rounded-full font-bold">
+                            <i class="fas fa-check mr-2"></i>Update Appointment
+                        </button>
+                        <a href="{{ url_for('dog_appointments', dog_id=appointment.dog_id) }}" 
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-full">
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="mb-4">
-            <label for="category" class="block text-gray-700 font-bold mb-2">Category</label>
-            <select id="category" name="category" required class="w-full px-3 py-2 border rounded-lg">
-                {% for category in categories %}
-                    <option value="{{ category.name }}" {% if category == appointment.category %}selected{% endif %}>
-                        {{ category.value }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-4">
-            <label for="description" class="block text-gray-700 font-bold mb-2">Description</label>
-            <textarea id="description" name="description" required class="w-full px-3 py-2 border rounded-lg" rows="3">{{ appointment.description }}</textarea>
-        </div>
-        <div class="mb-4">
-            <label for="veterinarian" class="block text-gray-700 font-bold mb-2">Veterinarian</label>
-            <input type="text" id="veterinarian" name="veterinarian" class="w-full px-3 py-2 border rounded-lg" value="{{ appointment.veterinarian }}">
-        </div>
-        <div class="mb-4">
-            <label for="location" class="block text-gray-700 font-bold mb-2">Location</label>
-            <input type="text" id="location" name="location" class="w-full px-3 py-2 border rounded-lg" value="{{ appointment.location }}">
-        </div>
-        <div class="mb-4">
-            <label class="flex items-center">
-                <input type="checkbox" name="completed" {% if appointment.completed %}checked{% endif %} class="mr-2">
-                <span class="text-gray-700 font-bold">Completed</span>
-            </label>
-        </div>
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Update Appointment</button>
-    </form>
+    </div>
 </div>
 {% endblock %}
