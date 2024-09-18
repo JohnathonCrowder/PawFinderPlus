@@ -317,9 +317,40 @@ def create_app():
                                 pagination=paginated_litters,
                                 DogStatus=DogStatus)
 
+        # Get featured litters
+        featured_count = 5  # Number of featured litters to display
+        breed = request.args.get('breed')
+
+        if breed:
+            # If a breed is specified, prioritize that breed
+            breed_litters = Litter.query.filter(Litter.is_public == True)\
+                .filter((Litter.father.has(breed=breed)) | (Litter.mother.has(breed=breed)))\
+                .order_by(func.random())\
+                .limit(featured_count)\
+                .all()
+            
+            # If we don't have enough of the specified breed, fill with random litters
+            if len(breed_litters) < featured_count:
+                remaining_count = featured_count - len(breed_litters)
+                other_litters = Litter.query.filter(Litter.is_public == True)\
+                    .filter(~((Litter.father.has(breed=breed)) | (Litter.mother.has(breed=breed))))\
+                    .order_by(func.random())\
+                    .limit(remaining_count)\
+                    .all()
+                featured_litters = breed_litters + other_litters
+            else:
+                featured_litters = breed_litters
+        else:
+            # If no breed is specified, select random litters
+            featured_litters = Litter.query.filter_by(is_public=True)\
+                .order_by(func.random())\
+                .limit(featured_count)\
+                .all()
+
         return render_template('public_litters.html', 
                             litters=paginated_litters.items,
                             pagination=paginated_litters,
+                            featured_litters=featured_litters,
                             breeds=breeds,
                             min_price=min_price_overall,
                             max_price=max_price_overall,

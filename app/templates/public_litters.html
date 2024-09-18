@@ -48,6 +48,87 @@
     .noUi-handle:before, .noUi-handle:after {
         display: none;
     }
+    .featured-litters-slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.featured-litter-card {
+    flex: 0 0 auto;
+    width: 100%;
+    scroll-snap-align: start;
+    margin-right: 1rem;
+}
+
+@media (min-width: 640px) {
+    .featured-litter-card {
+        width: calc(50% - 0.5rem);
+    }
+}
+
+@media (min-width: 1024px) {
+    .featured-litter-card {
+        width: calc(33.333% - 0.667rem);
+    }
+}
+
+.featured-litters-slider {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .featured-litter-card {
+        flex: 0 0 auto;
+        width: 100%;
+        scroll-snap-align: start;
+        margin-right: 1rem;
+    }
+
+    @media (min-width: 640px) {
+        .featured-litter-card {
+            width: calc(50% - 0.5rem);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .featured-litter-card {
+            width: calc(33.333% - 0.667rem);
+        }
+    }
+
+    .featured-litters-slider::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .featured-litters-slider::-webkit-scrollbar-thumb {
+        background: #4a5568;
+        border-radius: 10px;
+    }
+
+    .featured-litters-slider::-webkit-scrollbar-track {
+        background: #cbd5e0;
+        border-radius: 10px;
+    }
+
+    .from-blue-500 {
+        --tw-gradient-from: #3b82f6;
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(59, 130, 246, 0));
+    }
+    .to-purple-600 {
+        --tw-gradient-to: #7c3aed;
+    }
+    .hover\:scale-105:hover {
+        --tw-scale-x: 1.05;
+        --tw-scale-y: 1.05;
+        transform: var(--tw-transform);
+    }
 </style>
 {% endblock %}
 
@@ -55,6 +136,71 @@
 <div class="bg-gray-100 min-h-screen py-12">
     <div class="container mx-auto px-4">
         <h1 class="text-4xl font-bold mb-8 text-center text-gray-800">Puppy Litters Marketplace</h1>
+
+        <!-- Featured Litters Section -->
+{% if featured_litters %}
+<div class="mb-12 bg-gradient-to-r from-blue-500 to-purple-600 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <h2 class="text-3xl font-extrabold text-white text-center mb-8">
+            <i class="fas fa-star text-yellow-400 mr-2"></i>Spotlight Litters
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for litter in featured_litters %}
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-500 hover:scale-105">
+                <div class="relative">
+                    {% if litter.images %}
+                    <img src="{{ url_for('get_litter_image', image_id=litter.images[0].id) }}" 
+                         alt="{{ litter.name }}" 
+                         class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-paw text-gray-400 text-4xl"></i>
+                    </div>
+                    {% endif %}
+                    <div class="absolute top-0 right-0 bg-yellow-400 text-white px-3 py-1 m-2 rounded-bl-lg text-sm font-bold">
+                        Spotlight
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ litter.name }}</h3>
+                    <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2 text-blue-500"></i>{{ litter.father.breed }}</p>
+                    <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2 text-blue-500"></i>Born: {{ litter.date_of_birth.strftime('%b %d, %Y') }}</p>
+                    <p class="text-gray-600 mb-4"><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>{{ litter.user.location or 'Location not specified' }}</p>
+                    {% if litter.puppies %}
+                        {% set min_price = namespace(value=None) %}
+                        {% set max_price = namespace(value=None) %}
+                        {% for puppy in litter.puppies %}
+                            {% if puppy.price and puppy.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
+                                {% if min_price.value is none or puppy.price < min_price.value %}
+                                    {% set min_price.value = puppy.price %}
+                                {% endif %}
+                                {% if max_price.value is none or puppy.price > max_price.value %}
+                                    {% set max_price.value = puppy.price %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if min_price.value is not none %}
+                            <p class="text-green-600 font-semibold mb-4">
+                                <i class="fas fa-tag mr-2"></i>
+                                {% if min_price.value == max_price.value %}
+                                    ${{ "%.2f"|format(min_price.value) }}
+                                {% else %}
+                                    ${{ "%.2f"|format(min_price.value) }} - ${{ "%.2f"|format(max_price.value) }}
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                    {% endif %}
+                    <a href="{{ url_for('litter_detail', id=litter.id) }}" 
+                       class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        View Litter
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
 
         <!-- Filters Section -->
         <div class="mb-8">
@@ -392,4 +538,50 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const slider = document.querySelector('.featured-litters-slider');
+        if (slider) {
+            const cards = slider.querySelectorAll('.featured-litter-card');
+            
+            if (cards.length > 0) {
+                const cardWidth = cards[0].offsetWidth;
+                const sliderWidth = slider.offsetWidth;
+                const maxScroll = slider.scrollWidth - sliderWidth;
+                
+                const scrollAmount = cardWidth + 16; // 16px for margin
+                
+                // Create and append navigation buttons
+                const leftButton = document.createElement('button');
+                leftButton.innerHTML = '&lt;';
+                leftButton.className = 'absolute left-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-r';
+                
+                const rightButton = document.createElement('button');
+                rightButton.innerHTML = '&gt;';
+                rightButton.className = 'absolute right-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-l';
+                
+                slider.parentNode.appendChild(leftButton);
+                slider.parentNode.appendChild(rightButton);
+                
+                leftButton.addEventListener('click', () => {
+                    slider.scrollLeft -= scrollAmount;
+                });
+                
+                rightButton.addEventListener('click', () => {
+                    slider.scrollLeft += scrollAmount;
+                });
+                
+                // Hide/show buttons based on scroll position
+                slider.addEventListener('scroll', () => {
+                    leftButton.style.display = slider.scrollLeft > 0 ? 'block' : 'none';
+                    rightButton.style.display = slider.scrollLeft < maxScroll ? 'block' : 'none';
+                });
+                
+                // Initial button visibility
+                leftButton.style.display = 'none';
+                rightButton.style.display = cards.length > 3 ? 'block' : 'none';
+            }
+        }
+    });
+    </script>
 {% endblock %}
