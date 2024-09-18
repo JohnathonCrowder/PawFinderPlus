@@ -1,208 +1,396 @@
 {% extends "base.html" %}
 
-{% block title %}{{ dog.name }}'s Vet Appointments - DogBreederPlus{% endblock %}
+{% block title %}{{ dog.name }}'s Appointments - DogBreederPlus{% endblock %}
 
 {% block head %}
 {{ super() }}
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css' rel='stylesheet' />
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js'></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 <style>
+    .dog-appointments-page {
+        background-color: #f3f4f6;
+        padding: 2rem 0;
+    }
+    .dog-appointments-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    .card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111827;
+    }
+    .grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+        .grid {
+            grid-template-columns: 2fr 1fr;
+        }
+    }
     .appointment-card {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1rem;
         transition: all 0.3s ease;
+        cursor: pointer;
     }
     .appointment-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .dog-appointments-btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-align: center;
+        border-radius: 0.375rem;
+        transition: background-color 0.2s;
+    }
+    .dog-appointments-btn-primary {
+        background-color: #3b82f6;
+        color: #ffffff;
+    }
+    .dog-appointments-btn-primary:hover {
+        background-color: #2563eb;
     }
     .status-badge {
-        font-size: 0.75rem;
+        display: inline-block;
         padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 500;
         border-radius: 9999px;
+    }
+    #calendar {
+        height: 600px;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+        background-color: #ffffff;
+        margin: 5% auto;
+        padding: 0;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    .modal-header {
+        background-color: #f3f4f6;
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .modal-body {
+        padding: 24px;
+    }
+    .modal-title {
+        color: #111827;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    .modal-subtitle {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+    .close {
+        color: #9ca3af;
+        float: right;
+        font-size: 20px;
+        font-weight: bold;
+        line-height: 1;
+    }
+    .close:hover,
+    .close:focus {
+        color: #6b7280;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .modal-info-group {
+        margin-bottom: 16px;
+    }
+    .modal-info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+    .modal-info-value {
+        color: #111827;
+        font-size: 1rem;
+    }
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 16px;
+        border-top: 1px solid #e5e7eb;
+    }
+    .modal-button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+    .modal-button-edit {
+        background-color: #3b82f6;
+        color: white;
+        margin-right: 8px;
+    }
+    .modal-button-edit:hover {
+        background-color: #2563eb;
+    }
+    .modal-button-delete {
+        background-color: #ef4444;
+        color: white;
+    }
+    .modal-button-delete:hover {
+        background-color: #dc2626;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">{{ dog.name }}'s Vet Appointments</h1>
-        <a href="{{ url_for('add_appointment', dog_id=dog.id) }}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-            <i class="fas fa-plus mr-2"></i>Add New Appointment
-        </a>
-    </div>
-
-    <!-- Category Filter -->
-    <div class="mb-6">
-        <h2 class="text-xl font-semibold mb-2">Filter by Category</h2>
-        <div class="flex flex-wrap gap-2">
-            <a href="{{ url_for('dog_appointments', dog_id=dog.id, category='all') }}" 
-               class="px-4 py-2 rounded {% if selected_category == 'all' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
-                All
-            </a>
-            {% for category in categories %}
-                <a href="{{ url_for('dog_appointments', dog_id=dog.id, category=category.name) }}" 
-                   class="px-4 py-2 rounded {% if selected_category == category.name %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
-                    {{ category.value }}
+<div class="dog-appointments-page">
+    <div class="dog-appointments-container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">{{ dog.name }}'s Vet Appointments</h1>
+            </div>
+            <div class="mb-4">
+                <a href="{{ url_for('add_appointment', dog_id=dog.id) }}" class="dog-appointments-btn dog-appointments-btn-primary">
+                    Add New Appointment
                 </a>
-            {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Filter by Category</h2>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ url_for('dog_appointments', dog_id=dog.id) }}" class="dog-appointments-btn {% if not selected_category %}dog-appointments-btn-primary{% endif %}">All</a>
+                {% for category in categories %}
+                    <a href="{{ url_for('dog_appointments', dog_id=dog.id, category=category.name) }}" class="dog-appointments-btn {% if selected_category == category.name %}dog-appointments-btn-primary{% endif %}">{{ category.value }}</a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Appointment Calendar</h2>
+                </div>
+                <div id="calendar"></div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Upcoming Appointments</h2>
+                    </div>
+                    {% set upcoming_appointments = appointments|selectattr("date", "ge", now)|list %}
+                    {% if upcoming_appointments %}
+                        {% for appointment in upcoming_appointments %}
+                            <div class="appointment-card" data-appointment-id="{{ appointment.id }}">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-semibold text-lg">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</h3>
+                                        <p class="text-blue-600 font-medium">Category: {{ appointment.category.value }}</p>
+                                        <p class="text-gray-600">{{ appointment.description }}</p>
+                                        <p class="text-sm text-gray-500 mt-2">
+                                            <i class="fas fa-user-md mr-2"></i>{{ appointment.veterinarian or 'Not specified' }}
+                                        </p>
+                                        <p class="text-sm text-gray-500">
+                                            <i class="fas fa-map-marker-alt mr-2"></i>{{ appointment.location or 'Not specified' }}
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-col items-end">
+                                        <span class="status-badge bg-yellow-100 text-yellow-800 mb-2">Upcoming</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-gray-600">No upcoming appointments.</p>
+                    {% endif %}
+                </div>
+
+                <div class="card mt-6">
+                    <div class="card-header">
+                        <h2 class="card-title">Past Appointments</h2>
+                    </div>
+                    {% set past_appointments = appointments|selectattr("date", "lt", now)|list %}
+                    {% if past_appointments %}
+                        {% for appointment in past_appointments %}
+                            <div class="appointment-card" data-appointment-id="{{ appointment.id }}">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-semibold text-lg">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</h3>
+                                        <p class="text-blue-600 font-medium">Category: {{ appointment.category.value }}</p>
+                                        <p class="text-gray-600">{{ appointment.description }}</p>
+                                        <p class="text-sm text-gray-500 mt-2">
+                                            <i class="fas fa-user-md mr-2"></i>{{ appointment.veterinarian or 'Not specified' }}
+                                        </p>
+                                        <p class="text-sm text-gray-500">
+                                            <i class="fas fa-map-marker-alt mr-2"></i>{{ appointment.location or 'Not specified' }}
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-col items-end">
+                                        <span class="status-badge {% if appointment.completed %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %} mb-2">
+                                            {{ 'Completed' if appointment.completed else 'Missed' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-gray-600">No past appointments.</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Appointments List -->
-        <div class="lg:col-span-2">
-            <!-- Upcoming Appointments -->
-            <div class="mb-8">
-                <h2 class="text-2xl font-semibold mb-4">Upcoming Appointments</h2>
-                {% set upcoming_appointments = appointments|selectattr("date", "ge", now)|list %}
-                {% if upcoming_appointments %}
-                    {% for appointment in upcoming_appointments %}
-                        <div class="appointment-card bg-white p-4 rounded-lg shadow mb-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-semibold text-lg">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</h3>
-                                    <p class="text-blue-600 font-medium">Category: {{ appointment.category.value }}</p>
-                                    <p class="text-gray-600">{{ appointment.description }}</p>
-                                    <p class="text-sm text-gray-500 mt-2">
-                                        <i class="fas fa-user-md mr-2"></i>{{ appointment.veterinarian or 'Not specified' }}
-                                    </p>
-                                    <p class="text-sm text-gray-500">
-                                        <i class="fas fa-map-marker-alt mr-2"></i>{{ appointment.location or 'Not specified' }}
-                                    </p>
-                                </div>
-                                <div class="flex flex-col items-end">
-                                    <span class="status-badge bg-yellow-100 text-yellow-800 mb-2">Upcoming</span>
-                                    <div class="flex space-x-2">
-                                        <a href="{{ url_for('edit_appointment', appointment_id=appointment.id) }}" class="text-blue-500 hover:text-blue-600">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ url_for('delete_appointment', appointment_id=appointment.id) }}" method="POST" class="inline">
-                                            <button type="submit" class="text-red-500 hover:text-red-600" onclick="return confirm('Are you sure you want to delete this appointment?')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-gray-600">No upcoming appointments.</p>
-                {% endif %}
-            </div>
-
-            <!-- Past Appointments -->
-            <div>
-                <h2 class="text-2xl font-semibold mb-4">Past Appointments</h2>
-                {% set past_appointments = appointments|selectattr("date", "lt", now)|list %}
-                {% if past_appointments %}
-                    {% for appointment in past_appointments %}
-                        <div class="appointment-card bg-white p-4 rounded-lg shadow mb-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-semibold text-lg">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</h3>
-                                    <p class="text-blue-600 font-medium">Category: {{ appointment.category.value }}</p>
-                                    <p class="text-gray-600">{{ appointment.description }}</p>
-                                    <p class="text-sm text-gray-500 mt-2">
-                                        <i class="fas fa-user-md mr-2"></i>{{ appointment.veterinarian or 'Not specified' }}
-                                    </p>
-                                    <p class="text-sm text-gray-500">
-                                        <i class="fas fa-map-marker-alt mr-2"></i>{{ appointment.location or 'Not specified' }}
-                                    </p>
-                                </div>
-                                <div class="flex flex-col items-end">
-                                    <span class="status-badge {% if appointment.completed %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %} mb-2">
-                                        {{ 'Completed' if appointment.completed else 'Missed' }}
-                                    </span>
-                                    <div class="flex space-x-2">
-                                        <a href="{{ url_for('edit_appointment', appointment_id=appointment.id) }}" class="text-blue-500 hover:text-blue-600">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ url_for('delete_appointment', appointment_id=appointment.id) }}" method="POST" class="inline">
-                                            <button type="submit" class="text-red-500 hover:text-red-600" onclick="return confirm('Are you sure you want to delete this appointment?')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-gray-600">No past appointments.</p>
-                {% endif %}
-            </div>
+<!-- Appointment Modal -->
+<div id="appointmentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle" class="modal-title"></h2>
+            <p id="modalSubtitle" class="modal-subtitle"></p>
         </div>
-
-        <!-- Sidebar -->
-        <div class="space-y-6">
-            <!-- Quick Add Appointment -->
-            <div class="bg-white p-4 rounded-lg shadow">
-                <h2 class="text-xl font-semibold mb-4">Quick Add Appointment</h2>
-                <form action="{{ url_for('add_appointment') }}" method="POST">
-                    <input type="hidden" name="dog_id" value="{{ dog.id }}">
-                    <div class="mb-4">
-                        <label for="date" class="block text-sm font-medium text-gray-700">Date and Time</label>
-                        <input type="datetime-local" id="date" name="date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                    </div>
-                    <div class="mb-4">
-                        <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                        <select id="category" name="category" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            {% for category in categories %}
-                                <option value="{{ category.name }}">{{ category.value }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                        <textarea id="description" name="description" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" rows="3"></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label for="veterinarian" class="block text-sm font-medium text-gray-700">Veterinarian</label>
-                        <input type="text" id="veterinarian" name="veterinarian" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                    </div>
-                    <div class="mb-4">
-                        <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-                        <input type="text" id="location" name="location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                    </div>
-                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                        Add Appointment
+        <div class="modal-body">
+            <div class="modal-info-group">
+                <p class="modal-info-label">Category</p>
+                <p id="modalCategory" class="modal-info-value"></p>
+            </div>
+            <div class="modal-info-group">
+                <p class="modal-info-label">Description</p>
+                <p id="modalDescription" class="modal-info-value"></p>
+            </div>
+            <div class="modal-info-group">
+                <p class="modal-info-label">Veterinarian</p>
+                <p id="modalVeterinarian" class="modal-info-value"></p>
+            </div>
+            <div class="modal-info-group">
+                <p class="modal-info-label">Location</p>
+                <p id="modalLocation" class="modal-info-value"></p>
+            </div>
+            <div class="modal-actions">
+                <a id="modalEditLink" href="#" class="modal-button modal-button-edit">
+                    Edit
+                </a>
+                <form id="modalDeleteForm" method="POST" class="inline">
+                    <button type="submit" class="modal-button modal-button-delete" onclick="return confirm('Are you sure you want to delete this appointment?')">
+                        Delete
                     </button>
                 </form>
-            </div>
-
-            <!-- Calendar View -->
-            <div class="bg-white p-4 rounded-lg shadow">
-                <h2 class="text-xl font-semibold mb-4">Appointment Calendar</h2>
-                <div id="calendar"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        events: [
-            {% for appointment in appointments %}
-            {
-                title: '{{ appointment.category.value }}: {{ appointment.description|truncate(20) }}',
-                start: '{{ appointment.date.isoformat() }}',
-                url: '{{ url_for("edit_appointment", appointment_id=appointment.id) }}',
-                backgroundColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}'
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            {% endfor %}
-        ],
-        eventClick: function(info) {
-            info.jsEvent.preventDefault();
-            if (info.event.url) {
-                window.location.href = info.event.url;
+            events: [
+                {% for appointment in appointments %}
+                {
+                    id: '{{ appointment.id }}',
+                    title: '{{ appointment.category.value }}',
+                    start: '{{ appointment.date.isoformat() }}',
+                    extendedProps: {
+                        category: '{{ appointment.category.value }}',
+                        description: '{{ appointment.description }}',
+                        veterinarian: '{{ appointment.veterinarian or "Not specified" }}',
+                        location: '{{ appointment.location or "Not specified" }}',
+                        editUrl: '{{ url_for("edit_appointment", appointment_id=appointment.id) }}',
+                        deleteUrl: '{{ url_for("delete_appointment", appointment_id=appointment.id) }}'
+                    },
+                    backgroundColor: '{% if appointment.date < now %}{% if appointment.completed %}#10B981{% else %}#EF4444{% endif %}{% else %}#3B82F6{% endif %}'
+                },
+                {% endfor %}
+            ],
+            eventClick: function(info) {
+                openModal(info.event);
+            }
+        });
+        calendar.render();
+    
+        // Modal functionality
+        var modal = document.getElementById("appointmentModal");
+        var span = document.getElementsByClassName("close")[0];
+    
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+    
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
             }
         }
+    
+        function openModal(event) {
+            document.getElementById("modalTitle").textContent = "Appointment Details";
+            document.getElementById("modalSubtitle").textContent = event.start.toLocaleString([], {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'});
+            document.getElementById("modalCategory").textContent = event.extendedProps.category;
+            document.getElementById("modalDescription").textContent = event.extendedProps.description;
+            document.getElementById("modalVeterinarian").textContent = event.extendedProps.veterinarian;
+            document.getElementById("modalLocation").textContent = event.extendedProps.location;
+            document.getElementById("modalEditLink").href = event.extendedProps.editUrl;
+            document.getElementById("modalDeleteForm").action = event.extendedProps.deleteUrl;
+            modal.style.display = "block";
+        }
+    
+        // Add click event listeners to appointment cards
+        var appointmentCards = document.querySelectorAll('.appointment-card');
+        appointmentCards.forEach(function(card) {
+            card.addEventListener('click', function() {
+                var appointmentId = this.dataset.appointmentId;
+                var event = calendar.getEventById(appointmentId);
+                if (event) {
+                    openModal(event);
+                }
+            });
+        });
     });
-    calendar.render();
-});
-</script>
+    </script>
 {% endblock %}
