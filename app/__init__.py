@@ -9,10 +9,11 @@ from .models import User, Dog, DogImage, Litter, LitterImage, Message, DogStatus
 from io import BytesIO
 from flask_migrate import Migrate
 from sqlalchemy.orm import joinedload
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, func
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask import current_app
 import json
+
 
 
 
@@ -243,17 +244,19 @@ def create_app():
         # Get filter parameters
         breed = request.args.get('breed')
         age = request.args.get('age')
-        max_price = request.args.get('max_price')
+        min_price = request.args.get('minPrice', type=float)
+        max_price = request.args.get('maxPrice', type=float)
+        status = request.args.get('status')
+        sort = request.args.get('sort', 'newest')
         search = request.args.get('search')
 
         # Start with base query
         query = Litter.query.filter_by(is_public=True)
 
-        # Apply breed filter
-        if breed and breed != 'All Breeds':
+        # Apply filters
+        if breed:
             query = query.filter(or_(Litter.father.has(breed=breed), Litter.mother.has(breed=breed)))
 
-        # Apply age filter
         if age:
             today = datetime.utcnow().date()
             if age == '0-4 weeks':
@@ -267,21 +270,16 @@ def create_app():
                 date_limit = today - timedelta(weeks=8)
                 query = query.filter(Litter.date_of_birth <= date_limit)
 
-        # Apply max price filter
-        if max_price and max_price != 'Any':
-            if max_price == '5000+':
-                query = query.filter(Litter.puppies.any(and_(
-                    Dog.price >= 5000,
-                    Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])
-                )))
-            else:
-                max_price = float(max_price)
-                query = query.filter(Litter.puppies.any(and_(
-                    Dog.price <= max_price,
-                    Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])
-                )))
+        if min_price is not None and max_price is not None:
+            query = query.filter(Litter.puppies.any(and_(
+                Dog.price >= min_price,
+                Dog.price <= max_price,
+                Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])
+            )))
 
-        # Apply search
+        if status:
+            query = query.filter(Litter.puppies.any(Dog.status == DogStatus[status]))
+
         if search:
             search_term = f"%{search}%"
             query = query.filter(or_(
@@ -292,20 +290,43 @@ def create_app():
                 Litter.mother.has(Dog.breed.ilike(search_term))
             ))
 
-        # Order by date of birth (newest first) and paginate
-        paginated_litters = query.order_by(Litter.date_of_birth.desc()).paginate(page=page, per_page=per_page, error_out=False)
+        # Apply sorting
+        if sort == 'oldest':
+            query = query.order_by(Litter.date_of_birth.asc())
+        elif sort == 'price_low':
+            query = query.order_by(Litter.puppies.any(Dog.price.asc()))
+        elif sort == 'price_high':
+            query = query.order_by(Litter.puppies.any(Dog.price.desc()))
+        else:  # newest
+            query = query.order_by(Litter.date_of_birth.desc())
+
+        # Paginate results
+        paginated_litters = query.paginate(page=page, per_page=per_page, error_out=False)
 
         # Get unique breeds for the filter dropdown
         breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
         breeds = [breed[0] for breed in breeds]
 
+        # Get min and max prices for the price range slider
+        min_price_overall = db.session.query(func.min(Dog.price)).scalar() or 0
+        max_price_overall = db.session.query(func.max(Dog.price)).scalar() or 10000
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return render_template('public_litters_content.html', 
+                                litters=paginated_litters.items,
+                                pagination=paginated_litters,
+                                DogStatus=DogStatus)
+
         return render_template('public_litters.html', 
                             litters=paginated_litters.items,
                             pagination=paginated_litters,
                             breeds=breeds,
+                            min_price=min_price_overall,
+                            max_price=max_price_overall,
                             current_breed=breed,
                             current_age=age,
-                            current_max_price=max_price,
+                            current_status=status,
+                            current_sort=sort,
                             search=search,
                             DogStatus=DogStatus)
     
