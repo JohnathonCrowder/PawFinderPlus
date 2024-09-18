@@ -227,7 +227,6 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiZGVmdGVybGFtYjYzIiwiYSI6ImNtMTg0b29kNTBzMnEya
 var geocoder = new MapboxGeocoder({
     accessToken: mapboxgl.accessToken,
     types: 'address',
-    countries: 'us',   // Limit to US addresses. Remove or change if you want to allow other countries
     placeholder: 'Search for an address',
     minLength: 3 // Minimum number of characters to trigger autocomplete
 });

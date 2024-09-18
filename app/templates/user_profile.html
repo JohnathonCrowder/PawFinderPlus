@@ -116,7 +116,14 @@
                         <h1 class="text-4xl font-bold mb-2">{{ user.full_name or user.username }}</h1>
                         
                         {% if user.city and user.country %}
-    <p class="text-xl mb-2"><i class="fas fa-map-marker-alt mr-2"></i>{{ user.city }}, {{ user.country }}</p>
+    <p class="text-xl mb-2">
+        <i class="fas fa-map-marker-alt mr-2"></i>
+        {% if user.country == 'United States' %}
+            {{ user.city }}, {{ user.state }}, USA
+        {% else %}
+            {{ user.city }}, {{ user.country }}
+        {% endif %}
+    </p>
 {% endif %}
                         <p class="text-lg">Member since {{ user.created_at.strftime('%Y') }}</p>
                     </div>
