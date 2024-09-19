@@ -125,20 +125,25 @@
         });
     
         function setView(view) {
-            if (view === 'table') {
-                cardView.classList.add('hidden');
-                tableView.classList.remove('hidden');
-                viewToggleText.textContent = 'Switch to Card View';
-                viewToggle.querySelector('i').classList.remove('fa-list');
-                viewToggle.querySelector('i').classList.add('fa-th');
-            } else {
-                cardView.classList.remove('hidden');
-                tableView.classList.add('hidden');
-                viewToggleText.textContent = 'Switch to Table View';
-                viewToggle.querySelector('i').classList.remove('fa-th');
-                viewToggle.querySelector('i').classList.add('fa-list');
-            }
-        }
+    const cardView = document.getElementById('cardView');
+    const tableView = document.getElementById('tableView');
+    const viewToggleText = document.getElementById('viewToggleText');
+    const viewToggle = document.getElementById('viewToggle');
+
+    if (view === 'table') {
+        cardView.classList.add('hidden');
+        tableView.classList.remove('hidden');
+        viewToggleText.textContent = 'Switch to Card View';
+        viewToggle.querySelector('i').classList.remove('fa-list');
+        viewToggle.querySelector('i').classList.add('fa-th');
+    } else {
+        cardView.classList.remove('hidden');
+        tableView.classList.add('hidden');
+        viewToggleText.textContent = 'Switch to Table View';
+        viewToggle.querySelector('i').classList.remove('fa-th');
+        viewToggle.querySelector('i').classList.add('fa-list');
+    }
+}
     
         // Delete functionality
         function confirmDelete(dogId, dogName) {
@@ -210,7 +215,7 @@
         }
     
         function submitForm() {
-    const formData = new FormData(filterForm);
+    const formData = new FormData(document.getElementById('filterForm'));
     const searchParams = new URLSearchParams(formData);
 
     fetch(`${filterForm.action}?${searchParams.toString()}`, {
