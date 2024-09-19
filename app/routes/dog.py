@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, request
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from app.models import Dog, DogImage, DogStatus, Litter
@@ -6,24 +6,59 @@ from app.extensions import db
 from app.utils import allowed_file, load_json_data
 from datetime import datetime
 from io import BytesIO
+from datetime import datetime, timedelta
 
 bp = Blueprint('dog', __name__)
 
 @bp.route('/dog_management')
 @login_required
 def dog_management():
+    # Get filter parameters from request
+    breed = request.args.get('breed')
+    age = request.args.get('age')
+    status = request.args.get('status')
     search = request.args.get('search', '')
+
+    # Start with base query
+    query = Dog.query.filter_by(user_id=current_user.id)
+
+    # Apply filters
+    if breed:
+        query = query.filter(Dog.breed == breed)
+    
+    if age:
+        today = datetime.utcnow().date()
+        if age == 'puppy':
+            date_limit = today - timedelta(months=12)
+            query = query.filter(Dog.date_of_birth >= date_limit)
+        elif age == 'adult':
+            date_limit = today - timedelta(years=7)
+            query = query.filter(Dog.date_of_birth.between(date_limit, today - timedelta(months=12)))
+        elif age == 'senior':
+            date_limit = today - timedelta(years=7)
+            query = query.filter(Dog.date_of_birth <= date_limit)
+
+    if status:
+        query = query.filter(Dog.status == DogStatus[status])
+
     if search:
-        dogs = Dog.query.filter(
-            Dog.user_id == current_user.id,
-            db.or_(
-                Dog.name.ilike(f'%{search}%'),
-                Dog.breed.ilike(f'%{search}%')
-            )
-        ).all()
-    else:
-        dogs = Dog.query.filter_by(user_id=current_user.id).all()
-    return render_template('dog_management.html', dogs=dogs, search=search)
+        query = query.filter(Dog.name.ilike(f'%{search}%'))
+
+    # Execute query
+    dogs = query.all()
+
+    # Get unique breeds for filter options
+    breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
+    breeds = [breed[0] for breed in breeds]
+
+    return render_template('dog_management.html', 
+                           dogs=dogs, 
+                           breeds=breeds, 
+                           current_breed=breed,
+                           current_age=age,
+                           current_status=status,
+                           search=search,
+                           DogStatus=DogStatus)
 
 @bp.route('/add_dog', methods=['GET', 'POST'])
 @login_required

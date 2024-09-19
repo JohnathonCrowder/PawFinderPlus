@@ -46,6 +46,48 @@
         </div>
     </form>
 
+
+    <!-- Filter and Search Form -->
+    <form id='filterForm' action="{{ url_for('dog.dog_management') }}" method="GET" class="mb-6">
+        <div class="flex flex-wrap -mx-2 mb-4">
+            <div class="px-2 w-full sm:w-1/2 md:w-1/4 mb-4">
+                <label for="breed" class="block mb-2">Breed</label>
+                <select name="breed" id="breed" class="w-full p-2 border rounded">
+                    <option value="">All Breeds</option>
+                    {% for breed in breeds %}
+                        <option value="{{ breed }}" {% if breed == current_breed %}selected{% endif %}>{{ breed }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="px-2 w-full sm:w-1/2 md:w-1/4 mb-4">
+                <label for="age" class="block mb-2">Age</label>
+                <select name="age" id="age" class="w-full p-2 border rounded">
+                    <option value="">All Ages</option>
+                    <option value="puppy" {% if current_age == 'puppy' %}selected{% endif %}>Puppy (0-1 year)</option>
+                    <option value="adult" {% if current_age == 'adult' %}selected{% endif %}>Adult (1-7 years)</option>
+                    <option value="senior" {% if current_age == 'senior' %}selected{% endif %}>Senior (7+ years)</option>
+                </select>
+            </div>
+            <div class="px-2 w-full sm:w-1/2 md:w-1/4 mb-4">
+                <label for="status" class="block mb-2">Status</label>
+                <select name="status" id="status" class="w-full p-2 border rounded">
+                    <option value="">All Statuses</option>
+                    {% for status in DogStatus %}
+                        <option value="{{ status.name }}" {% if status.name == current_status %}selected{% endif %}>{{ status.value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="px-2 w-full sm:w-1/2 md:w-1/4 mb-4">
+                <label for="search" class="block mb-2">Search</label>
+                <input type="text" name="search" id="search" placeholder="Search by name" value="{{ search }}" class="w-full p-2 border rounded">
+            </div>
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Apply Filters</button>
+        <a href="{{ url_for('dog.dog_management') }}" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 ml-2">Clear Filters</a>
+    </form>
+
+
+
     {% if dogs %}
     <!-- Card View -->
 <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -251,4 +293,28 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
     }
 });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('filterForm');
+        const filterInputs = filterForm.querySelectorAll('select, input[type="text"]');
+    
+        filterInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                filterForm.submit();
+            });
+        });
+    
+        // Add event listener for search input
+        const searchInput = document.getElementById('search');
+        let typingTimer;
+        const doneTypingInterval = 500; // ms
+    
+        searchInput.addEventListener('input', function() {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(function() {
+                filterForm.submit();
+            }, doneTypingInterval);
+        });
+    });
+    </script>
 {% endblock %}
