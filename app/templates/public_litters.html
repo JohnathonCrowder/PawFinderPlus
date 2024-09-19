@@ -138,6 +138,7 @@
         margin: 0 auto;
         padding: 2rem 1rem;
     }
+    
 </style>
 {% endblock %}
 
@@ -158,33 +159,76 @@
                 <div class="carousel-track flex transition-transform duration-500 ease-in-out">
                     {% for litter in featured_litters %}
                     <div class="carousel-slide flex-shrink-0 w-full px-4">
-                        <div class="featured-litter">
+                        <div class="featured-litter bg-white text-gray-800 rounded-lg overflow-hidden shadow-lg">
                             <div class="md:flex">
-                                <div class="md:w-1/2">
+                                <div class="md:w-2/3">
                                     {% if litter.images %}
                                     <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
                                          alt="{{ litter.name }}" 
-                                         class="w-full h-full object-cover">
+                                         class="w-full h-96 object-cover">
                                     {% else %}
-                                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                    <div class="w-full h-96 bg-gray-200 flex items-center justify-center">
                                         <i class="fas fa-paw text-gray-400 text-6xl"></i>
                                     </div>
                                     {% endif %}
                                 </div>
-                                <div class="md:w-1/2 p-8">
-                                    <div class="uppercase tracking-wide text-sm text-indigo-200 font-semibold">Featured Litter</div>
-                                    <h3 class="mt-2 text-3xl leading-8 font-extrabold tracking-tight">{{ litter.name }}</h3>
-                                    <p class="mt-4 text-xl">{{ litter.father.breed }} Puppies</p>
-                                    <div class="mt-6 flex items-center">
-                                        <i class="fas fa-calendar-alt text-2xl text-indigo-200 mr-3"></i>
+                                <div class="md:w-1/3 p-6">
+                                    <div class="uppercase tracking-wide text-sm text-indigo-600 font-semibold">Featured Litter</div>
+                                    <h3 class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900">{{ litter.name }}</h3>
+                                    <p class="mt-2 text-xl text-gray-600">{{ litter.father.breed }} Puppies</p>
+                                    <div class="mt-4 flex items-center">
+                                        <i class="fas fa-calendar-alt text-2xl text-indigo-600 mr-3"></i>
                                         <div>
-                                            <p class="text-sm font-medium">Born</p>
-                                            <p class="text-lg">{{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
+                                            <p class="text-sm font-medium text-gray-600">Born</p>
+                                            <p class="text-lg text-gray-900">{{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
                                         </div>
                                     </div>
+                                    <div class="mt-4 flex items-center">
+                                        <i class="fas fa-paw text-2xl text-indigo-600 mr-3"></i>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-600">Puppies</p>
+                                            <p class="text-lg text-gray-900">{{ litter.puppies|length }} available</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 flex items-center">
+                                        <i class="fas fa-map-marker-alt text-2xl text-indigo-600 mr-3"></i>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-600">Location</p>
+                                            <p class="text-lg text-gray-900">{{ litter.user.location or 'Not specified' }}</p>
+                                        </div>
+                                    </div>
+                                    {% if litter.puppies %}
+                                        {% set min_price = namespace(value=None) %}
+                                        {% set max_price = namespace(value=None) %}
+                                        {% for puppy in litter.puppies %}
+                                            {% if puppy.price and puppy.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
+                                                {% if min_price.value is none or puppy.price < min_price.value %}
+                                                    {% set min_price.value = puppy.price %}
+                                                {% endif %}
+                                                {% if max_price.value is none or puppy.price > max_price.value %}
+                                                    {% set max_price.value = puppy.price %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if min_price.value is not none %}
+                                            <div class="mt-4 flex items-center">
+                                                <i class="fas fa-tag text-2xl text-indigo-600 mr-3"></i>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-600">Price Range</p>
+                                                    <p class="text-lg font-semibold text-green-600">
+                                                        {% if min_price.value == max_price.value %}
+                                                            ${{ "%.2f"|format(min_price.value) }}
+                                                        {% else %}
+                                                            ${{ "%.2f"|format(min_price.value) }} - ${{ "%.2f"|format(max_price.value) }}
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
                                     <div class="mt-6">
                                         <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" 
-                                           class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50">
+                                           class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition duration-150 ease-in-out">
                                             View Litter Details
                                             <i class="fas fa-arrow-right ml-2"></i>
                                         </a>
@@ -196,10 +240,10 @@
                     {% endfor %}
                 </div>
             </div>
-            <button class="carousel-button prev absolute top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-full transition duration-300">
+            <button class="carousel-button prev absolute top-1/2 left-4 transform -translate-y-1/2 bg-white text-indigo-600 font-bold py-2 px-4 rounded-full transition duration-300 hover:bg-indigo-100">
                 <i class="fas fa-chevron-left"></i>
             </button>
-            <button class="carousel-button next absolute top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-full transition duration-300">
+            <button class="carousel-button next absolute top-1/2 right-4 transform -translate-y-1/2 bg-white text-indigo-600 font-bold py-2 px-4 rounded-full transition duration-300 hover:bg-indigo-100">
                 <i class="fas fa-chevron-right"></i>
             </button>
         </div>
