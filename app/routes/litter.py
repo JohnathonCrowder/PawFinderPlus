@@ -52,12 +52,16 @@ def litter_management():
     breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
     breeds = [breed[0] for breed in breeds]
 
-    return render_template('litter_management.html', 
-                           litters=litters, 
-                           breeds=breeds, 
-                           current_breed=breed,
-                           current_age=age,
-                           search=search)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('partials/litter_list.html', 
+                               litters=litters)
+    else:
+        return render_template('litter_management.html', 
+                               litters=litters, 
+                               breeds=breeds, 
+                               current_breed=breed,
+                               current_age=age,
+                               search=search)
 
 
 @bp.route('/add_litter', methods=['GET', 'POST'])

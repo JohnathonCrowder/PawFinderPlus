@@ -1,0 +1,104 @@
+<!-- Card View -->
+<div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for litter in litters %}
+    <div class="litter-card bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="h-56 md:h-64 lg:h-72 bg-gray-300 relative overflow-hidden">
+            {% if litter.images %}
+                <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
+                     alt="{{ litter.name }}" 
+                     class="w-full h-full object-cover">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center text-gray-500">
+                    <i class="fas fa-paw text-6xl"></i>
+                </div>
+            {% endif %}
+        </div>
+        <div class="p-6">
+            <h2 class="text-2xl font-bold mb-2" style="color: #0080ff;">{{ litter.name }}</h2>
+            <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2"></i> Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
+            <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Father: {{ litter.father.name }}</p>
+            <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Mother: {{ litter.mother.name }}</p>
+            <p class="text-gray-600 mb-4"><i class="fas fa-paw mr-2"></i> Puppies: {{ litter.puppies|length }}</p>
+            <p class="text-gray-600 mb-2">
+                <i class="fas fa-eye{% if not litter.is_public %}-slash{% endif %} mr-2"></i>
+                {{ 'Public' if litter.is_public else 'Private' }}
+            </p>
+            <div class="flex space-x-2">
+                <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="flex-grow text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                    <i class="fas fa-eye mr-2"></i> View Details
+                </a>
+                <a href="{{ url_for('litter.edit_litter', id=litter.id) }}" class="flex-grow text-center bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                    <i class="fas fa-edit mr-2"></i> Edit
+                </a>
+                <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="flex-grow bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                    <i class="fas fa-trash-alt mr-2"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Table View -->
+<div id="tableView" class="hidden overflow-x-auto">
+    <table class="w-full border-collapse">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="px-4 py-2 text-left">Image</th>
+                <th class="px-4 py-2 text-left">Name</th>
+                <th class="px-4 py-2 text-left">Date of Birth</th>
+                <th class="px-4 py-2 text-left">Father</th>
+                <th class="px-4 py-2 text-left">Mother</th>
+                <th class="px-4 py-2 text-left">Puppies</th>
+                <th class="px-4 py-2 text-left">Visibility</th>
+                <th class="px-4 py-2 text-left">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for litter in litters %}
+            <tr class="border-t">
+                <td class="px-4 py-2">
+                    {% if litter.images %}
+                        <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" alt="{{ litter.name }}" class="w-16 h-16 object-cover rounded">
+                    {% else %}
+                        <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
+                            <i class="fas fa-paw text-gray-400 text-2xl"></i>
+                        </div>
+                    {% endif %}
+                </td>
+                <td class="px-4 py-2">{{ litter.name }}</td>
+                <td class="px-4 py-2">{{ litter.date_of_birth.strftime('%Y-%m-%d') }}</td>
+                <td class="px-4 py-2">{{ litter.father.name }}</td>
+                <td class="px-4 py-2">{{ litter.mother.name }}</td>
+                <td class="px-4 py-2">{{ litter.puppies|length }}</td>
+                <td class="px-4 py-2">
+                    <span class="{% if litter.is_public %}text-green-600{% else %}text-red-600{% endif %}">
+                        <i class="fas fa-{% if litter.is_public %}eye{% else %}eye-slash{% endif %} mr-2"></i>
+                        {{ 'Public' if litter.is_public else 'Private' }}
+                    </span>
+                </td>
+                <td class="px-4 py-2">
+                    <div class="flex space-x-2">
+                        <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="text-blue-500 hover:text-blue-700" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{{ url_for('litter.edit_litter', id=litter.id) }}" class="text-green-500 hover:text-green-700" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="text-red-500 hover:text-red-700" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if not litters %}
+<div class="text-center py-12">
+    <i class="fas fa-paw text-6xl text-gray-400 mb-4"></i>
+    <p class="text-xl text-gray-600">No litters found matching your criteria.</p>
+</div>
+{% endif %}

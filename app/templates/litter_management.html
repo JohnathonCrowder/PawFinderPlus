@@ -137,103 +137,9 @@
             </div>
 
             {% if litters %}
-                <!-- Card View -->
-                <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {% for litter in litters %}
-                        <div class="litter-card">
-                            <div class="h-56 md:h-64 lg:h-72 bg-gray-300 relative overflow-hidden">
-                                {% if litter.images %}
-                                    <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
-                                         alt="{{ litter.name }}" 
-                                         class="w-full h-full object-cover">
-                                {% else %}
-                                    <div class="w-full h-full flex items-center justify-center text-gray-500">
-                                        <i class="fas fa-paw text-6xl"></i>
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="litter-info">
-                                <h2 class="text-2xl font-bold mb-2" style="color: #0080ff;">{{ litter.name }}</h2>
-                                <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2"></i> Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
-                                <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Father: {{ litter.father.name }}</p>
-                                <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Mother: {{ litter.mother.name }}</p>
-                                <p class="text-gray-600 mb-4"><i class="fas fa-paw mr-2"></i> Puppies: {{ litter.puppies|length }}</p>
-                                <p class="text-gray-600 mb-2">
-                                    <i class="fas fa-eye{% if not litter.is_public %}-slash{% endif %} mr-2"></i>
-                                    {{ 'Public' if litter.is_public else 'Private' }}
-                                </p>
-                                <div class="flex space-x-2">
-                                    <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="bone-button flex-grow text-center">
-                                        <i class="fas fa-eye mr-2"></i> View Details
-                                    </a>
-                                    <a href="{{ url_for('litter.edit_litter', id=litter.id) }}" class="bone-button edit-button flex-grow text-center">
-                                        <i class="fas fa-edit mr-2"></i> Edit
-                                    </a>
-                                    <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="bone-button delete-button flex-grow">
-                                        <i class="fas fa-trash-alt mr-2"></i> Delete
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Table View -->
-                <div id="tableView" class="hidden overflow-x-auto">
-                    <table class="w-full border-collapse">
-                        <thead>
-                            <tr class="table-header">
-                                <th class="px-4 py-2 text-left">Image</th>
-                                <th class="px-4 py-2 text-left">Name</th>
-                                <th class="px-4 py-2 text-left">Date of Birth</th>
-                                <th class="px-4 py-2 text-left">Father</th>
-                                <th class="px-4 py-2 text-left">Mother</th>
-                                <th class="px-4 py-2 text-left">Puppies</th>
-                                <th class="px-4 py-2 text-left">Visibility</th>
-                                <th class="px-4 py-2 text-left">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for litter in litters %}
-                            <tr class="table-row">
-                                <td class="border px-4 py-2">
-                                    {% if litter.images %}
-                                        <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" alt="{{ litter.name }}" class="w-16 h-16 object-cover rounded">
-                                    {% else %}
-                                        <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
-                                            <i class="fas fa-paw text-gray-400 text-2xl"></i>
-                                        </div>
-                                    {% endif %}
-                                </td>
-                                <td class="border px-4 py-2">{{ litter.name }}</td>
-                                <td class="border px-4 py-2">{{ litter.date_of_birth.strftime('%Y-%m-%d') }}</td>
-                                <td class="border px-4 py-2">{{ litter.father.name }}</td>
-                                <td class="border px-4 py-2">{{ litter.mother.name }}</td>
-                                <td class="border px-4 py-2">{{ litter.puppies|length }}</td>
-                                <td class="border px-4 py-2">
-                                    <span class="{% if litter.is_public %}text-green-600{% else %}text-red-600{% endif %}">
-                                        <i class="fas fa-{% if litter.is_public %}eye{% else %}eye-slash{% endif %} mr-2"></i>
-                                        {{ 'Public' if litter.is_public else 'Private' }}
-                                    </span>
-                                </td>
-                                <td class="border px-4 py-2">
-                                    <div class="flex space-x-2">
-                                        <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="text-blue-500 hover:text-blue-700" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ url_for('litter.edit_litter', id=litter.id) }}" class="text-green-500 hover:text-green-700" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="text-red-500 hover:text-red-700" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div id="littersContainer">
+                {% include "partials/litter_list.html" %}
+            </div>
             {% else %}
                 <div class="text-center py-12">
                     <i class="fas fa-paw text-6xl text-gray-400 mb-4"></i>
@@ -262,40 +168,100 @@
     </div>
 </div>
 
+
 <script>
-// View toggling
-const viewToggle = document.getElementById('viewToggle');
-const viewToggleText = document.getElementById('viewToggleText');
-const cardView = document.getElementById('cardView');
-const tableView = document.getElementById('tableView');
+document.addEventListener('DOMContentLoaded', function() {
+    const viewToggle = document.getElementById('viewToggle');
+    const viewToggleText = document.getElementById('viewToggleText');
+    const cardView = document.getElementById('cardView');
+    const tableView = document.getElementById('tableView');
+    const filterToggle = document.getElementById('filterToggle');
+    const filterPanel = document.getElementById('filterPanel');
+    const chevronIcon = document.getElementById('toggleIcon');
+    const filterForm = document.getElementById('filterForm');
+    const filterInputs = filterForm.querySelectorAll('select, input[type="text"]');
 
-// Check local storage for saved view preference
-const currentView = localStorage.getItem('litterListView') || 'card';
-setView(currentView);
+    // Check local storage for saved view preference
+    const currentView = localStorage.getItem('litterListView') || 'card';
+    setView(currentView);
 
-viewToggle.addEventListener('click', () => {
-    const newView = cardView.classList.contains('hidden') ? 'card' : 'table';
-    setView(newView);
-    localStorage.setItem('litterListView', newView);
+    viewToggle.addEventListener('click', () => {
+        const newView = cardView.classList.contains('hidden') ? 'card' : 'table';
+        setView(newView);
+        localStorage.setItem('litterListView', newView);
+    });
+
+    filterToggle.addEventListener('click', () => {
+        filterPanel.classList.toggle('hidden');
+        chevronIcon.classList.toggle('rotate-180');
+    });
+
+    filterInputs.forEach(input => {
+        input.addEventListener('change', submitForm);
+    });
+
+    function setView(view) {
+        if (view === 'table') {
+            cardView.classList.add('hidden');
+            tableView.classList.remove('hidden');
+            viewToggleText.textContent = 'Switch to Card View';
+            viewToggle.querySelector('i').classList.remove('fa-list');
+            viewToggle.querySelector('i').classList.add('fa-th');
+        } else {
+            cardView.classList.remove('hidden');
+            tableView.classList.add('hidden');
+            viewToggleText.textContent = 'Switch to Table View';
+            viewToggle.querySelector('i').classList.remove('fa-th');
+            viewToggle.querySelector('i').classList.add('fa-list');
+        }
+    }
+
+    function submitForm() {
+        const formData = new FormData(filterForm);
+        const searchParams = new URLSearchParams(formData);
+
+        fetch(`${filterForm.action}?${searchParams.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const littersContainer = document.getElementById('littersContainer');
+            littersContainer.innerHTML = html;
+
+            // Reapply view preference
+            setView(localStorage.getItem('litterListView') || 'card');
+
+            history.pushState(null, '', `${filterForm.action}?${searchParams.toString()}`);
+        });
+    }
+
+    // Debounce function for search input
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Add event listener for search input with debounce
+    const searchInput = document.getElementById('search');
+    const debouncedSubmit = debounce(() => submitForm(), 300);
+    searchInput.addEventListener('input', debouncedSubmit);
+
+    // Show filter panel if any filter is active
+    if ({{ 'true' if current_breed or current_age or search else 'false' }}) {
+        filterPanel.classList.remove('hidden');
+        chevronIcon.classList.add('transform', 'rotate-180');
+    }
 });
 
-function setView(view) {
-    if (view === 'table') {
-        cardView.classList.add('hidden');
-        tableView.classList.remove('hidden');
-        viewToggleText.textContent = 'Switch to Card View';
-        viewToggle.querySelector('i').classList.remove('fa-list');
-        viewToggle.querySelector('i').classList.add('fa-th');
-    } else {
-        cardView.classList.remove('hidden');
-        tableView.classList.add('hidden');
-        viewToggleText.textContent = 'Switch to Table View';
-        viewToggle.querySelector('i').classList.remove('fa-th');
-        viewToggle.querySelector('i').classList.add('fa-list');
-    }
-}
-
-// Delete functionality
 function confirmDelete(litterId, litterName) {
     const modal = document.getElementById('deleteModal');
     const confirmText = document.getElementById('deleteConfirmText');
@@ -319,51 +285,4 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
     }
 });
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const filterToggle = document.getElementById('filterToggle');
-        const filterPanel = document.getElementById('filterPanel');
-        const chevronIcon = filterToggle.querySelector('.fa-chevron-down');
-        const filterForm = document.getElementById('filterForm');
-        const filterInputs = filterForm.querySelectorAll('select, input[type="text"]');
-    
-        // Toggle filter panel visibility
-        filterToggle.addEventListener('click', () => {
-            filterPanel.classList.toggle('hidden');
-            chevronIcon.classList.toggle('transform');
-            chevronIcon.classList.toggle('rotate-180');
-        });
-    
-        // Auto-submit form on input change
-        filterInputs.forEach(input => {
-            input.addEventListener('change', function() {
-                filterForm.submit();
-            });
-        });
-    
-        // Debounce function for search input
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-    
-        // Add event listener for search input with debounce
-        const searchInput = document.getElementById('search');
-        const debouncedSubmit = debounce(() => filterForm.submit(), 300);
-        searchInput.addEventListener('input', debouncedSubmit);
-    
-        // Show filter panel if any filter is active
-        if ({{ 'true' if current_breed or current_age or search else 'false' }}) {
-            filterPanel.classList.remove('hidden');
-            chevronIcon.classList.add('transform', 'rotate-180');
-        }
-    });
-    </script>
 {% endblock %}
