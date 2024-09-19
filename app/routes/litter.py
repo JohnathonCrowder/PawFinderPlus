@@ -54,14 +54,16 @@ def litter_management():
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render_template('partials/litter_list.html', 
-                               litters=litters)
+                               litters=litters,
+                               DogStatus=DogStatus)
     else:
         return render_template('litter_management.html', 
                                litters=litters, 
                                breeds=breeds, 
                                current_breed=breed,
                                current_age=age,
-                               search=search)
+                               search=search,
+                               DogStatus=DogStatus)
 
 
 @bp.route('/add_litter', methods=['GET', 'POST'])

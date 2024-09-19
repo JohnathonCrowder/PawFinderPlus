@@ -97,44 +97,43 @@
             {% endwith %}
 
             <!-- Filter and Search Form -->
-            <div class="bg-white shadow-md rounded-lg mb-6">
-                <button id="filterToggle" class="w-full px-6 py-4 text-left font-semibold text-gray-700 focus:outline-none flex justify-between items-center">
-                    <span><i class="fas fa-filter mr-2"></i> Filter Litters</span>
-                    <i class="fas fa-chevron-down transition-transform duration-300"></i>
-                </button>
-                <div id="filterPanel" class="hidden px-6 py-4">
-                    <form id="filterForm" action="{{ url_for('litter.litter_management') }}" method="GET">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <div>
-                                <label for="breed" class="block text-sm font-medium text-gray-700 mb-1">Breed</label>
-                                <select name="breed" id="breed" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">All Breeds</option>
-                                    {% for breed in breeds %}
-                                        <option value="{{ breed }}" {% if breed == current_breed %}selected{% endif %}>{{ breed }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div>
-                                <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age of Litter</label>
-                                <select name="age" id="age" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">All Ages</option>
-                                    <option value="0-8 weeks" {% if current_age == '0-8 weeks' %}selected{% endif %}>0-8 weeks</option>
-                                    <option value="8-16 weeks" {% if current_age == '8-16 weeks' %}selected{% endif %}>8-16 weeks</option>
-                                    <option value="16+ weeks" {% if current_age == '16+ weeks' %}selected{% endif %}>16+ weeks</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                                <input type="text" name="search" id="search" placeholder="Search by name" value="{{ search }}" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                        </div>
-                        <div class="mt-4 flex justify-end space-x-2">
-                            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out">Apply Filters</button>
-                            <a href="{{ url_for('litter.litter_management') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-300 ease-in-out">Clear Filters</a>
-                        </div>
-                    </form>
+<div class="bg-white shadow-md rounded-lg mb-6">
+    <button id="filterToggle" class="w-full px-6 py-4 text-left font-semibold text-gray-700 focus:outline-none flex justify-between items-center">
+        <span><i class="fas fa-filter mr-2"></i> Filter Litters</span>
+        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+    </button>
+    <div id="filterPanel" class="hidden px-6 py-4">
+        <form id="filterForm" action="{{ url_for('litter.litter_management') }}" method="GET">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                    <label for="breed" class="block text-sm font-medium text-gray-700 mb-1">Breed</label>
+                    <select name="breed" id="breed" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All Breeds</option>
+                        {% for breed in breeds %}
+                            <option value="{{ breed }}" {% if breed == current_breed %}selected{% endif %}>{{ breed }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age of Litter</label>
+                    <select name="age" id="age" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All Ages</option>
+                        <option value="0-8 weeks" {% if current_age == '0-8 weeks' %}selected{% endif %}>0-8 weeks</option>
+                        <option value="8-16 weeks" {% if current_age == '8-16 weeks' %}selected{% endif %}>8-16 weeks</option>
+                        <option value="16+ weeks" {% if current_age == '16+ weeks' %}selected{% endif %}>16+ weeks</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <input type="text" name="search" id="search" placeholder="Search by name" value="{{ search }}" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
+            <div class="mt-4 flex justify-end">
+                <a href="{{ url_for('litter.litter_management') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-300 ease-in-out">Clear Filters</a>
+            </div>
+        </form>
+    </div>
+</div>
 
             {% if litters %}
             <div id="littersContainer">
@@ -171,34 +170,45 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const viewToggle = document.getElementById('viewToggle');
-    const viewToggleText = document.getElementById('viewToggleText');
-    const cardView = document.getElementById('cardView');
-    const tableView = document.getElementById('tableView');
+    const littersContainer = document.getElementById('littersContainer');
+    const filterForm = document.getElementById('filterForm');
     const filterToggle = document.getElementById('filterToggle');
     const filterPanel = document.getElementById('filterPanel');
-    const chevronIcon = document.getElementById('toggleIcon');
-    const filterForm = document.getElementById('filterForm');
-    const filterInputs = filterForm.querySelectorAll('select, input[type="text"]');
+    const chevronIcon = filterToggle.querySelector('i.fas.fa-chevron-down');
+    
+    let viewToggle, viewToggleText, cardView, tableView;
+
+    function initializeViewToggle() {
+        viewToggle = document.getElementById('viewToggle');
+        viewToggleText = document.getElementById('viewToggleText');
+        cardView = document.getElementById('cardView');
+        tableView = document.getElementById('tableView');
+
+        if (viewToggle) {
+            viewToggle.addEventListener('click', toggleView);
+        }
+    }
+
+    initializeViewToggle();
 
     // Check local storage for saved view preference
     const currentView = localStorage.getItem('litterListView') || 'card';
     setView(currentView);
-
-    viewToggle.addEventListener('click', () => {
-        const newView = cardView.classList.contains('hidden') ? 'card' : 'table';
-        setView(newView);
-        localStorage.setItem('litterListView', newView);
-    });
 
     filterToggle.addEventListener('click', () => {
         filterPanel.classList.toggle('hidden');
         chevronIcon.classList.toggle('rotate-180');
     });
 
-    filterInputs.forEach(input => {
+    filterForm.querySelectorAll('select, input[type="text"]').forEach(input => {
         input.addEventListener('change', submitForm);
     });
+
+    function toggleView() {
+        const newView = cardView.classList.contains('hidden') ? 'card' : 'table';
+        setView(newView);
+        localStorage.setItem('litterListView', newView);
+    }
 
     function setView(view) {
         if (view === 'table') {
@@ -227,11 +237,14 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.text())
         .then(html => {
-            const littersContainer = document.getElementById('littersContainer');
             littersContainer.innerHTML = html;
 
+            // Reinitialize view toggle after content update
+            initializeViewToggle();
+
             // Reapply view preference
-            setView(localStorage.getItem('litterListView') || 'card');
+            const currentView = localStorage.getItem('litterListView') || 'card';
+            setView(currentView);
 
             history.pushState(null, '', `${filterForm.action}?${searchParams.toString()}`);
         });
