@@ -129,6 +129,39 @@
         --tw-scale-y: 1.05;
         transform: var(--tw-transform);
     }
+    .featured-litters-carousel {
+        position: relative;
+        height: 600px; /* Adjust as needed */
+        overflow: hidden;
+    }
+
+    .carousel-container {
+        height: 100%;
+    }
+
+    .carousel-track {
+        position: relative;
+        height: 100%;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .carousel-slide {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .carousel-button {
+        z-index: 1;
+        cursor: pointer;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .carousel-button.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
 </style>
 {% endblock %}
 
@@ -138,69 +171,81 @@
         <h1 class="text-4xl font-bold mb-8 text-center text-gray-800">Puppy Litters Marketplace</h1>
 
         <!-- Featured Litters Section -->
-{% if featured_litters %}
-<div class="mb-12 bg-gradient-to-r from-blue-500 to-purple-600 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
-        <h2 class="text-3xl font-extrabold text-white text-center mb-8">
-            <i class="fas fa-star text-yellow-400 mr-2"></i>Spotlight Litters
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {% for litter in featured_litters %}
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-500 hover:scale-105">
-                <div class="relative">
-                    {% if litter.images %}
-                    <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
-                         alt="{{ litter.name }}" 
-                         class="w-full h-48 object-cover">
-                    {% else %}
-                    <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
-                        <i class="fas fa-paw text-gray-400 text-4xl"></i>
+        {% if featured_litters %}
+        <div class="mb-12 bg-gradient-to-r from-blue-500 to-purple-600 py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl font-extrabold text-white text-center mb-8">
+                    <i class="fas fa-star text-yellow-400 mr-2"></i>Spotlight Litters
+                </h2>
+                <div class="featured-litters-carousel relative">
+                    <div class="carousel-container overflow-hidden">
+                        <div class="carousel-track flex transition-transform duration-300 ease-in-out">
+                            {% for litter in featured_litters %}
+                            <div class="carousel-slide flex-shrink-0 w-full">
+                                <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-500 hover:scale-105 mx-auto max-w-2xl">
+                                    <div class="relative">
+                                        {% if litter.images %}
+                                        <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
+                                             alt="{{ litter.name }}" 
+                                             class="w-full h-64 object-cover">
+                                        {% else %}
+                                        <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
+                                            <i class="fas fa-paw text-gray-400 text-4xl"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div class="absolute top-0 right-0 bg-yellow-400 text-white px-3 py-1 m-2 rounded-bl-lg text-sm font-bold">
+                                            Spotlight
+                                        </div>
+                                    </div>
+                                    <div class="p-6">
+                                        <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ litter.name }}</h3>
+                                        <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2 text-blue-500"></i>{{ litter.father.breed }}</p>
+                                        <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2 text-blue-500"></i>Born: {{ litter.date_of_birth.strftime('%b %d, %Y') }}</p>
+                                        <p class="text-gray-600 mb-4"><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>{{ litter.user.location or 'Location not specified' }}</p>
+                                        {% if litter.puppies %}
+                                            {% set min_price = namespace(value=None) %}
+                                            {% set max_price = namespace(value=None) %}
+                                            {% for puppy in litter.puppies %}
+                                                {% if puppy.price and puppy.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
+                                                    {% if min_price.value is none or puppy.price < min_price.value %}
+                                                        {% set min_price.value = puppy.price %}
+                                                    {% endif %}
+                                                    {% if max_price.value is none or puppy.price > max_price.value %}
+                                                        {% set max_price.value = puppy.price %}
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% if min_price.value is not none %}
+                                                <p class="text-green-600 font-semibold mb-4">
+                                                    <i class="fas fa-tag mr-2"></i>
+                                                    {% if min_price.value == max_price.value %}
+                                                        ${{ "%.2f"|format(min_price.value) }}
+                                                    {% else %}
+                                                        ${{ "%.2f"|format(min_price.value) }} - ${{ "%.2f"|format(max_price.value) }}
+                                                    {% endif %}
+                                                </p>
+                                            {% endif %}
+                                        {% endif %}
+                                        <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" 
+                                           class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                                            View Litter
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                    {% endif %}
-                    <div class="absolute top-0 right-0 bg-yellow-400 text-white px-3 py-1 m-2 rounded-bl-lg text-sm font-bold">
-                        Spotlight
-                    </div>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ litter.name }}</h3>
-                    <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2 text-blue-500"></i>{{ litter.father.breed }}</p>
-                    <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2 text-blue-500"></i>Born: {{ litter.date_of_birth.strftime('%b %d, %Y') }}</p>
-                    <p class="text-gray-600 mb-4"><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>{{ litter.user.location or 'Location not specified' }}</p>
-                    {% if litter.puppies %}
-                        {% set min_price = namespace(value=None) %}
-                        {% set max_price = namespace(value=None) %}
-                        {% for puppy in litter.puppies %}
-                            {% if puppy.price and puppy.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
-                                {% if min_price.value is none or puppy.price < min_price.value %}
-                                    {% set min_price.value = puppy.price %}
-                                {% endif %}
-                                {% if max_price.value is none or puppy.price > max_price.value %}
-                                    {% set max_price.value = puppy.price %}
-                                {% endif %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if min_price.value is not none %}
-                            <p class="text-green-600 font-semibold mb-4">
-                                <i class="fas fa-tag mr-2"></i>
-                                {% if min_price.value == max_price.value %}
-                                    ${{ "%.2f"|format(min_price.value) }}
-                                {% else %}
-                                    ${{ "%.2f"|format(min_price.value) }} - ${{ "%.2f"|format(max_price.value) }}
-                                {% endif %}
-                            </p>
-                        {% endif %}
-                    {% endif %}
-                    <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" 
-                       class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
-                        View Litter
-                    </a>
+                    <button class="carousel-button prev absolute top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-full">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-button next absolute top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-full">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
-            {% endfor %}
         </div>
-    </div>
-</div>
-{% endif %}
+        {% endif %}
 
         <!-- Filters Section -->
         <div class="mb-8">
@@ -584,4 +629,63 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = document.querySelector('.featured-litters-carousel');
+            const track = carousel.querySelector('.carousel-track');
+            const slides = Array.from(track.children);
+            const nextButton = carousel.querySelector('.carousel-button.next');
+            const prevButton = carousel.querySelector('.carousel-button.prev');
+            const slideWidth = slides[0].getBoundingClientRect().width;
+        
+            // Arrange the slides next to one another
+            const setSlidePosition = (slide, index) => {
+                slide.style.left = slideWidth * index + 'px';
+            };
+            slides.forEach(setSlidePosition);
+        
+            const moveToSlide = (track, currentSlide, targetSlide) => {
+                track.style.transform = 'translateX(-' + targetSlide.style.left + ')';
+                currentSlide.classList.remove('current-slide');
+                targetSlide.classList.add('current-slide');
+            };
+        
+            const hideShowArrows = (slides, prevButton, nextButton, targetIndex) => {
+                if (targetIndex === 0) {
+                    prevButton.classList.add('hidden');
+                    nextButton.classList.remove('hidden');
+                } else if (targetIndex === slides.length - 1) {
+                    prevButton.classList.remove('hidden');
+                    nextButton.classList.add('hidden');
+                } else {
+                    prevButton.classList.remove('hidden');
+                    nextButton.classList.remove('hidden');
+                }
+            };
+        
+            // When I click left, move slides to the left
+            prevButton.addEventListener('click', e => {
+                const currentSlide = track.querySelector('.current-slide');
+                const prevSlide = currentSlide.previousElementSibling;
+                const prevIndex = slides.findIndex(slide => slide === prevSlide);
+        
+                moveToSlide(track, currentSlide, prevSlide);
+                hideShowArrows(slides, prevButton, nextButton, prevIndex);
+            });
+        
+            // When I click right, move slides to the right
+            nextButton.addEventListener('click', e => {
+                const currentSlide = track.querySelector('.current-slide');
+                const nextSlide = currentSlide.nextElementSibling;
+                const nextIndex = slides.findIndex(slide => slide === nextSlide);
+        
+                moveToSlide(track, currentSlide, nextSlide);
+                hideShowArrows(slides, prevButton, nextButton, nextIndex);
+            });
+        
+            // Set initial state
+            slides[0].classList.add('current-slide');
+            hideShowArrows(slides, prevButton, nextButton, 0);
+        });
+        </script>
 {% endblock %}
