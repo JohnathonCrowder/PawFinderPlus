@@ -1,12 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, request
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, request, jsonify
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from app.models import Dog, DogImage, DogStatus, Litter
 from app.extensions import db
 from app.utils import allowed_file, load_json_data
-from datetime import datetime
 from io import BytesIO
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 bp = Blueprint('dog', __name__)
 
@@ -52,14 +51,23 @@ def dog_management():
     breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
     breeds = [breed[0] for breed in breeds]
 
-    return render_template('dog_management.html', 
-                           dogs=dogs, 
-                           breeds=breeds, 
-                           current_breed=breed,
-                           current_age=age,
-                           current_status=status,
-                           search=search,
-                           DogStatus=DogStatus)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # If it's an AJAX request, return only the dog cards/table HTML
+        return render_template('partials/dog_list.html', 
+                               dogs=dogs, 
+                               DogStatus=DogStatus,
+                               date=date)
+    else:
+        # For a full page load, return the entire page
+        return render_template('dog_management.html', 
+                               dogs=dogs, 
+                               breeds=breeds, 
+                               current_breed=breed,
+                               current_age=age,
+                               current_status=status,
+                               search=search,
+                               DogStatus=DogStatus,
+                               date=date)
 
 @bp.route('/add_dog', methods=['GET', 'POST'])
 @login_required
