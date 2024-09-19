@@ -29,13 +29,14 @@ def dog_management():
     if age:
         today = datetime.utcnow().date()
         if age == 'puppy':
-            date_limit = today - timedelta(months=12)
+            date_limit = today - timedelta(days=365)  # 1 year
             query = query.filter(Dog.date_of_birth >= date_limit)
         elif age == 'adult':
-            date_limit = today - timedelta(years=7)
-            query = query.filter(Dog.date_of_birth.between(date_limit, today - timedelta(months=12)))
+            adult_start = today - timedelta(days=365*7)  # 7 years
+            adult_end = today - timedelta(days=365)  # 1 year
+            query = query.filter(Dog.date_of_birth.between(adult_start, adult_end))
         elif age == 'senior':
-            date_limit = today - timedelta(years=7)
+            date_limit = today - timedelta(days=365*7)  # 7 years
             query = query.filter(Dog.date_of_birth <= date_limit)
 
     if status:

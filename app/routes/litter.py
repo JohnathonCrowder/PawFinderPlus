@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from app.models import Litter, LitterImage, Dog, DogStatus
 from app.extensions import db
 from app.utils import allowed_file
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from sqlalchemy import or_, and_, func
 
@@ -13,8 +13,52 @@ bp = Blueprint('litter', __name__)
 @bp.route('/litter_management')
 @login_required
 def litter_management():
-    litters = Litter.query.filter_by(user_id=current_user.id).all()
-    return render_template('litter_management.html', litters=litters)
+    # Get filter parameters from request
+    breed = request.args.get('breed')
+    age = request.args.get('age')
+    search = request.args.get('search', '')
+
+    # Start with base query
+    query = Litter.query.filter_by(user_id=current_user.id)
+
+    # Apply filters
+    if breed:
+        query = query.filter(or_(Litter.father.has(breed=breed), Litter.mother.has(breed=breed)))
+    
+    if age:
+        today = datetime.utcnow().date()
+        if age == '0-8 weeks':
+            date_limit = today - timedelta(weeks=8)
+            query = query.filter(Litter.date_of_birth >= date_limit)
+        elif age == '8-16 weeks':
+            start_date = today - timedelta(weeks=16)
+            end_date = today - timedelta(weeks=8)
+            query = query.filter(Litter.date_of_birth.between(start_date, end_date))
+        elif age == '16+ weeks':
+            date_limit = today - timedelta(weeks=16)
+            query = query.filter(Litter.date_of_birth <= date_limit)
+
+    if search:
+        query = query.filter(or_(
+            Litter.name.ilike(f'%{search}%'),
+            Litter.father.has(Dog.name.ilike(f'%{search}%')),
+            Litter.mother.has(Dog.name.ilike(f'%{search}%'))
+        ))
+
+    # Execute query
+    litters = query.all()
+
+    # Get unique breeds for filter options
+    breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
+    breeds = [breed[0] for breed in breeds]
+
+    return render_template('litter_management.html', 
+                           litters=litters, 
+                           breeds=breeds, 
+                           current_breed=breed,
+                           current_age=age,
+                           search=search)
+
 
 @bp.route('/add_litter', methods=['GET', 'POST'])
 @login_required
