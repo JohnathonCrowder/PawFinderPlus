@@ -48,119 +48,64 @@
     .noUi-handle:before, .noUi-handle:after {
         display: none;
     }
-    .featured-litters-slider {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-}
-
-.featured-litter-card {
-    flex: 0 0 auto;
-    width: 100%;
-    scroll-snap-align: start;
-    margin-right: 1rem;
-}
-
-@media (min-width: 640px) {
-    .featured-litter-card {
-        width: calc(50% - 0.5rem);
-    }
-}
-
-@media (min-width: 1024px) {
-    .featured-litter-card {
-        width: calc(33.333% - 0.667rem);
-    }
-}
-
-.featured-litters-slider {
-        display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .featured-litter-card {
-        flex: 0 0 auto;
-        width: 100%;
-        scroll-snap-align: start;
-        margin-right: 1rem;
-    }
-
-    @media (min-width: 640px) {
-        .featured-litter-card {
-            width: calc(50% - 0.5rem);
-        }
-    }
-
-    @media (min-width: 1024px) {
-        .featured-litter-card {
-            width: calc(33.333% - 0.667rem);
-        }
-    }
-
-    .featured-litters-slider::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-    }
-
-    .featured-litters-slider::-webkit-scrollbar-thumb {
-        background: #4a5568;
-        border-radius: 10px;
-    }
-
-    .featured-litters-slider::-webkit-scrollbar-track {
-        background: #cbd5e0;
-        border-radius: 10px;
-    }
-
-    .from-blue-500 {
-        --tw-gradient-from: #3b82f6;
-        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(59, 130, 246, 0));
-    }
-    .to-purple-600 {
-        --tw-gradient-to: #7c3aed;
-    }
-    .hover\:scale-105:hover {
-        --tw-scale-x: 1.05;
-        --tw-scale-y: 1.05;
-        transform: var(--tw-transform);
+    .featured-litters-section {
+        position: relative;
     }
     .featured-litters-carousel {
         position: relative;
-        height: 600px; /* Adjust as needed */
         overflow: hidden;
     }
-
     .carousel-container {
-        height: 100%;
+        overflow: hidden;
     }
-
     .carousel-track {
-        position: relative;
-        height: 100%;
-        transition: transform 0.3s ease-in-out;
+        display: flex;
+        transition: transform 0.5s ease-in-out;
     }
-
     .carousel-slide {
-        position: absolute;
-        top: 0;
-        width: 100%;
-        height: 100%;
+        flex: 0 0 100%;
     }
-
     .carousel-button {
-        z-index: 1;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
         cursor: pointer;
-        transition: opacity 0.3s ease-in-out;
+        transition: all 0.3s ease-in-out;
     }
-
+    .carousel-button:hover {
+        background-color: rgba(255, 255, 255, 0.9) !important;
+    }
     .carousel-button.hidden {
         opacity: 0;
         pointer-events: none;
+    }
+    .carousel-button.prev {
+        left: 1rem;
+    }
+    .carousel-button.next {
+        right: 1rem;
+    }
+    .featured-litters-carousel .carousel-slide > div {
+        display: flex;
+        height: 600px;
+    }
+    .featured-litters-carousel .carousel-slide > div > div {
+        flex: 1;
+    }
+    .featured-litters-carousel .carousel-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    @media (max-width: 768px) {
+        .featured-litters-carousel .carousel-slide > div {
+            flex-direction: column;
+            height: auto;
+        }
+        .featured-litters-carousel .carousel-slide img {
+            height: 300px;
+        }
     }
 </style>
 {% endblock %}
@@ -168,84 +113,121 @@
 {% block content %}
 <div class="bg-gray-100 min-h-screen py-12">
     <div class="container mx-auto px-4">
-        <h1 class="text-4xl font-bold mb-8 text-center text-gray-800">Puppy Litters Marketplace</h1>
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 py-16 px-4 sm:px-6 lg:px-8 mb-12">
+            <div class="max-w-7xl mx-auto text-center">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
+                    <span class="inline-block">Puppy Litters</span>
+                    <span class="inline-block">Marketplace</span>
+                </h1>
+                <div class="w-24 h-1 bg-yellow-400 mx-auto mb-6 rounded-full animate-pulse"></div>
+                <p class="text-xl sm:text-2xl text-blue-100 max-w-3xl mx-auto">
+                    Discover your perfect furry companion from our curated selection of premium puppy litters
+                </p>
+            </div>
+        </div>
 
         <!-- Featured Litters Section -->
         {% if featured_litters %}
-        <div class="mb-12 bg-gradient-to-r from-blue-500 to-purple-600 py-12 px-4 sm:px-6 lg:px-8">
-            <div class="max-w-7xl mx-auto">
-                <h2 class="text-3xl font-extrabold text-white text-center mb-8">
-                    <i class="fas fa-star text-yellow-400 mr-2"></i>Spotlight Litters
-                </h2>
-                <div class="featured-litters-carousel relative">
-                    <div class="carousel-container overflow-hidden">
-                        <div class="carousel-track flex transition-transform duration-300 ease-in-out">
-                            {% for litter in featured_litters %}
-                            <div class="carousel-slide flex-shrink-0 w-full">
-                                <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-500 hover:scale-105 mx-auto max-w-2xl">
-                                    <div class="relative">
-                                        {% if litter.images %}
-                                        <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
-                                             alt="{{ litter.name }}" 
-                                             class="w-full h-64 object-cover">
-                                        {% else %}
-                                        <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
-                                            <i class="fas fa-paw text-gray-400 text-4xl"></i>
+        <div class="featured-litters-section bg-gradient-to-r from-blue-500 to-purple-600 py-16 px-4 sm:px-6 lg:px-8 overflow-hidden mb-12">
+    <div class="max-w-7xl mx-auto">
+        <h2 class="text-4xl font-extrabold text-white text-center mb-12">
+            <i class="fas fa-star text-yellow-400 mr-2"></i>Spotlight Litters
+        </h2>
+        <div class="featured-litters-carousel relative">
+            <div class="carousel-container">
+                <div class="carousel-track flex transition-transform duration-500 ease-in-out">
+                    {% for litter in featured_litters %}
+                    <div class="carousel-slide flex-shrink-0 w-full">
+                        <div class="bg-white rounded-lg shadow-2xl overflow-hidden">
+                            <div class="md:flex">
+                                <div class="md:w-1/2 h-full">
+                                    {% if litter.images %}
+                                    <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
+                                         alt="{{ litter.name }}" 
+                                         class="w-full h-full object-cover">
+                                    {% else %}
+                                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                        <i class="fas fa-paw text-gray-400 text-6xl"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="md:w-1/2 p-8">
+                                    <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">Featured Litter</div>
+                                    <h3 class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">{{ litter.name }}</h3>
+                                    <p class="mt-4 text-xl text-gray-500">{{ litter.father.breed }} Puppies</p>
+                                    <div class="mt-6 flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-calendar-alt text-2xl text-indigo-500"></i>
                                         </div>
-                                        {% endif %}
-                                        <div class="absolute top-0 right-0 bg-yellow-400 text-white px-3 py-1 m-2 rounded-bl-lg text-sm font-bold">
-                                            Spotlight
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Born</p>
+                                            <p class="text-lg text-gray-500">{{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
                                         </div>
                                     </div>
-                                    <div class="p-6">
-                                        <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ litter.name }}</h3>
-                                        <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2 text-blue-500"></i>{{ litter.father.breed }}</p>
-                                        <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2 text-blue-500"></i>Born: {{ litter.date_of_birth.strftime('%b %d, %Y') }}</p>
-                                        <p class="text-gray-600 mb-4"><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>{{ litter.user.location or 'Location not specified' }}</p>
-                                        {% if litter.puppies %}
-                                            {% set min_price = namespace(value=None) %}
-                                            {% set max_price = namespace(value=None) %}
-                                            {% for puppy in litter.puppies %}
-                                                {% if puppy.price and puppy.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
-                                                    {% if min_price.value is none or puppy.price < min_price.value %}
-                                                        {% set min_price.value = puppy.price %}
-                                                    {% endif %}
-                                                    {% if max_price.value is none or puppy.price > max_price.value %}
-                                                        {% set max_price.value = puppy.price %}
-                                                    {% endif %}
+                                    <div class="mt-6 flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-map-marker-alt text-2xl text-indigo-500"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Location</p>
+                                            <p class="text-lg text-gray-500">{{ litter.user.location or 'Not specified' }}</p>
+                                        </div>
+                                    </div>
+                                    {% if litter.puppies %}
+                                        {% set min_price = namespace(value=None) %}
+                                        {% set max_price = namespace(value=None) %}
+                                        {% for puppy in litter.puppies %}
+                                            {% if puppy.price and puppy.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
+                                                {% if min_price.value is none or puppy.price < min_price.value %}
+                                                    {% set min_price.value = puppy.price %}
                                                 {% endif %}
-                                            {% endfor %}
-                                            {% if min_price.value is not none %}
-                                                <p class="text-green-600 font-semibold mb-4">
-                                                    <i class="fas fa-tag mr-2"></i>
-                                                    {% if min_price.value == max_price.value %}
-                                                        ${{ "%.2f"|format(min_price.value) }}
-                                                    {% else %}
-                                                        ${{ "%.2f"|format(min_price.value) }} - ${{ "%.2f"|format(max_price.value) }}
-                                                    {% endif %}
-                                                </p>
+                                                {% if max_price.value is none or puppy.price > max_price.value %}
+                                                    {% set max_price.value = puppy.price %}
+                                                {% endif %}
                                             {% endif %}
+                                        {% endfor %}
+                                        {% if min_price.value is not none %}
+                                            <div class="mt-6 flex items-center">
+                                                <div class="flex-shrink-0">
+                                                    <i class="fas fa-tag text-2xl text-green-500"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-900">Price Range</p>
+                                                    <p class="text-lg font-semibold text-green-600">
+                                                        {% if min_price.value == max_price.value %}
+                                                            ${{ "%.2f"|format(min_price.value) }}
+                                                        {% else %}
+                                                            ${{ "%.2f"|format(min_price.value) }} - ${{ "%.2f"|format(max_price.value) }}
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         {% endif %}
+                                    {% endif %}
+                                    <div class="mt-8">
                                         <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" 
-                                           class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
-                                            View Litter
+                                           class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                                            View Litter Details
+                                            <i class="fas fa-arrow-right ml-2"></i>
                                         </a>
                                     </div>
                                 </div>
                             </div>
-                            {% endfor %}
                         </div>
                     </div>
-                    <button class="carousel-button prev absolute top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-full">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="carousel-button next absolute top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-full">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
+                    {% endfor %}
                 </div>
             </div>
+            <button class="carousel-button prev absolute top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-full transition duration-300">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="carousel-button next absolute top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-full transition duration-300">
+                <i class="fas fa-chevron-right"></i>
+            </button>
         </div>
-        {% endif %}
+    </div>
+</div>
+{% endif %}
 
         <!-- Filters Section -->
         <div class="mb-8">
@@ -463,229 +445,210 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleFilters = document.getElementById('toggleFilters');
-    const filterSection = document.getElementById('filterSection');
-    const toggleIcon = document.getElementById('toggleIcon');
-
-    toggleFilters.addEventListener('click', function() {
-        filterSection.classList.toggle('hidden');
-        toggleIcon.classList.toggle('rotate-180');
-    });
-
-    // Price range slider
-    var priceRange = document.getElementById('priceRange');
-    var minPrice = {{ min_price|default(0) }};
-    var maxPrice = {{ max_price|default(10000) }};
-
-    noUiSlider.create(priceRange, {
-        start: [minPrice, maxPrice],
-        connect: true,
-        range: {
-            'min': minPrice,
-            'max': maxPrice
-        },
-        format: {
-            to: function (value) {
-                return Math.round(value);
-            },
-            from: function (value) {
-                return Number(value);
-            }
-        }
-    });
-
-    var priceMin = document.getElementById('priceMin');
-    var priceMax = document.getElementById('priceMax');
-    var minPriceInput = document.getElementById('minPrice');
-    var maxPriceInput = document.getElementById('maxPrice');
-
-    priceRange.noUiSlider.on('update', function (values, handle) {
-        var value = values[handle];
-        if (handle) {
-            priceMax.textContent = '$' + value;
-            maxPriceInput.value = value;
-        } else {
-            priceMin.textContent = '$' + value;
-            minPriceInput.value = value;
-        }
-    });
-
-    // Clear filters
-    document.getElementById('clearFilters').addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Reset form fields
-        document.getElementById('filterForm').reset();
-        
-        // Reset price range slider
-        priceRange.noUiSlider.set([minPrice, maxPrice]);
-        
-        // Clear hidden price inputs
-        minPriceInput.value = '';
-        maxPriceInput.value = '';
-        
-        // Trigger form submission to reload results without filters
-        submitForm();
-
-        // Keep the filter section open
-        filterSection.classList.remove('hidden');
-        toggleIcon.classList.add('rotate-180');
-    });
-
-    // AJAX filter update
-    document.getElementById('filterForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        submitForm();
-
-        // Close the filter section
-        filterSection.classList.add('hidden');
-        toggleIcon.classList.remove('rotate-180');
-    });
-
-    function submitForm() {
-        var formData = new FormData(document.getElementById('filterForm'));
-        var searchParams = new URLSearchParams(formData);
-
-        fetch('{{ url_for('litter.public_litters') }}?' + searchParams.toString(), {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            var parser = new DOMParser();
-            var doc = parser.parseFromString(html, 'text/html');
-            var newLitters = doc.getElementById('littersContainer');
-            var currentLitters = document.getElementById('littersContainer');
-            currentLitters.innerHTML = newLitters.innerHTML;
-
-            var noResults = doc.getElementById('noResults');
-            var currentNoResults = document.getElementById('noResults');
-            if (noResults) {
-                if (!currentNoResults) {
-                    currentLitters.insertAdjacentHTML('afterend', noResults.outerHTML);
-                }
-            } else if (currentNoResults) {
-                currentNoResults.remove();
-            }
-
-            // Update pagination if it exists
-            var newPagination = doc.querySelector('.pagination');
-            var currentPagination = document.querySelector('.pagination');
-            if (newPagination && currentPagination) {
-                currentPagination.innerHTML = newPagination.innerHTML;
-            }
-
-            history.pushState(null, '', '{{ url_for('litter.public_litters') }}?' + searchParams.toString());
-        });
-    }
-});
-</script>
-<script>
     document.addEventListener('DOMContentLoaded', function() {
-        const slider = document.querySelector('.featured-litters-slider');
-        if (slider) {
-            const cards = slider.querySelectorAll('.featured-litter-card');
+        // Featured Litters Carousel
+        const carousel = document.querySelector('.featured-litters-carousel');
+        const track = carousel.querySelector('.carousel-track');
+        const slides = Array.from(track.children);
+        const nextButton = carousel.querySelector('.carousel-button.next');
+        const prevButton = carousel.querySelector('.carousel-button.prev');
+    
+        let currentIndex = 0;
+        let intervalId;
+        const autoScrollInterval = 5000; // Time between slides in milliseconds
+    
+        const updateCarousel = () => {
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
             
-            if (cards.length > 0) {
-                const cardWidth = cards[0].offsetWidth;
-                const sliderWidth = slider.offsetWidth;
-                const maxScroll = slider.scrollWidth - sliderWidth;
-                
-                const scrollAmount = cardWidth + 16; // 16px for margin
-                
-                // Create and append navigation buttons
-                const leftButton = document.createElement('button');
-                leftButton.innerHTML = '&lt;';
-                leftButton.className = 'absolute left-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-r';
-                
-                const rightButton = document.createElement('button');
-                rightButton.innerHTML = '&gt;';
-                rightButton.className = 'absolute right-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-blue-800 font-bold py-2 px-4 rounded-l';
-                
-                slider.parentNode.appendChild(leftButton);
-                slider.parentNode.appendChild(rightButton);
-                
-                leftButton.addEventListener('click', () => {
-                    slider.scrollLeft -= scrollAmount;
-                });
-                
-                rightButton.addEventListener('click', () => {
-                    slider.scrollLeft += scrollAmount;
-                });
-                
-                // Hide/show buttons based on scroll position
-                slider.addEventListener('scroll', () => {
-                    leftButton.style.display = slider.scrollLeft > 0 ? 'block' : 'none';
-                    rightButton.style.display = slider.scrollLeft < maxScroll ? 'block' : 'none';
-                });
-                
-                // Initial button visibility
-                leftButton.style.display = 'none';
-                rightButton.style.display = cards.length > 3 ? 'block' : 'none';
+            // Update button visibility
+            prevButton.classList.toggle('hidden', currentIndex === 0);
+            nextButton.classList.toggle('hidden', currentIndex === slides.length - 1);
+        };
+    
+        const nextSlide = () => {
+            if (currentIndex < slides.length - 1) {
+                currentIndex++;
+            } else {
+                currentIndex = 0; // Loop back to the first slide
             }
+            updateCarousel();
+        };
+    
+        const prevSlide = () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+            } else {
+                currentIndex = slides.length - 1; // Loop to the last slide
+            }
+            updateCarousel();
+        };
+    
+        nextButton.addEventListener('click', () => {
+            nextSlide();
+            resetInterval();
+        });
+    
+        prevButton.addEventListener('click', () => {
+            prevSlide();
+            resetInterval();
+        });
+    
+        // Auto-scroll function
+        const startInterval = () => {
+            intervalId = setInterval(nextSlide, autoScrollInterval);
+        };
+    
+        // Reset interval function
+        const resetInterval = () => {
+            clearInterval(intervalId);
+            startInterval();
+        };
+    
+        // Pause on hover
+        carousel.addEventListener('mouseenter', () => {
+            clearInterval(intervalId);
+        });
+    
+        carousel.addEventListener('mouseleave', startInterval);
+    
+        // Initialize carousel
+        updateCarousel();
+        startInterval();
+    
+        // Filter toggle functionality
+        const toggleFilters = document.getElementById('toggleFilters');
+        const filterSection = document.getElementById('filterSection');
+        const toggleIcon = document.getElementById('toggleIcon');
+    
+        toggleFilters.addEventListener('click', function() {
+            filterSection.classList.toggle('hidden');
+            toggleIcon.classList.toggle('rotate-180');
+        });
+    
+        // Price range slider
+        var priceRange = document.getElementById('priceRange');
+        var minPrice = {{ min_price|default(0) }};
+        var maxPrice = {{ max_price|default(10000) }};
+    
+        noUiSlider.create(priceRange, {
+            start: [minPrice, maxPrice],
+            connect: true,
+            range: {
+                'min': minPrice,
+                'max': maxPrice
+            },
+            format: {
+                to: function (value) {
+                    return Math.round(value);
+                },
+                from: function (value) {
+                    return Number(value);
+                }
+            }
+        });
+    
+        var priceMin = document.getElementById('priceMin');
+        var priceMax = document.getElementById('priceMax');
+        var minPriceInput = document.getElementById('minPrice');
+        var maxPriceInput = document.getElementById('maxPrice');
+    
+        priceRange.noUiSlider.on('update', function (values, handle) {
+            var value = values[handle];
+            if (handle) {
+                priceMax.textContent = '$' + value;
+                maxPriceInput.value = value;
+            } else {
+                priceMin.textContent = '$' + value;
+                minPriceInput.value = value;
+            }
+        });
+    
+        // Clear filters
+        document.getElementById('clearFilters').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Reset form fields
+            document.getElementById('filterForm').reset();
+            
+            // Reset price range slider
+            priceRange.noUiSlider.set([minPrice, maxPrice]);
+            
+            // Clear hidden price inputs
+            minPriceInput.value = '';
+            maxPriceInput.value = '';
+            
+            // Trigger form submission to reload results without filters
+            submitForm();
+        });
+    
+        // AJAX filter update
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitForm();
+        });
+    
+        function submitForm() {
+            var formData = new FormData(document.getElementById('filterForm'));
+            var searchParams = new URLSearchParams(formData);
+    
+            fetch('{{ url_for('litter.public_litters') }}?' + searchParams.toString(), {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+                var newLitters = doc.getElementById('littersContainer');
+                var currentLitters = document.getElementById('littersContainer');
+                currentLitters.innerHTML = newLitters.innerHTML;
+    
+                var noResults = doc.getElementById('noResults');
+                var currentNoResults = document.getElementById('noResults');
+                if (noResults) {
+                    if (!currentNoResults) {
+                        currentLitters.insertAdjacentHTML('afterend', noResults.outerHTML);
+                    }
+                } else if (currentNoResults) {
+                    currentNoResults.remove();
+                }
+    
+                // Update pagination if it exists
+                var newPagination = doc.querySelector('.pagination');
+                var currentPagination = document.querySelector('.pagination');
+                if (newPagination && currentPagination) {
+                    currentPagination.innerHTML = newPagination.innerHTML;
+                }
+    
+                history.pushState(null, '', '{{ url_for('litter.public_litters') }}?' + searchParams.toString());
+            });
         }
+    
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    
+        // Add event listener for search input with debounce
+        const searchInput = document.getElementById('search');
+        const debouncedSubmit = debounce(() => submitForm(), 300);
+        searchInput.addEventListener('input', debouncedSubmit);
+    
+        // Auto-submit form on select changes
+        const selectInputs = document.querySelectorAll('#filterForm select');
+        selectInputs.forEach(select => {
+            select.addEventListener('change', submitForm);
+        });
     });
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const carousel = document.querySelector('.featured-litters-carousel');
-            const track = carousel.querySelector('.carousel-track');
-            const slides = Array.from(track.children);
-            const nextButton = carousel.querySelector('.carousel-button.next');
-            const prevButton = carousel.querySelector('.carousel-button.prev');
-            const slideWidth = slides[0].getBoundingClientRect().width;
-        
-            // Arrange the slides next to one another
-            const setSlidePosition = (slide, index) => {
-                slide.style.left = slideWidth * index + 'px';
-            };
-            slides.forEach(setSlidePosition);
-        
-            const moveToSlide = (track, currentSlide, targetSlide) => {
-                track.style.transform = 'translateX(-' + targetSlide.style.left + ')';
-                currentSlide.classList.remove('current-slide');
-                targetSlide.classList.add('current-slide');
-            };
-        
-            const hideShowArrows = (slides, prevButton, nextButton, targetIndex) => {
-                if (targetIndex === 0) {
-                    prevButton.classList.add('hidden');
-                    nextButton.classList.remove('hidden');
-                } else if (targetIndex === slides.length - 1) {
-                    prevButton.classList.remove('hidden');
-                    nextButton.classList.add('hidden');
-                } else {
-                    prevButton.classList.remove('hidden');
-                    nextButton.classList.remove('hidden');
-                }
-            };
-        
-            // When I click left, move slides to the left
-            prevButton.addEventListener('click', e => {
-                const currentSlide = track.querySelector('.current-slide');
-                const prevSlide = currentSlide.previousElementSibling;
-                const prevIndex = slides.findIndex(slide => slide === prevSlide);
-        
-                moveToSlide(track, currentSlide, prevSlide);
-                hideShowArrows(slides, prevButton, nextButton, prevIndex);
-            });
-        
-            // When I click right, move slides to the right
-            nextButton.addEventListener('click', e => {
-                const currentSlide = track.querySelector('.current-slide');
-                const nextSlide = currentSlide.nextElementSibling;
-                const nextIndex = slides.findIndex(slide => slide === nextSlide);
-        
-                moveToSlide(track, currentSlide, nextSlide);
-                hideShowArrows(slides, prevButton, nextButton, nextIndex);
-            });
-        
-            // Set initial state
-            slides[0].classList.add('current-slide');
-            hideShowArrows(slides, prevButton, nextButton, 0);
-        });
-        </script>
 {% endblock %}
