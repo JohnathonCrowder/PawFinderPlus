@@ -238,14 +238,13 @@
     const cancelEdit = document.getElementById('cancelEdit');
     const inputs = profileForm.querySelectorAll('input:not([type="hidden"]), textarea');
     const geocoderContainer = document.getElementById('geocoder');
+    const addressDisplay = document.getElementById('address_display');
     const profilePictureInput = document.getElementById('profile_picture');
     const profilePictureLabel = document.querySelector('label[for="profile_picture"]');
     const removePictureButton = document.querySelector('button[form="remove_picture_form"]');
     let geocoder;
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiZGVmdGVybGFtYjYzIiwiYSI6ImNtMTg0b29kNTBzMnEyanB3YTl4bjl4eGQifQ.tjgnZiJbwQxeccVfe3oCKw';
-
-    const addressDisplay = document.getElementById('address_display');
 
     editProfile.addEventListener('click', () => {
         inputs.forEach(input => {
@@ -260,6 +259,14 @@
         profilePictureLabel.classList.remove('hidden');
         if (removePictureButton) removePictureButton.classList.remove('hidden');
         initializeGeocoder();
+        
+        // Focus on the geocoder input without triggering a search
+        setTimeout(() => {
+            const geocoderInput = document.querySelector('.mapboxgl-ctrl-geocoder--input');
+            if (geocoderInput) {
+                geocoderInput.focus();
+            }
+        }, 0);
     });
 
     cancelEdit.addEventListener('click', () => {
@@ -283,6 +290,9 @@
                 accessToken: mapboxgl.accessToken,
                 types: 'address',
                 placeholder: 'Search for an address',
+                minLength: 1,
+                autocomplete: false,
+                flyTo: false,
             });
 
             geocoder.addTo('#geocoder');
@@ -292,7 +302,7 @@
                 document.getElementById('address').value = place_name;
                 document.getElementById('longitude').value = center[0];
                 document.getElementById('latitude').value = center[1];
-                addressDisplay.value = place_name;  // Update the display input as well
+                addressDisplay.value = place_name;
 
                 // Update other address fields
                 const context = e.result.context || [];
@@ -313,9 +323,24 @@
             if ("{{ user_data.address }}") {
                 geocoder.setInput("{{ user_data.address }}");
             }
+
+            // Add event listener to clear results when input is cleared
+            geocoder.on('clear', function() {
+                geocoder.lastSelected = null;
+            });
+
+            // Prevent the geocoder from automatically searching on focus
+            const geocoderInput = document.querySelector('.mapboxgl-ctrl-geocoder--input');
+            if (geocoderInput) {
+                geocoderInput.addEventListener('focus', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, true);
+            }
         }
     }
-    // Modify the form submission check
+
+    // Prevent form submission if a valid place hasn't been selected
     profileForm.addEventListener('submit', function(e) {
         var geocoderInput = document.querySelector('.mapboxgl-ctrl-geocoder--input');
         if (geocoderInput && geocoder && (!geocoder.lastSelected || geocoderInput.value !== geocoder.lastSelected.place_name)) {
