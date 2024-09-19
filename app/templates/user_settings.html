@@ -340,13 +340,24 @@
         }
     }
 
-    // Prevent form submission if a valid place hasn't been selected
-    profileForm.addEventListener('submit', function(e) {
-        var geocoderInput = document.querySelector('.mapboxgl-ctrl-geocoder--input');
-        if (geocoderInput && geocoder && (!geocoder.lastSelected || geocoderInput.value !== geocoder.lastSelected.place_name)) {
-            e.preventDefault();
-            alert('Please select a valid location from the dropdown list.');
+    // Prevent form submission if a new address has been entered but not selected from the dropdown
+profileForm.addEventListener('submit', function(e) {
+    var geocoderInput = document.querySelector('.mapboxgl-ctrl-geocoder--input');
+    var addressInput = document.getElementById('address');
+    
+    if (geocoderInput && geocoder) {
+        // If the geocoder input is visible (i.e., we're in edit mode)
+        if (geocoderInput.style.display !== 'none') {
+            // If the input value has changed from the original address
+            if (geocoderInput.value !== "{{ user_data.address }}") {
+                // And if it doesn't match the last selected result
+                if (!geocoder.lastSelected || geocoderInput.value !== geocoder.lastSelected.place_name) {
+                    e.preventDefault();
+                    alert('Please select a valid location from the dropdown list.');
+                }
+            }
         }
-    });
+    }
+});
 </script>
 {% endblock %}
