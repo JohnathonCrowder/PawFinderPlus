@@ -107,40 +107,60 @@
             height: 300px;
         }
     }
+
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 0;
+        width: 100%;
+    }
+    .hero-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    .featured-litter {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: transform 0.3s ease-in-out;
+    }
+    .featured-litter:hover {
+        transform: translateY(-5px);
+    }
+    .featured-litter img {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+    }
+    .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="bg-gray-100 min-h-screen py-12">
-    <div class="container mx-auto px-4">
-        <div class="bg-gradient-to-r from-blue-600 to-purple-600 py-16 px-4 sm:px-6 lg:px-8 mb-12">
-            <div class="max-w-7xl mx-auto text-center">
-                <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
-                    <span class="inline-block">Puppy Litters</span>
-                    <span class="inline-block">Marketplace</span>
-                </h1>
-                <div class="w-24 h-1 bg-yellow-400 mx-auto mb-6 rounded-full animate-pulse"></div>
-                <p class="text-xl sm:text-2xl text-blue-100 max-w-3xl mx-auto">
-                    Discover your perfect furry companion from our curated selection of premium puppy litters
-                </p>
-            </div>
-        </div>
-
-        <!-- Featured Litters Section -->
+<!-- Full-width Hero Section -->
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 tracking-tight text-center">
+            Puppy Litters Marketplace
+        </h1>
+        <p class="text-xl sm:text-2xl text-center mb-12 max-w-3xl mx-auto">
+            Discover your perfect furry companion from our curated selection of premium puppy litters
+        </p>
+        
         {% if featured_litters %}
-        <div class="featured-litters-section bg-gradient-to-r from-blue-500 to-purple-600 py-16 px-4 sm:px-6 lg:px-8 overflow-hidden mb-12">
-    <div class="max-w-7xl mx-auto">
-        <h2 class="text-4xl font-extrabold text-white text-center mb-12">
-            <i class="fas fa-star text-yellow-400 mr-2"></i>Spotlight Litters
-        </h2>
         <div class="featured-litters-carousel relative">
             <div class="carousel-container">
                 <div class="carousel-track flex transition-transform duration-500 ease-in-out">
                     {% for litter in featured_litters %}
-                    <div class="carousel-slide flex-shrink-0 w-full">
-                        <div class="bg-white rounded-lg shadow-2xl overflow-hidden">
+                    <div class="carousel-slide flex-shrink-0 w-full px-4">
+                        <div class="featured-litter">
                             <div class="md:flex">
-                                <div class="md:w-1/2 h-full">
+                                <div class="md:w-1/2">
                                     {% if litter.images %}
                                     <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
                                          alt="{{ litter.name }}" 
@@ -152,61 +172,19 @@
                                     {% endif %}
                                 </div>
                                 <div class="md:w-1/2 p-8">
-                                    <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">Featured Litter</div>
-                                    <h3 class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">{{ litter.name }}</h3>
-                                    <p class="mt-4 text-xl text-gray-500">{{ litter.father.breed }} Puppies</p>
+                                    <div class="uppercase tracking-wide text-sm text-indigo-200 font-semibold">Featured Litter</div>
+                                    <h3 class="mt-2 text-3xl leading-8 font-extrabold tracking-tight">{{ litter.name }}</h3>
+                                    <p class="mt-4 text-xl">{{ litter.father.breed }} Puppies</p>
                                     <div class="mt-6 flex items-center">
-                                        <div class="flex-shrink-0">
-                                            <i class="fas fa-calendar-alt text-2xl text-indigo-500"></i>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-medium text-gray-900">Born</p>
-                                            <p class="text-lg text-gray-500">{{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
+                                        <i class="fas fa-calendar-alt text-2xl text-indigo-200 mr-3"></i>
+                                        <div>
+                                            <p class="text-sm font-medium">Born</p>
+                                            <p class="text-lg">{{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
                                         </div>
                                     </div>
-                                    <div class="mt-6 flex items-center">
-                                        <div class="flex-shrink-0">
-                                            <i class="fas fa-map-marker-alt text-2xl text-indigo-500"></i>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-medium text-gray-900">Location</p>
-                                            <p class="text-lg text-gray-500">{{ litter.user.location or 'Not specified' }}</p>
-                                        </div>
-                                    </div>
-                                    {% if litter.puppies %}
-                                        {% set min_price = namespace(value=None) %}
-                                        {% set max_price = namespace(value=None) %}
-                                        {% for puppy in litter.puppies %}
-                                            {% if puppy.price and puppy.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
-                                                {% if min_price.value is none or puppy.price < min_price.value %}
-                                                    {% set min_price.value = puppy.price %}
-                                                {% endif %}
-                                                {% if max_price.value is none or puppy.price > max_price.value %}
-                                                    {% set max_price.value = puppy.price %}
-                                                {% endif %}
-                                            {% endif %}
-                                        {% endfor %}
-                                        {% if min_price.value is not none %}
-                                            <div class="mt-6 flex items-center">
-                                                <div class="flex-shrink-0">
-                                                    <i class="fas fa-tag text-2xl text-green-500"></i>
-                                                </div>
-                                                <div class="ml-3">
-                                                    <p class="text-sm font-medium text-gray-900">Price Range</p>
-                                                    <p class="text-lg font-semibold text-green-600">
-                                                        {% if min_price.value == max_price.value %}
-                                                            ${{ "%.2f"|format(min_price.value) }}
-                                                        {% else %}
-                                                            ${{ "%.2f"|format(min_price.value) }} - ${{ "%.2f"|format(max_price.value) }}
-                                                        {% endif %}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    {% endif %}
-                                    <div class="mt-8">
+                                    <div class="mt-6">
                                         <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" 
-                                           class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                                           class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50">
                                             View Litter Details
                                             <i class="fas fa-arrow-right ml-2"></i>
                                         </a>
@@ -225,11 +203,17 @@
                 <i class="fas fa-chevron-right"></i>
             </button>
         </div>
+        {% endif %}
     </div>
 </div>
-{% endif %}
 
-        <!-- Filters Section -->
+<!-- Main content with original container width -->
+<div class="main-content">
+    <!-- Filters Section -->
+
+<!-- Main Content (constrained width) -->
+<div class="main-content">
+    <!-- Filters Section -->
         <div class="mb-8">
             <button id="toggleFilters" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-t-lg focus:outline-none focus:shadow-outline transition duration-300 flex items-center justify-between">
                 <span><i class="fas fa-filter mr-2"></i>Filter Options</span>
