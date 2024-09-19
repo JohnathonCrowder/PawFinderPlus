@@ -5,8 +5,7 @@
 {% block head %}
 <style>
     .litter-bg {
-        background-image: url('https://www.transparenttextures.com/patterns/subtle-paw.png');
-        background-color: #f0f4f8;
+        background-color: #f3f4f6;
     }
     .litter-card {
         background: white;
@@ -72,174 +71,176 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 litter-bg">
-    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-4xl font-bold" style="color: #0080ff;">Litter Management</h1>
-            <div class="flex items-center space-x-4">
-                <button id="viewToggle" class="toggle-button">
-                    <i class="fas fa-th mr-2"></i> <span id="viewToggleText">Switch to Table View</span>
+<div class="litter-bg min-h-screen py-12">
+    <div class="container mx-auto px-4">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-4xl font-bold" style="color: #0080ff;">Litter Management</h1>
+                <div class="flex items-center space-x-4">
+                    <button id="viewToggle" class="toggle-button">
+                        <i class="fas fa-th mr-2"></i> <span id="viewToggleText">Switch to Table View</span>
+                    </button>
+                    <a href="{{ url_for('litter.add_litter') }}" class="bone-button">
+                        <i class="fas fa-plus mr-2"></i> Add New Litter
+                    </a>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span class="block sm:inline">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Filter and Search Form -->
+            <div class="bg-white shadow-md rounded-lg mb-6">
+                <button id="filterToggle" class="w-full px-6 py-4 text-left font-semibold text-gray-700 focus:outline-none flex justify-between items-center">
+                    <span><i class="fas fa-filter mr-2"></i> Filter Litters</span>
+                    <i class="fas fa-chevron-down transition-transform duration-300"></i>
                 </button>
-                <a href="{{ url_for('litter.add_litter') }}" class="bone-button">
-                    <i class="fas fa-plus mr-2"></i> Add New Litter
-                </a>
-            </div>
-        </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
-                        <span class="block sm:inline">{{ message }}</span>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <!-- Filter and Search Form -->
-        <div class="bg-white shadow-md rounded-lg mb-6">
-            <button id="filterToggle" class="w-full px-6 py-4 text-left font-semibold text-gray-700 focus:outline-none flex justify-between items-center">
-                <span><i class="fas fa-filter mr-2"></i> Filter Litters</span>
-                <i class="fas fa-chevron-down transition-transform duration-300"></i>
-            </button>
-            <div id="filterPanel" class="hidden px-6 py-4">
-                <form id="filterForm" action="{{ url_for('litter.litter_management') }}" method="GET">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                            <label for="breed" class="block text-sm font-medium text-gray-700 mb-1">Breed</label>
-                            <select name="breed" id="breed" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">All Breeds</option>
-                                {% for breed in breeds %}
-                                    <option value="{{ breed }}" {% if breed == current_breed %}selected{% endif %}>{{ breed }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age of Litter</label>
-                            <select name="age" id="age" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">All Ages</option>
-                                <option value="0-8 weeks" {% if current_age == '0-8 weeks' %}selected{% endif %}>0-8 weeks</option>
-                                <option value="8-16 weeks" {% if current_age == '8-16 weeks' %}selected{% endif %}>8-16 weeks</option>
-                                <option value="16+ weeks" {% if current_age == '16+ weeks' %}selected{% endif %}>16+ weeks</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                            <input type="text" name="search" id="search" placeholder="Search by name" value="{{ search }}" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                    <div class="mt-4 flex justify-end space-x-2">
-                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out">Apply Filters</button>
-                        <a href="{{ url_for('litter.litter_management') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-300 ease-in-out">Clear Filters</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        {% if litters %}
-            <!-- Card View -->
-            <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for litter in litters %}
-                    <div class="litter-card">
-                        <div class="h-56 md:h-64 lg:h-72 bg-gray-300 relative overflow-hidden">
-                            {% if litter.images %}
-                                <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
-                                     alt="{{ litter.name }}" 
-                                     class="w-full h-full object-cover">
-                            {% else %}
-                                <div class="w-full h-full flex items-center justify-center text-gray-500">
-                                    <i class="fas fa-paw text-6xl"></i>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="litter-info">
-                            <h2 class="text-2xl font-bold mb-2" style="color: #0080ff;">{{ litter.name }}</h2>
-                            <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2"></i> Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
-                            <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Father: {{ litter.father.name }}</p>
-                            <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Mother: {{ litter.mother.name }}</p>
-                            <p class="text-gray-600 mb-4"><i class="fas fa-paw mr-2"></i> Puppies: {{ litter.puppies|length }}</p>
-                            <p class="text-gray-600 mb-2">
-                                <i class="fas fa-eye{% if not litter.is_public %}-slash{% endif %} mr-2"></i>
-                                {{ 'Public' if litter.is_public else 'Private' }}
-                            </p>
-                            <div class="flex space-x-2">
-                                <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="bone-button flex-grow text-center">
-                                    <i class="fas fa-eye mr-2"></i> View Details
-                                </a>
-                                <a href="{{ url_for('litter.edit_litter', id=litter.id) }}" class="bone-button edit-button flex-grow text-center">
-                                    <i class="fas fa-edit mr-2"></i> Edit
-                                </a>
-                                <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="bone-button delete-button flex-grow">
-                                    <i class="fas fa-trash-alt mr-2"></i> Delete
-                                </button>
+                <div id="filterPanel" class="hidden px-6 py-4">
+                    <form id="filterForm" action="{{ url_for('litter.litter_management') }}" method="GET">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div>
+                                <label for="breed" class="block text-sm font-medium text-gray-700 mb-1">Breed</label>
+                                <select name="breed" id="breed" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">All Breeds</option>
+                                    {% for breed in breeds %}
+                                        <option value="{{ breed }}" {% if breed == current_breed %}selected{% endif %}>{{ breed }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age of Litter</label>
+                                <select name="age" id="age" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">All Ages</option>
+                                    <option value="0-8 weeks" {% if current_age == '0-8 weeks' %}selected{% endif %}>0-8 weeks</option>
+                                    <option value="8-16 weeks" {% if current_age == '8-16 weeks' %}selected{% endif %}>8-16 weeks</option>
+                                    <option value="16+ weeks" {% if current_age == '16+ weeks' %}selected{% endif %}>16+ weeks</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                                <input type="text" name="search" id="search" placeholder="Search by name" value="{{ search }}" class="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
+                        <div class="mt-4 flex justify-end space-x-2">
+                            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out">Apply Filters</button>
+                            <a href="{{ url_for('litter.litter_management') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-300 ease-in-out">Clear Filters</a>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <!-- Table View -->
-            <div id="tableView" class="hidden overflow-x-auto">
-                <table class="w-full border-collapse">
-                    <thead>
-                        <tr class="table-header">
-                            <th class="px-4 py-2 text-left">Image</th>
-                            <th class="px-4 py-2 text-left">Name</th>
-                            <th class="px-4 py-2 text-left">Date of Birth</th>
-                            <th class="px-4 py-2 text-left">Father</th>
-                            <th class="px-4 py-2 text-left">Mother</th>
-                            <th class="px-4 py-2 text-left">Puppies</th>
-                            <th class="px-4 py-2 text-left">Visibility</th>
-                            <th class="px-4 py-2 text-left">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for litter in litters %}
-                        <tr class="table-row">
-                            <td class="border px-4 py-2">
+            {% if litters %}
+                <!-- Card View -->
+                <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for litter in litters %}
+                        <div class="litter-card">
+                            <div class="h-56 md:h-64 lg:h-72 bg-gray-300 relative overflow-hidden">
                                 {% if litter.images %}
-                                    <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" alt="{{ litter.name }}" class="w-16 h-16 object-cover rounded">
+                                    <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
+                                         alt="{{ litter.name }}" 
+                                         class="w-full h-full object-cover">
                                 {% else %}
-                                    <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
-                                        <i class="fas fa-paw text-gray-400 text-2xl"></i>
+                                    <div class="w-full h-full flex items-center justify-center text-gray-500">
+                                        <i class="fas fa-paw text-6xl"></i>
                                     </div>
                                 {% endif %}
-                            </td>
-                            <td class="border px-4 py-2">{{ litter.name }}</td>
-                            <td class="border px-4 py-2">{{ litter.date_of_birth.strftime('%Y-%m-%d') }}</td>
-                            <td class="border px-4 py-2">{{ litter.father.name }}</td>
-                            <td class="border px-4 py-2">{{ litter.mother.name }}</td>
-                            <td class="border px-4 py-2">{{ litter.puppies|length }}</td>
-                            <td class="border px-4 py-2">
-                                <span class="{% if litter.is_public %}text-green-600{% else %}text-red-600{% endif %}">
-                                    <i class="fas fa-{% if litter.is_public %}eye{% else %}eye-slash{% endif %} mr-2"></i>
+                            </div>
+                            <div class="litter-info">
+                                <h2 class="text-2xl font-bold mb-2" style="color: #0080ff;">{{ litter.name }}</h2>
+                                <p class="text-gray-600 mb-2"><i class="fas fa-calendar-alt mr-2"></i> Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
+                                <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Father: {{ litter.father.name }}</p>
+                                <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2"></i> Mother: {{ litter.mother.name }}</p>
+                                <p class="text-gray-600 mb-4"><i class="fas fa-paw mr-2"></i> Puppies: {{ litter.puppies|length }}</p>
+                                <p class="text-gray-600 mb-2">
+                                    <i class="fas fa-eye{% if not litter.is_public %}-slash{% endif %} mr-2"></i>
                                     {{ 'Public' if litter.is_public else 'Private' }}
-                                </span>
-                            </td>
-                            <td class="border px-4 py-2">
+                                </p>
                                 <div class="flex space-x-2">
-                                    <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="text-blue-500 hover:text-blue-700" title="View Details">
-                                        <i class="fas fa-eye"></i>
+                                    <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="bone-button flex-grow text-center">
+                                        <i class="fas fa-eye mr-2"></i> View Details
                                     </a>
-                                    <a href="{{ url_for('litter.edit_litter', id=litter.id) }}" class="text-green-500 hover:text-green-700" title="Edit">
-                                        <i class="fas fa-edit"></i>
+                                    <a href="{{ url_for('litter.edit_litter', id=litter.id) }}" class="bone-button edit-button flex-grow text-center">
+                                        <i class="fas fa-edit mr-2"></i> Edit
                                     </a>
-                                    <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="text-red-500 hover:text-red-700" title="Delete">
-                                        <i class="fas fa-trash"></i>
+                                    <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="bone-button delete-button flex-grow">
+                                        <i class="fas fa-trash-alt mr-2"></i> Delete
                                     </button>
                                 </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="text-center py-12">
-                <i class="fas fa-paw text-6xl text-gray-400 mb-4"></i>
-                <p class="text-xl text-gray-600">No litters added yet. Start by adding a new litter!</p>
-            </div>
-        {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Table View -->
+                <div id="tableView" class="hidden overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="table-header">
+                                <th class="px-4 py-2 text-left">Image</th>
+                                <th class="px-4 py-2 text-left">Name</th>
+                                <th class="px-4 py-2 text-left">Date of Birth</th>
+                                <th class="px-4 py-2 text-left">Father</th>
+                                <th class="px-4 py-2 text-left">Mother</th>
+                                <th class="px-4 py-2 text-left">Puppies</th>
+                                <th class="px-4 py-2 text-left">Visibility</th>
+                                <th class="px-4 py-2 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for litter in litters %}
+                            <tr class="table-row">
+                                <td class="border px-4 py-2">
+                                    {% if litter.images %}
+                                        <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" alt="{{ litter.name }}" class="w-16 h-16 object-cover rounded">
+                                    {% else %}
+                                        <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
+                                            <i class="fas fa-paw text-gray-400 text-2xl"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="border px-4 py-2">{{ litter.name }}</td>
+                                <td class="border px-4 py-2">{{ litter.date_of_birth.strftime('%Y-%m-%d') }}</td>
+                                <td class="border px-4 py-2">{{ litter.father.name }}</td>
+                                <td class="border px-4 py-2">{{ litter.mother.name }}</td>
+                                <td class="border px-4 py-2">{{ litter.puppies|length }}</td>
+                                <td class="border px-4 py-2">
+                                    <span class="{% if litter.is_public %}text-green-600{% else %}text-red-600{% endif %}">
+                                        <i class="fas fa-{% if litter.is_public %}eye{% else %}eye-slash{% endif %} mr-2"></i>
+                                        {{ 'Public' if litter.is_public else 'Private' }}
+                                    </span>
+                                </td>
+                                <td class="border px-4 py-2">
+                                    <div class="flex space-x-2">
+                                        <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="text-blue-500 hover:text-blue-700" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('litter.edit_litter', id=litter.id) }}" class="text-green-500 hover:text-green-700" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button onclick="confirmDelete({{ litter.id }}, '{{ litter.name }}')" class="text-red-500 hover:text-red-700" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <i class="fas fa-paw text-6xl text-gray-400 mb-4"></i>
+                    <p class="text-xl text-gray-600">No litters added yet. Start by adding a new litter!</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 
