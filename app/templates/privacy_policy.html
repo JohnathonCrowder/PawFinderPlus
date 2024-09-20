@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - DogBreederPlus{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+    }
+    .privacy-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+    .privacy-container {
+        max-width: 800px;
+    }
+    .section-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .section-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    .section-icon {
+        font-size: 2rem;
+        color: #3b82f6;
+    }
+    .table-of-contents {
+        background-color: #e0f2fe;
+        border-left: 4px solid #3b82f6;
+    }
+    .table-of-contents a {
+        color: #1e40af;
+        transition: all 0.2s ease;
+    }
+    .table-of-contents a:hover {
+        color: #3b82f6;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="privacy-header text-white py-16 mb-12">
+    <div class="container mx-auto text-center">
+        <h1 class="text-4xl font-bold mb-4">Privacy Policy</h1>
+        <p class="text-xl">Your privacy is important to us at DogBreederPlus</p>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 pb-12">
+    <div class="privacy-container mx-auto">
+        <div class="bg-white p-8 rounded-lg shadow-md mb-8">
+            <p class="text-gray-600 mb-4">Last updated: <span class="font-semibold">July 1, 2023</span></p>
+            <p class="text-gray-700">This Privacy Policy describes how DogBreederPlus ("we", "our", or "us") collects, uses, and shares your personal information when you use our website and services.</p>
+        </div>
+
+        <div class="table-of-contents p-6 rounded-lg mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Table of Contents</h2>
+            <ol class="list-decimal list-inside">
+                <li><a href="#information-we-collect">Information We Collect</a></li>
+                <li><a href="#how-we-use-your-information">How We Use Your Information</a></li>
+                <li><a href="#how-we-share-your-information">How We Share Your Information</a></li>
+                <li><a href="#your-rights">Your Rights</a></li>
+                <li><a href="#data-security">Data Security</a></li>
+                <li><a href="#changes-to-this-policy">Changes to This Policy</a></li>
+                <li><a href="#contact-us">Contact Us</a></li>
+            </ol>
+        </div>
+
+        <section id="information-we-collect" class="section-card p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-database section-icon mr-4"></i>
+                <h2 class="text-2xl font-semibold">Information We Collect</h2>
+            </div>
+            <p class="text-gray-700 mb-4">We collect several types of information from and about users of our website, including:</p>
+            <ul class="list-disc pl-6 text-gray-700">
+                <li>Personal identifiers (e.g., name, email address)</li>
+                <li>Account information</li>
+                <li>Dog breeding and management data</li>
+                <li>Usage data and analytics</li>
+                <li>Communication data (e.g., customer support inquiries)</li>
+            </ul>
+        </section>
+
+        <section id="how-we-use-your-information" class="section-card p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-cogs section-icon mr-4"></i>
+                <h2 class="text-2xl font-semibold">How We Use Your Information</h2>
+            </div>
+            <p class="text-gray-700 mb-4">We use your personal information to:</p>
+            <ul class="list-disc pl-6 text-gray-700">
+                <li>Provide and improve our services</li>
+                <li>Communicate with you</li>
+                <li>Analyze usage patterns and trends</li>
+                <li>Ensure the security of our platform</li>
+                <li>Comply with legal obligations</li>
+            </ul>
+        </section>
+
+        <section id="how-we-share-your-information" class="section-card p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-share-alt section-icon mr-4"></i>
+                <h2 class="text-2xl font-semibold">How We Share Your Information</h2>
+            </div>
+            <p class="text-gray-700 mb-4">We may share your personal information with:</p>
+            <ul class="list-disc pl-6 text-gray-700">
+                <li>Service providers and business partners</li>
+                <li>Legal and regulatory authorities</li>
+                <li>Potential buyers or investors (in the event of a sale, merger, or acquisition)</li>
+            </ul>
+            <p class="text-gray-700 mt-4">We do not sell your personal information to third parties.</p>
+        </section>
+
+        <section id="your-rights" class="section-card p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-user-shield section-icon mr-4"></i>
+                <h2 class="text-2xl font-semibold">Your Rights</h2>
+            </div>
+            <p class="text-gray-700 mb-4">Depending on your location, you may have certain rights regarding your personal information, including:</p>
+            <ul class="list-disc pl-6 text-gray-700">
+                <li>The right to access your personal information</li>
+                <li>The right to correct inaccurate information</li>
+                <li>The right to delete your information</li>
+                <li>The right to restrict or object to processing</li>
+                <li>The right to data portability</li>
+            </ul>
+        </section>
+
+        <section id="data-security" class="section-card p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-lock section-icon mr-4"></i>
+                <h2 class="text-2xl font-semibold">Data Security</h2>
+            </div>
+            <p class="text-gray-700">We implement appropriate technical and organizational measures to protect your personal information against unauthorized or unlawful processing, accidental loss, destruction, or damage.</p>
+        </section>
+
+        <section id="changes-to-this-policy" class="section-card p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-edit section-icon mr-4"></i>
+                <h2 class="text-2xl font-semibold">Changes to This Policy</h2>
+            </div>
+            <p class="text-gray-700">We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.</p>
+        </section>
+
+        <section id="contact-us" class="section-card p-8">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-envelope section-icon mr-4"></i>
+                <h2 class="text-2xl font-semibold">Contact Us</h2>
+            </div>
+            <p class="text-gray-700 mb-4">If you have any questions about this Privacy Policy, please contact us:</p>
+            <ul class="list-disc pl-6 text-gray-700">
+                <li>Email: privacy@dogbreederplus.com</li>
+                <li>Phone: +1 (555) 123-4567</li>
+                <li>Address: 123 Breeder Lane, Dogtown, CA 90210, USA</li>
+            </ul>
+        </section>
+    </div>
+</main>
+{% endblock %}
