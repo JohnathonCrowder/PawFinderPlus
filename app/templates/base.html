@@ -77,6 +77,9 @@
                             <li><a href="{{ url_for('user.account_management') }}" class="hover:underline">Account Management</a></li>
                         </ul>
                     </li>
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+<li><a href="{{ url_for('admin.admin_dashboard') }}" class="hover:underline">Admin Dashboard</a></li>
+{% endif %}
                 {% else %}
                     <li><a href="{{ url_for('auth.login') }}" class="hover:underline">Login</a></li>
                     <li><a href="{{ url_for('auth.register') }}" class="hover:underline">Register</a></li>

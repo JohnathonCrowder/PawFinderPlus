@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - DogBreederPlus{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Admin Dashboard</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-2">Total Users</h2>
+            <p class="text-3xl font-bold text-blue-600">{{ total_users }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-2">Total Dogs</h2>
+            <p class="text-3xl font-bold text-green-600">{{ total_dogs }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-2">Total Litters</h2>
+            <p class="text-3xl font-bold text-purple-600">{{ total_litters }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-2">Total Appointments</h2>
+            <p class="text-3xl font-bold text-yellow-600">{{ total_appointments }}</p>
+        </div>
+    </div>
+    
+    <!-- Add more admin features here -->
+</div>
+{% endblock %}
+

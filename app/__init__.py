@@ -5,6 +5,9 @@ from flask_migrate import Migrate
 from flask_socketio import SocketIO
 from flask_login import LoginManager
 from .routes import init_app as init_routes
+from flask.cli import with_appcontext
+from .models import User
+import click
 
 migrate = Migrate()
 socketio = SocketIO()
@@ -34,5 +37,17 @@ def create_app(config_class=Config):
     # Register error handlers
     from . import error_handlers
     error_handlers.register_error_handlers(app)
+
+    @app.cli.command("make-admin")
+    @click.argument("username")
+    @with_appcontext
+    def make_admin(username):
+        user = User.query.filter_by(username=username).first()
+        if user:
+            user.is_admin = True
+            db.session.commit()
+            click.echo(f"User {username} has been made an admin.")
+        else:
+            click.echo(f"User {username} not found.")
 
     return app

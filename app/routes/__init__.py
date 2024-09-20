@@ -1,4 +1,4 @@
-from . import main, auth, dog, litter, user, message, vet
+from . import main, auth, dog, litter, user, message, vet, admin
 from . import main
 from . import auth
 from . import dog
@@ -15,5 +15,6 @@ def init_app(app):
     app.register_blueprint(user.bp)
     app.register_blueprint(message.bp)
     app.register_blueprint(vet.bp)
+    app.register_blueprint(admin.bp)
 
     
