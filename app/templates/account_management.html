@@ -1,34 +1,394 @@
 {% extends "base.html" %}
 
-{% block title %}Account Management - DogBreederPlus{% endblock %}
+{% block title %}Premium Dog Breeding Management Plans | DogBreederPlus{% endblock %}
+
+{% block head %}
+{{ super() }}
+<meta name="description" content="Elevate your dog breeding program with DogBreederPlus premium plans. Access advanced genetics tools, health analytics, and expert support.">
+<link rel="canonical" href="{{ url_for('user.account_management', _external=True) }}">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "DogBreederPlus Premium Plan",
+  "description": "Advanced dog breeding management software with genetics tools and health analytics",
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "USD",
+    "price": "59.00",
+    "priceValidUntil": "2023-12-31",
+    "availability": "https://schema.org/InStock"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [{
+    "@type": "Question",
+    "name": "Can I upgrade or downgrade my plan at any time?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes, you can change your plan at any time. Upgrades take effect immediately, while downgrades will be applied at the start of your next billing cycle."
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "Is there a long-term contract?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No, all our plans are billed monthly and you can cancel at any time without penalty."
+    }
+  }]
+}
+</script>
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f0f4f8;
+    }
+    .plan-card {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .plan-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    .current-plan {
+        border: 3px solid #3B82F6;
+    }
+    .badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #EF4444;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .feature-icon {
+        background-color: #EBF5FF;
+        color: #3B82F6;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+    }
+    .testimonial-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .feature-card {
+        border-radius: 12px;
+        padding: 20px;
+        transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .sticky-cta {
+        transition: all 0.3s ease;
+        transform: translateY(100%);
+    }
+    .sticky-cta.visible {
+        transform: translateY(0);
+    }
+    .faq-item {
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .faq-question {
+        cursor: pointer;
+    }
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+    .faq-item.active .faq-answer {
+        max-height: 500px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">Account Management</h1>
-    
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-2xl font-semibold mb-4">Current Account Type: {{ user.account_type.value }}</h2>
-        
-        <form action="{{ url_for('user.change_account_type') }}" method="POST" class="mb-6">
-            <label for="account_type" class="block mb-2">Change Account Type:</label>
-            <select name="account_type" id="account_type" class="border rounded px-2 py-1 mb-2">
-                {% for type in AccountType %}
-                    <option value="{{ type.name }}" {% if user.account_type == type %}selected{% endif %}>
-                        {{ type.value }}
-                    </option>
-                {% endfor %}
-            </select>
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                Change Account Type
-            </button>
-        </form>
-        
-        <h3 class="text-xl font-semibold mb-2">Account Features:</h3>
-        <ul class="list-disc pl-6">
-            <li>Free: Basic features</li>
-            <li>Basic: Enhanced features</li>
-            <li>Premium: All features</li>
-        </ul>
+<main class="container mx-auto px-4 py-12">
+    <header>
+        <h1 class="text-5xl font-bold mb-2 text-center text-gray-800" data-aos="fade-up">Elevate Your Breeding Program</h1>
+        <p class="text-xl text-center text-gray-600 mb-12" data-aos="fade-up" data-aos-delay="100">Unlock powerful tools and insights with our premium plans</p>
+    </header>
+
+    <section aria-labelledby="current-plan" class="gradient-bg text-white p-8 rounded-lg shadow-md mb-16 text-center" data-aos="fade-up" data-aos-delay="200">
+        <h2 id="current-plan" class="text-3xl font-semibold mb-4">Your Current Plan: <span class="font-bold">{{ user.account_type.value }}</span></h2>
+        <p class="text-xl mb-6">Experience the full potential of DogBreederPlus with our advanced features.</p>
+        <a href="#compare" class="bg-white text-blue-600 px-8 py-3 rounded-full font-bold hover:bg-blue-100 transition duration-300">Explore Premium Features</a>
+    </section>
+
+    <section aria-labelledby="pricing-plans" class="mb-16">
+        <h2 id="pricing-plans" class="sr-only">Pricing Plans</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for plan in AccountType %}
+            <div class="plan-card bg-white shadow-lg {% if user.account_type == plan %}current-plan{% endif %} relative flex flex-col" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                {% if plan == AccountType.PREMIUM %}
+                <div class="badge">Most Popular</div>
+                {% endif %}
+                <div class="p-8 flex-grow">
+                    <h3 class="text-2xl font-bold mb-2 {% if plan == AccountType.FREE %}text-gray-700{% elif plan == AccountType.BASIC %}text-blue-600{% else %}text-purple-600{% endif %}">
+                        {{ plan.value }} Plan
+                    </h3>
+                    <p class="text-4xl font-bold mb-4">
+                        {% if plan == AccountType.FREE %}
+                        $0<span class="text-lg font-normal">/month</span>
+                        {% elif plan == AccountType.BASIC %}
+                        $29<span class="text-lg font-normal">/month</span>
+                        {% else %}
+                        $59<span class="text-lg font-normal">/month</span>
+                        {% endif %}
+                    </p>
+                    <ul class="mb-8">
+                        {% if plan == AccountType.FREE %}
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Up to 5 dogs</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Basic breed information</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Limited health tracking</li>
+                        {% elif plan == AccountType.BASIC %}
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Up to 50 dogs</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Advanced breed information</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Full health tracking</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Basic pedigree management</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Email & chat support</li>
+                        {% else %}
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-infinity"></i></div>Unlimited dogs</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Expert breed insights</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Comprehensive health analytics</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Advanced pedigree management</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>Priority 24/7 support</li>
+                        <li class="flex items-center mb-3"><div class="feature-icon"><i class="fas fa-check"></i></div>AI-powered breeding recommendations</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="p-8 pt-0">
+                    {% if user.account_type == plan %}
+                    <button class="w-full bg-gray-300 text-gray-800 px-6 py-3 rounded-full font-bold" disabled>Current Plan</button>
+                    {% else %}
+                    <form action="{{ url_for('user.change_account_type') }}" method="POST">
+                        <input type="hidden" name="account_type" value="{{ plan.name }}">
+                        <button type="submit" class="w-full bg-blue-500 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-600 transition duration-300">
+                            {% if plan == AccountType.FREE %}
+                            Switch to Free
+                            {% else %}
+                            Upgrade to {{ plan.value }}
+                            {% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section aria-labelledby="premium-features" class="bg-white p-12 rounded-lg shadow-md mb-16">
+        <h2 id="premium-features" class="text-4xl font-bold mb-12 text-center" data-aos="fade-up">Why Choose Premium?</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="feature-card text-center" data-aos="fade-up">
+                <i class="fas fa-chart-line text-5xl text-blue-500 mb-6"></i>
+                <h3 class="text-2xl font-semibold mb-4">Advanced Analytics</h3>
+                <p class="text-gray-600">Gain deeper insights into your breeding program with comprehensive analytics tools.</p>
+            </div>
+            <div class="feature-card text-center" data-aos="fade-up" data-aos-delay="100">
+                <i class="fas fa-dna text-5xl text-blue-500 mb-6"></i>
+                <h3 class="text-2xl font-semibold mb-4">Genetic Matching</h3>
+                <p class="text-gray-600">Make informed breeding decisions with our AI-powered genetic matching system.</p>
+            </div>
+            <div class="feature-card text-center" data-aos="fade-up" data-aos-delay="200">
+                <i class="fas fa-user-md text-5xl text-blue-500 mb-6"></i>
+                <h3 class="text-2xl font-semibold mb-4">Health Monitoring</h3>
+                <p class="text-gray-600">Keep your dogs healthy with advanced monitoring and alert systems.</p>
+            </div>
+            <div class="feature-card text-center" data-aos="fade-up" data-aos-delay="300">
+                <i class="fas fa-clipboard-list text-5xl text-blue-500 mb-6"></i>
+                <h3 class="text-2xl font-semibold mb-4">Custom Reports</h3>
+                <p class="text-gray-600">Generate detailed, professional reports tailored to your specific needs.</p>
+            </div>
+            <div class="feature-card text-center" data-aos="fade-up" data-aos-delay="400">
+                <i class="fas fa-users text-5xl text-blue-500 mb-6"></i>
+                <h3 class="text-2xl font-semibold mb-4">Expert Community</h3>
+                <p class="text-gray-600">Connect with top breeders and experts in our exclusive premium community.</p>
+            </div>
+            <div class="feature-card text-center" data-aos="fade-up" data-aos-delay="500">
+                <i class="fas fa-headset text-5xl text-blue-500 mb-6"></i>
+                <h3 class="text-2xl font-semibold mb-4">Priority Support</h3>
+                <p class="text-gray-600">Get instant help from our dedicated support team, available 24/7.</p>
+            </div>
+        </div>
+    </section>
+
+    <section aria-labelledby="success-stories" class="mb-16">
+        <h2 id="success-stories" class="text-4xl font-bold mb-12 text-center" data-aos="fade-up">Success Stories</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="testimonial-card" data-aos="fade-up">
+                <p class="text-gray-600 mb-4">"The Premium plan has revolutionized my breeding program. The advanced features have helped me make better decisions and significantly improve the health of my dogs."</p>
+                <div class="flex items-center">
+                    <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Sarah J., Award-winning Breeder" class="w-12 h-12 rounded-full mr-4 lazy" data-src="https://randomuser.me/api/portraits/women/32.jpg">
+                    <div>
+                        <p class="font-semibold">Sarah J.</p>
+                        <p class="text-sm text-gray-500">Award-winning Breeder</p>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+                <p class="text-gray-600 mb-4">"The genetic matching feature in Premium is like having a team of geneticists on call 24/7. It's completely transformed how I approach breeding."</p>
+                <div class="flex items-center">
+                    <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Michael T., Champion Breeder" class="w-12 h-12 rounded-full mr-4 lazy" data-src="https://randomuser.me/api/portraits/men/45.jpg">
+                    <div>
+                        <p class="font-semibold">Michael T.</p>
+                        <p class="text-sm text-gray-500">Champion Breeder</p>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                <p class="text-gray-600 mb-4">"The Premium support team is outstanding. They've helped me customize the software to perfectly fit my breeding goals and workflow."</p>
+                <div class="flex items-center">
+                    <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Emily R., Professional Kennel Owner" class="w-12 h-12 rounded-full mr-4 lazy" data-src="https://randomuser.me/api/portraits/women/68.jpg">
+                    <div>
+                        <p class="font-semibold">Emily R.</p>
+                        <p class="text-sm text-gray-500">Professional Kennel Owner</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section aria-labelledby="faq" class="bg-white p-12 rounded-lg shadow-md" data-aos="fade-up">
+        <h2 id="faq" class="text-4xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+        <div class="space-y-4">
+            <div class="faq-item">
+                <h3 class="text-xl font-semibold mb-2 faq-question flex justify-between items-center">
+                    <span>Can I upgrade or downgrade my plan at any time?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </h3>
+                <p class="text-gray-600 faq-answer">Yes, you can change your plan at any time. Upgrades take effect immediately, while downgrades will be applied at the start of your next billing cycle.</p>
+            </div>
+            <div class="faq-item">
+                <h3 class="text-xl font-semibold mb-2 faq-question flex justify-between items-center">
+                    <span>Is there a long-term contract?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </h3>
+                <p class="text-gray-600 faq-answer">No, all our plans are billed monthly and you can cancel at any time without penalty.</p>
+            </div>
+            <div class="faq-item">
+                <h3 class="text-xl font-semibold mb-2 faq-question flex justify-between items-center">
+                    <span>What payment methods do you accept?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </h3>
+                <p class="text-gray-600 faq-answer">We accept all major credit cards, PayPal, and bank transfers for your convenience.</p>
+            </div>
+            <div class="faq-item">
+                <h3 class="text-xl font-semibold mb-2 faq-question flex justify-between items-center">
+                    <span>Is my data safe and secure?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </h3>
+                <p class="text-gray-600 faq-answer">Absolutely. We use industry-standard encryption and security measures to protect your data. Your privacy and the security of your information are our top priorities.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="bg-gray-800 text-white py-8 mt-16">
+    <div class="container mx-auto px-4">
+        <nav>
+            <ul class="flex justify-center space-x-6">
+                <li><a href="{{ url_for('main.home') }}" class="hover:text-blue-300">Home</a></li>
+                <li><a href="{{ url_for('main.about') }}" class="hover:text-blue-300">About</a></li>
+                <li><a href="{{ url_for('main.contact') }}" class="hover:text-blue-300">Contact</a></li>
+                <li><a href="{{ url_for('main.about') }}" class="hover:text-blue-300">Privacy Policy</a></li>
+                <li><a href="{{ url_for('main.about') }}" class="hover:text-blue-300">Terms of Service</a></li>
+            </ul>
+        </nav>
+        <p class="text-center mt-4">&copy; 2023 DogBreederPlus. All rights reserved.</p>
     </div>
+</footer>
+
+<!-- Sticky CTA -->
+<div class="sticky-cta fixed bottom-0 left-0 right-0 bg-blue-600 text-white py-6 text-center">
+    <p class="text-xl font-semibold mb-4">Ready to revolutionize your breeding program?</p>
+    <a href="#" class="bg-white text-blue-600 px-8 py-3 rounded-full font-bold hover:bg-blue-100 transition duration-300">Upgrade to Premium Now</a>
 </div>
+
+<script>
+    // Initialize AOS
+    AOS.init({
+        duration: 1000,
+        once: true,
+    });
+
+    // FAQ Functionality
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        question.addEventListener('click', () => {
+            item.classList.toggle('active');
+        });
+    });
+
+    // Sticky CTA
+    const stickyCta = document.querySelector('.sticky-cta');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            stickyCta.classList.add('visible');
+        } else {
+            stickyCta.classList.remove('visible');
+        }
+    });
+
+    // Lazy loading images
+    document.addEventListener("DOMContentLoaded", function() {
+        var lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
+
+        if ("IntersectionObserver" in window) {
+            let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        let lazyImage = entry.target;
+                        lazyImage.src = lazyImage.dataset.src;
+                        lazyImage.classList.remove("lazy");
+                        lazyImageObserver.unobserve(lazyImage);
+                    }
+                });
+            });
+
+            lazyImages.forEach(function(lazyImage) {
+                lazyImageObserver.observe(lazyImage);
+            });
+        } else {
+            // Fallback for browsers that don't support IntersectionObserver
+            lazyImages.forEach(function(lazyImage) {
+                lazyImage.src = lazyImage.dataset.src;
+                lazyImage.classList.remove("lazy");
+            });
+        }
+    });
+</script>
 {% endblock %}
