@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Account Management - DogBreederPlus{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Account Management</h1>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold mb-4">Current Account Type: {{ user.account_type.value }}</h2>
+        
+        <form action="{{ url_for('user.change_account_type') }}" method="POST" class="mb-6">
+            <label for="account_type" class="block mb-2">Change Account Type:</label>
+            <select name="account_type" id="account_type" class="border rounded px-2 py-1 mb-2">
+                {% for type in AccountType %}
+                    <option value="{{ type.name }}" {% if user.account_type == type %}selected{% endif %}>
+                        {{ type.value }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Change Account Type
+            </button>
+        </form>
+        
+        <h3 class="text-xl font-semibold mb-2">Account Features:</h3>
+        <ul class="list-disc pl-6">
+            <li>Free: Basic features</li>
+            <li>Basic: Enhanced features</li>
+            <li>Premium: All features</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

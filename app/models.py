@@ -19,6 +19,11 @@ class AppointmentCategory(Enum):
     SURGERY = "Surgery"
     OTHER = "Other"
 
+class AccountType(Enum):
+    FREE = "Free"
+    BASIC = "Basic"
+    PREMIUM = "Premium"
+
 # Add User model
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -27,6 +32,9 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     dogs = db.relationship('Dog', backref='owner', lazy=True)
+
+    #Account Type
+    account_type = db.Column(db.Enum(AccountType), default=AccountType.FREE)
 
     #Contact Info
     website = db.Column(db.String(200))

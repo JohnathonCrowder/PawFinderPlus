@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
 from flask_login import login_required, current_user
-from app.models import User, Dog, Litter, DogStatus
+from app.models import User, Dog, Litter, DogStatus, AccountType
 from app.extensions import db
 from app.utils import format_url
 from werkzeug.utils import secure_filename
@@ -117,3 +117,30 @@ def user_profile(username):
                            DogStatus=DogStatus,
                            user_data=user_data,
                            date=datetime.now().date())
+
+
+
+
+
+
+
+
+
+####################   Changing Account Types    ##########################
+
+@bp.route('/account_management')
+@login_required
+def account_management():
+    return render_template('account_management.html', user=current_user, AccountType=AccountType)
+
+@bp.route('/change_account_type', methods=['POST'])
+@login_required
+def change_account_type():
+    new_type = request.form.get('account_type')
+    if new_type in AccountType.__members__:
+        current_user.account_type = AccountType[new_type]
+        db.session.commit()
+        flash(f'Account type changed to {new_type}', 'success')
+    else:
+        flash('Invalid account type', 'error')
+    return redirect(url_for('user.account_management'))
