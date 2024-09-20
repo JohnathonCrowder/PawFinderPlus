@@ -105,6 +105,22 @@
         background-color: #6B7280;
         color: white;
     }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+        }
+    }
+
+    .copy-button {
+        animation: pulse 2s infinite;
+    }
 </style>
 {% endblock %}
 
@@ -218,7 +234,36 @@
                         {{ (date.today() - dog.date_of_birth).days // 365 }} years and 
                         {{ ((date.today() - dog.date_of_birth).days % 365) // 30 }} months.
                     </p>
-                </div>
+                    <div class="mt-8 bg-gray-100 rounded-lg p-6 shadow-md">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Share {{ dog.name }}'s Profile</h3>
+                        
+                        <div class="flex flex-wrap gap-3 mb-6">
+                            <a href="{{ social_links.facebook }}" target="_blank" class="flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-300" title="Share on Facebook">
+                                <i class="fab fa-facebook-f text-xl"></i>
+                            </a>
+                            <a href="{{ social_links.twitter }}" target="_blank" class="flex items-center justify-center w-12 h-12 bg-blue-400 text-white rounded-full hover:bg-blue-500 transition duration-300" title="Share on Twitter">
+                                <i class="fab fa-twitter text-xl"></i>
+                            </a>
+                            <a href="{{ social_links.linkedin }}" target="_blank" class="flex items-center justify-center w-12 h-12 bg-blue-700 text-white rounded-full hover:bg-blue-800 transition duration-300" title="Share on LinkedIn">
+                                <i class="fab fa-linkedin-in text-xl"></i>
+                            </a>
+                            <a href="{{ social_links.whatsapp }}" target="_blank" class="flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded-full hover:bg-green-600 transition duration-300" title="Share on WhatsApp">
+                                <i class="fab fa-whatsapp text-xl"></i>
+                            </a>
+                            <a href="{{ social_links.email }}" class="flex items-center justify-center w-12 h-12 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition duration-300" title="Share via Email">
+                                <i class="fas fa-envelope text-xl"></i>
+                            </a>
+                        </div>
+                    
+                        <div class="relative">
+                            <input type="text" value="{{ shareable_link }}" class="w-full p-3 pr-28 border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+                            <button onclick="copyToClipboard('{{ shareable_link }}')" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 copy-button">
+                                Copy Link
+                            </button>
+                        </div>
+                    </div>
+                    
+                </div> 
 
                 <div class="info-card p-6">
                     <h2 class="text-2xl font-semibold mb-4">Family Tree</h2>

@@ -1,7 +1,9 @@
 import json
 from datetime import datetime, timedelta
-from flask import current_app
+from flask import current_app, url_for
 from werkzeug.utils import secure_filename
+from urllib.parse import quote
+
 
 def allowed_file(filename):
     """
@@ -102,3 +104,18 @@ def truncate_string(string, length, suffix='...'):
         return string
     else:
         return string[:length].rsplit(' ', 1)[0] + suffix
+    
+
+def generate_shareable_link(route, **kwargs):
+    return url_for(route, _external=True, **kwargs)
+
+def generate_social_links(url, title):
+    encoded_url = quote(url)
+    encoded_title = quote(title)
+    return {
+        'facebook': f"https://www.facebook.com/sharer/sharer.php?u={encoded_url}",
+        'twitter': f"https://twitter.com/intent/tweet?url={encoded_url}&text={encoded_title}",
+        'linkedin': f"https://www.linkedin.com/shareArticle?mini=true&url={encoded_url}&title={encoded_title}",
+        'whatsapp': f"https://api.whatsapp.com/send?text={encoded_title}%20{encoded_url}",
+        'email': f"mailto:?subject={encoded_title}&body={encoded_url}"
+    }

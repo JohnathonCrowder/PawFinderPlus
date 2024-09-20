@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from app.models import User, Dog, Litter, DogStatus, AccountType
 from app.extensions import db
-from app.utils import format_url
+from app.utils import format_url, generate_shareable_link, generate_social_links
 from werkzeug.utils import secure_filename
 from io import BytesIO
 from datetime import datetime
@@ -110,6 +110,11 @@ def user_profile(username):
         'country': user.country
     }
 
+    shareable_link = generate_shareable_link('user.user_profile', username=username)
+    social_links = generate_social_links(shareable_link, f"Check out {user.username}'s profile on DogBreederPlus!")
+   
+                           
+
     return render_template('user_profile.html', 
                            user=user, 
                            dogs=dogs,
@@ -120,7 +125,7 @@ def user_profile(username):
                            is_own_profile=is_own_profile,
                            DogStatus=DogStatus,
                            user_data=user_data,
-                           date=datetime.now().date())
+                           shareable_link=shareable_link, social_links=social_links)
 
 
 
