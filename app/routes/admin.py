@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, abort, current_app, request
 from flask_login import login_required, current_user
 from app.models import User, Dog, Litter, VetAppointment
 from app.extensions import db
+from datetime import datetime
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -54,7 +55,8 @@ def appointment_management():
     if not current_user.is_admin:
         abort(403)
     appointments = VetAppointment.query.all()
-    return render_template('admin/appointment_management.html', appointments=appointments)
+    now = datetime.utcnow()
+    return render_template('admin/appointment_management.html', appointments=appointments, now=now)
 
 
 
@@ -77,3 +79,26 @@ def delete_dog(dog_id):
     db.session.commit()
     flash(f'Dog {dog.name} has been deleted.', 'success')
     return redirect(url_for('admin.dog_management'))
+
+
+@bp.route('/litters/<int:litter_id>/delete', methods=['POST'])
+@login_required
+def delete_litter(litter_id):
+    if not current_user.is_admin:
+        abort(403)
+    litter = Litter.query.get_or_404(litter_id)
+    db.session.delete(litter)
+    db.session.commit()
+    flash(f'Litter {litter.name} has been deleted.', 'success')
+    return redirect(url_for('admin.litter_management'))
+
+@bp.route('/appointments/<int:appointment_id>/delete', methods=['POST'])
+@login_required
+def delete_appointment(appointment_id):
+    if not current_user.is_admin:
+        abort(403)
+    appointment = VetAppointment.query.get_or_404(appointment_id)
+    db.session.delete(appointment)
+    db.session.commit()
+    flash(f'Appointment for {appointment.dog.name} has been deleted.', 'success')
+    return redirect(url_for('admin.appointment_management'))
