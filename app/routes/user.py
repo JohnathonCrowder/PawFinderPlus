@@ -24,9 +24,10 @@ def user_settings():
         'address': current_user.address,
         'city': current_user.city,
         'state': current_user.state,
-        'country': current_user.country
+        'country': current_user.country,
+        'account_type': current_user.account_type,  
     }
-    return render_template('user_settings.html', user_data=user_data)
+    return render_template('user_settings.html', user_data=user_data, AccountType=AccountType)
 
 @bp.route('/update_profile', methods=['POST'])
 @login_required
@@ -42,6 +43,7 @@ def update_profile():
     current_user.location = request.form.get('location', '').strip() or None
     current_user.phone_number = request.form.get('phone_number', '').strip() or None
     current_user.bio = request.form.get('bio', '').strip() or None
+    
 
     current_user.address = request.form.get('address')
     current_user.city = request.form.get('city')
@@ -53,6 +55,8 @@ def update_profile():
     current_user.website = format_url(request.form.get('website', '').strip()) or None
     current_user.facebook = format_url(request.form.get('facebook', '').strip()) or None
     current_user.instagram = format_url(request.form.get('instagram', '').strip()) or None
+
+    # Note: We're not changing the account_type here
 
     db.session.commit()
 
