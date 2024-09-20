@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from app.models import Dog, DogImage, DogStatus, Litter
 from app.extensions import db
-from app.utils import allowed_file, load_json_data
+from app.utils import allowed_file, load_json_data, generate_shareable_link, generate_social_links
 from io import BytesIO
 from datetime import datetime, timedelta, date
 
@@ -166,7 +166,9 @@ def dog_profile(id):
     if not dog.is_public and (not current_user.is_authenticated or current_user.id != dog.user_id):
         flash('This dog profile is not publicly visible.', 'error')
         return redirect(url_for('main.home'))
-    return render_template('dog_profile.html', dog=dog, date=datetime.now().date(), DogStatus=DogStatus)
+    shareable_link = generate_shareable_link('dog.dog_profile', id=id)
+    social_links = generate_social_links(shareable_link, f"Check out {dog.name}'s profile on DogBreederPlus!")
+    return render_template('dog_profile.html', dog=dog, date=datetime.now().date(), DogStatus=DogStatus, shareable_link=shareable_link, social_links=social_links)
 
 @bp.route('/dog_image/<int:image_id>')
 def get_dog_image(image_id):

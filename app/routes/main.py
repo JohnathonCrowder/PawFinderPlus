@@ -15,3 +15,11 @@ def about():
 @bp.route('/contact')
 def contact():
     return render_template('contact.html')
+
+@bp.route('/privacy-policy')
+def privacy_policy():
+    return render_template('privacy_policy.html')
+
+@bp.route('/terms-of-service')
+def terms_of_service():
+    return render_template('terms_of_service.html')

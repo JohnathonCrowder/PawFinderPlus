@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from app.models import Litter, LitterImage, Dog, DogStatus
 from app.extensions import db
-from app.utils import allowed_file
+from app.utils import allowed_file, generate_shareable_link, generate_social_links
 from datetime import datetime, timedelta
 from io import BytesIO
 from sqlalchemy import or_, and_, func
@@ -64,6 +64,17 @@ def litter_management():
                                current_age=age,
                                search=search,
                                DogStatus=DogStatus)
+    
+
+@bp.route('/litter/<int:id>')
+def litter_detail(id):
+    litter = Litter.query.get_or_404(id)
+    if not litter.is_public and (not current_user.is_authenticated or current_user.id != litter.user_id):
+        flash('This litter is not publicly visible.', 'error')
+        return redirect(url_for('main.home'))
+    shareable_link = generate_shareable_link('litter.litter_detail', id=id)
+    social_links = generate_social_links(shareable_link, f"Check out this litter on DogBreederPlus!")
+    return render_template('litter_detail.html', litter=litter, DogStatus=DogStatus, shareable_link=shareable_link, social_links=social_links)
 
 
 @bp.route('/add_litter', methods=['GET', 'POST'])
@@ -141,13 +152,7 @@ def edit_litter(id):
     all_dogs = Dog.query.filter(Dog.user_id == current_user.id).order_by(Dog.date_of_birth).all()
     return render_template('edit_litter.html', litter=litter, dogs=all_dogs)
 
-@bp.route('/litter/<int:id>')
-def litter_detail(id):
-    litter = Litter.query.get_or_404(id)
-    if not litter.is_public and (not current_user.is_authenticated or current_user.id != litter.user_id):
-        flash('This litter is not publicly visible.', 'error')
-        return redirect(url_for('main.home'))
-    return render_template('litter_detail.html', litter=litter, DogStatus=DogStatus)
+
 
 @bp.route('/litter_image/<int:image_id>')
 def get_litter_image(image_id):

@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
 from flask_login import login_required, current_user
-from app.models import User, Dog, Litter, DogStatus
+from app.models import User, Dog, Litter, DogStatus, AccountType
 from app.extensions import db
-from app.utils import format_url
+from app.utils import format_url, generate_shareable_link, generate_social_links
 from werkzeug.utils import secure_filename
 from io import BytesIO
 from datetime import datetime
@@ -24,9 +24,10 @@ def user_settings():
         'address': current_user.address,
         'city': current_user.city,
         'state': current_user.state,
-        'country': current_user.country
+        'country': current_user.country,
+        'account_type': current_user.account_type,  
     }
-    return render_template('user_settings.html', user_data=user_data)
+    return render_template('user_settings.html', user_data=user_data, AccountType=AccountType)
 
 @bp.route('/update_profile', methods=['POST'])
 @login_required
@@ -42,6 +43,7 @@ def update_profile():
     current_user.location = request.form.get('location', '').strip() or None
     current_user.phone_number = request.form.get('phone_number', '').strip() or None
     current_user.bio = request.form.get('bio', '').strip() or None
+    
 
     current_user.address = request.form.get('address')
     current_user.city = request.form.get('city')
@@ -53,6 +55,8 @@ def update_profile():
     current_user.website = format_url(request.form.get('website', '').strip()) or None
     current_user.facebook = format_url(request.form.get('facebook', '').strip()) or None
     current_user.instagram = format_url(request.form.get('instagram', '').strip()) or None
+
+    # Note: We're not changing the account_type here
 
     db.session.commit()
 
@@ -106,6 +110,11 @@ def user_profile(username):
         'country': user.country
     }
 
+    shareable_link = generate_shareable_link('user.user_profile', username=username)
+    social_links = generate_social_links(shareable_link, f"Check out {user.username}'s profile on DogBreederPlus!")
+   
+                           
+
     return render_template('user_profile.html', 
                            user=user, 
                            dogs=dogs,
@@ -116,4 +125,31 @@ def user_profile(username):
                            is_own_profile=is_own_profile,
                            DogStatus=DogStatus,
                            user_data=user_data,
-                           date=datetime.now().date())
+                           shareable_link=shareable_link, social_links=social_links)
+
+
+
+
+
+
+
+
+
+####################   Changing Account Types    ##########################
+
+@bp.route('/account_management')
+@login_required
+def account_management():
+    return render_template('account_management.html', user=current_user, AccountType=AccountType)
+
+@bp.route('/change_account_type', methods=['POST'])
+@login_required
+def change_account_type():
+    new_type = request.form.get('account_type')
+    if new_type in AccountType.__members__:
+        current_user.account_type = AccountType[new_type]
+        db.session.commit()
+        flash(f'Account type changed to {new_type}', 'success')
+    else:
+        flash('Invalid account type', 'error')
+    return redirect(url_for('user.account_management'))
