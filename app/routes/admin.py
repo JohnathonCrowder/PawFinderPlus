@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, abort, request, jsonify
+from flask import Blueprint, render_template, abort, request, jsonify, current_app
 from flask_login import login_required, current_user
 from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus,AppointmentCategory
 from app.extensions import db
@@ -8,6 +8,7 @@ from flask import render_template, request, send_file, flash, redirect, url_for
 from werkzeug.utils import secure_filename
 from app.admin.backup import create_backup, restore_backup, list_backups
 import os
+import time
 
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -492,25 +493,90 @@ def backup_restore():
     backups = list_backups()
     return render_template('admin/backup_restore.html', backups=backups)
 
-@bp.route('/download_backup/<filename>')
+@bp.route('/database-management', methods=['GET', 'POST'])
+@login_required
+def database_management():
+    if not current_user.is_admin:
+        abort(403)  # Forbidden
+
+    if request.method == 'POST':
+        if 'create_backup' in request.form:
+            try:
+                backup_file = create_backup()
+                flash(f'Backup created successfully: {os.path.basename(backup_file)}', 'success')
+            except Exception as e:
+                flash(f'Error creating backup: {str(e)}', 'error')
+        elif 'restore_backup' in request.form:
+            if 'backup_file' not in request.files:
+                flash('No file part', 'error')
+            else:
+                file = request.files['backup_file']
+                if file.filename == '':
+                    flash('No selected file', 'error')
+                elif file and file.filename.endswith('.zip'):
+                    try:
+                        filename = secure_filename(file.filename)
+                        file_path = os.path.join(current_app.config['BACKUP_DIR'], filename)
+                        file.save(file_path)
+                        restore_backup(file_path)
+                        flash('Database restored successfully from backup', 'success')
+                        
+                        # Schedule file deletion
+                        def delete_file(file_path, retries=5, delay=1):
+                            for _ in range(retries):
+                                try:
+                                    os.remove(file_path)
+                                    break
+                                except PermissionError:
+                                    time.sleep(delay)
+                            else:
+                                current_app.logger.warning(f"Could not delete file: {file_path}")
+
+                        import threading
+                        threading.Thread(target=delete_file, args=(file_path,)).start()
+
+                        # Reconnect to the database
+                        db.engine.dispose()
+                        db.session.remove()
+                        
+                        # Redirect to force a new request and reconnection
+                        return redirect(url_for('admin.database_management'))
+                    except Exception as e:
+                        flash(f'Error restoring backup: {str(e)}', 'error')
+                else:
+                    flash('Invalid file format. Please upload a zip file.', 'error')
+
+    backups = list_backups()
+    return render_template('admin/database_management.html', backups=backups)
+
+
+@bp.route('/download-backup/<filename>')
 @login_required
 def download_backup(filename):
     if not current_user.is_admin:
-        abort(403)
+        abort(403)  # Forbidden
 
-    return send_file(os.path.join(current_app.config['BACKUP_DIR'], filename), as_attachment=True)
+    backup_path = os.path.join(current_app.config['BACKUP_DIR'], filename)
+    if os.path.exists(backup_path):
+        return send_file(backup_path, as_attachment=True)
+    else:
+        flash('Backup file not found', 'error')
+        return redirect(url_for('admin.database_management'))
 
-@bp.route('/delete_backup/<filename>', methods=['POST'])
+@bp.route('/delete-backup/<filename>', methods=['POST'])
 @login_required
 def delete_backup(filename):
     if not current_user.is_admin:
-        abort(403)
+        abort(403)  # Forbidden
 
     file_path = os.path.join(current_app.config['BACKUP_DIR'], filename)
     if os.path.exists(file_path):
-        os.remove(file_path)
-        flash('Backup deleted successfully', 'success')
+        try:
+            os.remove(file_path)
+            flash('Backup deleted successfully', 'success')
+        except Exception as e:
+            flash(f'Error deleting backup: {str(e)}', 'error')
     else:
         flash('Backup file not found', 'error')
 
-    return redirect(url_for('admin.backup_restore'))
+    return redirect(url_for('admin.database_management'))

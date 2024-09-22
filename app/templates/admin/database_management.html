@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Database Management - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Database Management</h1>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded-md {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Create Backup -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">Create Backup</h2>
+            <form action="{{ url_for('admin.database_management') }}" method="post">
+                <button type="submit" name="create_backup" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                    Create New Backup
+                </button>
+            </form>
+        </div>
+
+        <!-- Restore Backup -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">Restore Backup</h2>
+            <form action="{{ url_for('admin.database_management') }}" method="post" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <input type="file" name="backup_file" accept=".zip" required class="border rounded p-2 w-full">
+                </div>
+                <button type="submit" name="restore_backup" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-300" onclick="return confirm('Are you sure you want to restore this backup? This will overwrite your current database.');">
+                    Restore Backup
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Backup History -->
+    <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+        <h2 class="text-2xl font-semibold mb-4">Backup History</h2>
+        {% if backups %}
+        <div class="overflow-x-auto">
+            <table class="w-full table-auto">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="px-4 py-2 text-left">Filename</th>
+                        <th class="px-4 py-2 text-left">Date</th>
+                        <th class="px-4 py-2 text-left">Size</th>
+                        <th class="px-4 py-2 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in backups %}
+                    <tr class="border-b">
+                        <td class="px-4 py-2">{{ backup.filename }}</td>
+                        <td class="px-4 py-2">{{ backup.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td class="px-4 py-2">{{ (backup.size / 1024 / 1024) | round(2) }} MB</td>
+                        <td class="px-4 py-2">
+                            <a href="{{ url_for('admin.download_backup', filename=backup.filename) }}" class="text-blue-500 hover:text-blue-600 mr-2">Download</a>
+                            <form action="{{ url_for('admin.delete_backup', filename=backup.filename) }}" method="post" class="inline">
+                                <button type="submit" class="text-red-500 hover:text-red-600" onclick="return confirm('Are you sure you want to delete this backup?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-gray-600">No backups available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.querySelector('input[name="backup_file"]').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const maxSize = 104857600; // 100 MB in bytes
+    if (file.size > maxSize) {
+        alert('File is too large. Maximum size is 100 MB.');
+        this.value = ''; // Clear the file input
+    }
+});
+</script>
+{% endblock %}
