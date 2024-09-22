@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, abort, request, jsonify
 from flask_login import login_required, current_user
-from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus
+from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus,AppointmentCategory
 from app.extensions import db
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from datetime import datetime, timedelta
 
 
@@ -138,17 +138,117 @@ def dog_management():
 def litter_management():
     if not current_user.is_admin:
         abort(403)
-    litters = Litter.query.all()
-    return render_template('admin/litter_management.html', litters=litters)
+
+    # Get filter parameters from request
+    breed = request.args.get('breed')
+    age = request.args.get('age')
+    search = request.args.get('search', '')
+
+    # Start with base query
+    query = Litter.query
+
+    # Apply filters
+    if breed:
+        query = query.filter(or_(Litter.father.has(breed=breed), Litter.mother.has(breed=breed)))
+    
+    if age:
+        today = datetime.utcnow().date()
+        if age == '0-8 weeks':
+            date_limit = today - timedelta(weeks=8)
+            query = query.filter(Litter.date_of_birth >= date_limit)
+        elif age == '8-16 weeks':
+            start_date = today - timedelta(weeks=16)
+            end_date = today - timedelta(weeks=8)
+            query = query.filter(Litter.date_of_birth.between(start_date, end_date))
+        elif age == '16+ weeks':
+            date_limit = today - timedelta(weeks=16)
+            query = query.filter(Litter.date_of_birth <= date_limit)
+
+    if search:
+        query = query.filter(or_(
+            Litter.name.ilike(f'%{search}%'),
+            Litter.father.has(Dog.name.ilike(f'%{search}%')),
+            Litter.mother.has(Dog.name.ilike(f'%{search}%'))
+        ))
+
+    # Execute query
+    litters = query.all()
+
+    # Get unique breeds for filter options
+    breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
+    breeds = [breed[0] for breed in breeds if breed[0]]
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('admin/partials/litter_list.html', 
+                               litters=litters)
+    else:
+        return render_template('admin/litter_management.html', 
+                               litters=litters, 
+                               breeds=breeds,
+                               current_breed=breed,
+                               current_age=age,
+                               search=search)
 
 @bp.route('/appointments')
 @login_required
 def appointment_management():
     if not current_user.is_admin:
         abort(403)
-    appointments = VetAppointment.query.all()
+
+    # Get filter parameters from request
+    status = request.args.get('status')
+    category = request.args.get('category')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    search = request.args.get('search', '')
+
+    # Start with base query
+    query = VetAppointment.query
+
+    # Apply filters
     now = datetime.utcnow()
-    return render_template('admin/appointment_management.html', appointments=appointments, now=now)
+    if status == 'upcoming':
+        query = query.filter(VetAppointment.date >= now)
+    elif status == 'past':
+        query = query.filter(VetAppointment.date < now)
+    elif status == 'completed':
+        query = query.filter(VetAppointment.completed == True)
+
+    if category:
+        query = query.filter(VetAppointment.category == AppointmentCategory[category])
+
+    if start_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        query = query.filter(VetAppointment.date >= start_date)
+
+    if end_date:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        query = query.filter(VetAppointment.date <= end_date)
+
+    if search:
+        query = query.join(Dog).join(User).filter(or_(
+            Dog.name.ilike(f'%{search}%'),
+            User.username.ilike(f'%{search}%'),
+            VetAppointment.veterinarian.ilike(f'%{search}%')
+        ))
+
+    # Execute query
+    appointments = query.order_by(VetAppointment.date).all()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('admin/partials/appointment_list.html', 
+                               appointments=appointments,
+                               now=now)
+    else:
+        return render_template('admin/appointment_management.html', 
+                               appointments=appointments,
+                               AppointmentCategory=AppointmentCategory,
+                               now=now,
+                               current_status=status,
+                               current_category=category,
+                               current_start_date=start_date,
+                               current_end_date=end_date,
+                               search=search)
 
 
 
