@@ -6,6 +6,7 @@ from . import litter
 from . import user
 from . import message
 from . import vet
+from . import blog
 
 def init_app(app):
     app.register_blueprint(main.bp)
@@ -16,5 +17,6 @@ def init_app(app):
     app.register_blueprint(message.bp)
     app.register_blueprint(vet.bp)
     app.register_blueprint(admin.bp)
+    app.register_blueprint(blog.bp)
 
     

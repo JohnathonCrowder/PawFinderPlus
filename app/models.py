@@ -5,6 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from sqlalchemy import LargeBinary
 from enum import Enum
+from datetime import datetime
+
 
 class DogStatus(Enum):
     AVAILABLE_NOW = "Available Now"
@@ -164,3 +166,18 @@ class LitterImage(db.Model):
     mimetype = db.Column(db.String(50), nullable=False)
     litter_id = db.Column(db.Integer, db.ForeignKey('litter.id'), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class BlogPost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_published = db.Column(db.Boolean, default=False)
+
+    author = db.relationship('User', backref='blog_posts')
+
+    def __repr__(self):
+        return f'<BlogPost {self.title}>'

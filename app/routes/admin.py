@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, abort, request, jsonify, current_app
 from flask_login import login_required, current_user
-from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus,AppointmentCategory
+from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus,AppointmentCategory , BlogPost
 from app.extensions import db
 from sqlalchemy import func, or_, extract, distinct
 from datetime import datetime, timedelta
@@ -580,3 +580,16 @@ def delete_backup(filename):
         flash('Backup file not found', 'error')
 
     return redirect(url_for('admin.database_management'))
+
+
+
+###########   Blog Routes   ##########################
+
+
+@bp.route('/blog_management')
+@login_required
+def blog_management():
+    if not current_user.is_admin:
+        abort(403)
+    posts = BlogPost.query.order_by(BlogPost.created_at.desc()).all()
+    return render_template('admin/blog_management.html', posts=posts)
