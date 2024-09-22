@@ -1,15 +1,80 @@
 {% extends "base.html" %}
 
+{% block title %}{{ post.title }} - DogBreederPlus Blog{% endblock %}
+
 {% block content %}
-<h1>{{ post.title }}</h1>
-<p>By {{ post.author.username }} on {{ post.created_at.strftime('%B %d, %Y') }}</p>
-{% if current_user.id == post.author_id %}
-<a href="{{ url_for('blog.edit_post', post_id=post.id) }}" class="btn btn-secondary">Edit</a>
-<form action="{{ url_for('blog.delete_post', post_id=post.id) }}" method="POST" style="display:inline;">
-    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this post?');">Delete</button>
-</form>
+<div class="bg-gray-100 min-h-screen py-12">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+            {% if post.image_filename %}
+<img src="{{ url_for('blog.get_blog_image', post_id=post.id) }}" alt="{{ post.title }}">
 {% endif %}
-<div class="post-content">
-    {{ post.content }}
+            
+            <div class="p-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ post.title }}</h1>
+                
+                <div class="flex items-center text-gray-600 mb-8">
+                    <img class="w-10 h-10 rounded-full mr-4" src="{{ url_for('user.get_profile_picture', user_id=post.author.id) }}" alt="{{ post.author.username }}">
+                    <div>
+                        <p class="font-semibold">{{ post.author.username }}</p>
+                        <p class="text-sm">{{ post.created_at.strftime('%B %d, %Y') }}</p>
+                    </div>
+                </div>
+
+                <div class="prose max-w-none mb-8">
+                    {{ post.content|safe }}
+                </div>
+
+                {% if post.categories %}
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-2">Categories:</h3>
+                    <div class="flex flex-wrap">
+                        {% for category in post.categories %}
+                        <a href="{{ url_for('blog.blog_index', category=category.name) }}" class="bg-indigo-100 text-indigo-800 rounded-full px-3 py-1 text-sm font-semibold mr-2 mb-2">{{ category.name }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="border-t border-gray-200 pt-8">
+                    <h3 class="text-2xl font-semibold mb-4">Share this post:</h3>
+                    <div class="flex space-x-4">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            <i class="fab fa-facebook-square text-2xl"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url={{ request.url|urlencode }}&text={{ post.title|urlencode }}" target="_blank" class="text-blue-400 hover:text-blue-600">
+                            <i class="fab fa-twitter-square text-2xl"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.url|urlencode }}&title={{ post.title|urlencode }}" target="_blank" class="text-blue-700 hover:text-blue-900">
+                            <i class="fab fa-linkedin text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if related_posts %}
+        <div class="max-w-4xl mx-auto mt-12">
+            <h2 class="text-2xl font-bold mb-6">Related Posts</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for related_post in related_posts %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    {% if post.image_filename %}
+<img src="{{ url_for('blog.get_blog_image', post_id=post.id) }}" alt="{{ post.title }}">
+{% endif %}
+                    
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">
+                            <a href="{{ url_for('blog.blog_post', post_id=related_post.id) }}" class="text-gray-900 hover:text-indigo-600">{{ related_post.title }}</a>
+                        </h3>
+                        <p class="text-gray-600 mb-4">{{ related_post.content|truncate(100) }}</p>
+                        <span class="text-sm text-gray-500"><i class="far fa-calendar mr-2"></i>{{ related_post.created_at.strftime('%B %d, %Y') }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

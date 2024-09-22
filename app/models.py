@@ -3,7 +3,7 @@ from .extensions import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from sqlalchemy import LargeBinary
+from sqlalchemy import LargeBinary, Table
 from enum import Enum
 from datetime import datetime
 
@@ -168,6 +168,12 @@ class LitterImage(db.Model):
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+# Add this association table for the many-to-many relationship
+blog_post_category = Table('blog_post_category', db.Model.metadata,
+    db.Column('blog_post_id', db.Integer, db.ForeignKey('blog_post.id')),
+    db.Column('category_id', db.Integer, db.ForeignKey('category.id'))
+)
+
 class BlogPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -176,8 +182,23 @@ class BlogPost(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_published = db.Column(db.Boolean, default=False)
+    
+    # New image fields
+    image_data = db.Column(db.LargeBinary)
+    image_filename = db.Column(db.String(255))
+    image_mimetype = db.Column(db.String(50))
 
     author = db.relationship('User', backref='blog_posts')
+    categories = db.relationship('Category', secondary=blog_post_category, back_populates='posts')
 
     def __repr__(self):
         return f'<BlogPost {self.title}>'
+    
+
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    posts = db.relationship('BlogPost', secondary=blog_post_category, back_populates='categories')
+
+    def __repr__(self):
+        return f'<Category {self.name}>'

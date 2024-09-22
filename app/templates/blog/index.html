@@ -1,15 +1,113 @@
 {% extends "base.html" %}
 
+{% block title %}DogBreederPlus Blog{% endblock %}
+
 {% block content %}
-<h1>Blog Posts</h1>
-{% if current_user.is_authenticated %}
-<a href="{{ url_for('blog.new_post') }}" class="btn btn-primary">New Post</a>
+<div class="bg-gray-100 min-h-screen py-12">
+    <div class="container mx-auto px-4">
+        <h1 class="text-4xl font-bold text-center mb-12 text-gray-800">DogBreederPlus Blog</h1>
+
+        {% if featured_post %}
+        <!-- Featured Post -->
+        <div class="mb-12">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="md:flex">
+                    <div class="md:flex-shrink-0">
+                        {% if featured_post.image %}
+                        <img class="h-48 w-full object-cover md:w-48" src="{{ url_for('static', filename='uploads/' + featured_post.image) }}" alt="{{ featured_post.title }}">
+                        {% else %}
+                        <div class="h-48 w-full md:w-48 bg-gray-300 flex items-center justify-center">
+                            <span class="text-gray-500 text-2xl">No Image</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="p-8">
+                        <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">Featured Post</div>
+                        <a href="{{ url_for('blog.blog_post', post_id=featured_post.id) }}" class="block mt-1 text-2xl leading-tight font-bold text-gray-900 hover:underline">{{ featured_post.title }}</a>
+                        <p class="mt-2 text-gray-600">{{ featured_post.content|truncate(200) }}</p>
+                        <div class="mt-4">
+                            <span class="text-gray-500"><i class="far fa-user mr-2"></i>{{ featured_post.author.username }}</span>
+                            <span class="ml-4 text-gray-500"><i class="far fa-calendar mr-2"></i>{{ featured_post.created_at.strftime('%B %d, %Y') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="flex flex-wrap -mx-4">
+            <!-- Main Content -->
+            <div class="w-full lg:w-2/3 px-4">
+                <div class="grid md:grid-cols-2 gap-8">
+                    {% for post in posts %}
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        {% if post.image_filename %}
+<img src="{{ url_for('blog.get_blog_image', post_id=post.id) }}" alt="{{ post.title }}">
 {% endif %}
-{% for post in posts %}
-<div class="post-preview">
-    <h2><a href="{{ url_for('blog.blog_post', post_id=post.id) }}">{{ post.title }}</a></h2>
-    <p>By {{ post.author.username }} on {{ post.created_at.strftime('%B %d, %Y') }}</p>
-    <p>{{ post.content[:200] }}...</p>
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold mb-2">
+                                <a href="{{ url_for('blog.blog_post', post_id=post.id) }}" class="text-gray-900 hover:text-indigo-600">{{ post.title }}</a>
+                            </h2>
+                            <p class="text-gray-600 mb-4">{{ post.content|truncate(100) }}</p>
+                            <div class="flex justify-between items-center text-sm text-gray-500">
+                                <span><i class="far fa-user mr-2"></i>{{ post.author.username }}</span>
+                                <span><i class="far fa-calendar mr-2"></i>{{ post.created_at.strftime('%B %d, %Y') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-12">
+                    <nav class="flex justify-center">
+                        <ul class="flex">
+                            {% for page in pagination.iter_pages() %}
+                                {% if page %}
+                                    <li>
+                                        <a href="{{ url_for('blog.blog_index', page=page) }}" class="px-3 py-2 mx-1 bg-white text-indigo-500 rounded-md {% if page == pagination.page %}border-2 border-indigo-500{% endif %}">
+                                            {{ page }}
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li><span class="px-3 py-2 mx-1">...</span></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="w-full lg:w-1/3 px-4 mt-12 lg:mt-0">
+                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Categories</h3>
+                    <ul class="space-y-2">
+                        {% for category in categories %}
+                        <li>
+                            <a href="{{ url_for('blog.blog_index', category=category.name) }}" class="text-indigo-600 hover:text-indigo-800">{{ category.name }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Recent Posts</h3>
+                    <ul class="space-y-4">
+                        {% for post in recent_posts %}
+                        <li>
+                            <a href="{{ url_for('blog.blog_post', post_id=post.id) }}" class="flex items-center">
+                                {% if post.image_filename %}
+<img src="{{ url_for('blog.get_blog_image', post_id=post.id) }}" alt="{{ post.title }}">
+{% endif %}
+                                <span class="text-gray-800 hover:text-indigo-600">{{ post.title }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-{% endfor %}
 {% endblock %}

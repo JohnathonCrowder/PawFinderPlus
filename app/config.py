@@ -9,6 +9,7 @@ class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     BACKUP_DIR = os.path.join(BASE_DIR, '..', 'backups')
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(INSTANCE_DIR, 'dogbreeder.db')
+    POSTS_PER_PAGE = 10
     
     @classmethod
     def init_app(cls, app):

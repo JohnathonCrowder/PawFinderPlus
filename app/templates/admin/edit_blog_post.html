@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Edit Blog Post</h1>
+
+    <form action="{{ url_for('admin.edit_blog_post', post_id=post.id) }}" method="post" enctype="multipart/form-data" class="space-y-6">
+        <div>
+            <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+            <input type="text" name="title" id="title" value="{{ post.title }}" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+        </div>
+
+        <div>
+            <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
+            <textarea name="content" id="content" rows="10" required
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">{{ post.content }}</textarea>
+        </div>
+
+        <div>
+            <label for="image" class="block text-sm font-medium text-gray-700">Image</label>
+            <input type="file" name="image" id="image" accept="image/*"
+                   class="mt-1 block w-full">
+            {% if post.image %}
+            <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="Current image" class="mt-2 max-w-xs">
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Categories</label>
+            <div class="mt-2 space-y-2">
+                {% for category in categories %}
+                <label class="inline-flex items-center">
+                    <input type="checkbox" name="categories" value="{{ category.id }}"
+                           {% if category in post.categories %}checked{% endif %}
+                           class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    <span class="ml-2">{{ category.name }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="is_published" {% if post.is_published %}checked{% endif %}
+                       class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                <span class="ml-2">Publish</span>
+            </label>
+        </div>
+
+        <div>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                Update Post
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

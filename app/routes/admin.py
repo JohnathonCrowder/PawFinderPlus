@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, abort, request, jsonify, current_app
 from flask_login import login_required, current_user
-from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus,AppointmentCategory , BlogPost
+from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus,AppointmentCategory , BlogPost, Category
 from app.extensions import db
 from sqlalchemy import func, or_, extract, distinct
 from datetime import datetime, timedelta
@@ -626,3 +626,67 @@ def toggle_publish(post_id):
     db.session.commit()
     
     return jsonify({'success': True, 'is_published': post.is_published})
+
+
+@bp.route('/admin/categories')
+@login_required
+def manage_categories():
+    if not current_user.is_admin:
+        abort(403)
+    categories = Category.query.all()
+    return render_template('admin/manage_categories.html', categories=categories)
+
+@bp.route('/admin/categories/add', methods=['POST'])
+@login_required
+def add_category():
+    if not current_user.is_admin:
+        abort(403)
+    name = request.form.get('name')
+    if name:
+        category = Category(name=name)
+        db.session.add(category)
+        db.session.commit()
+        flash('Category added successfully', 'success')
+    return redirect(url_for('admin.manage_categories'))
+
+@bp.route('/admin/categories/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_category(id):
+    if not current_user.is_admin:
+        abort(403)
+    category = Category.query.get_or_404(id)
+    db.session.delete(category)
+    db.session.commit()
+    flash('Category deleted successfully', 'success')
+    return redirect(url_for('admin.manage_categories'))
+
+@bp.route('/admin/blog/edit/<int:post_id>', methods=['GET', 'POST'])
+@login_required
+def edit_blog_post(post_id):
+    if not current_user.is_admin:
+        abort(403)
+    post = BlogPost.query.get_or_404(post_id)
+    categories = Category.query.all()
+
+    if request.method == 'POST':
+        post.title = request.form['title']
+        post.content = request.form['content']
+        post.is_published = 'is_published' in request.form
+        
+        # Handle image upload
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+                post.image = filename
+
+        # Update categories
+        selected_categories = request.form.getlist('categories')
+        post.categories = Category.query.filter(Category.id.in_(selected_categories)).all()
+
+        db.session.commit()
+        flash('Blog post updated successfully', 'success')
+        return redirect(url_for('admin.blog_management'))
+
+    return render_template('admin/edit_blog_post.html', post=post, categories=categories)
