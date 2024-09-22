@@ -4,6 +4,10 @@ from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus
 from app.extensions import db
 from sqlalchemy import func, or_, extract, distinct
 from datetime import datetime, timedelta
+from flask import render_template, request, send_file, flash, redirect, url_for
+from werkzeug.utils import secure_filename
+from app.admin.backup import create_backup, restore_backup, list_backups
+import os
 
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -445,3 +449,68 @@ def delete_appointment(appointment_id):
     db.session.commit()
     flash(f'Appointment for {appointment.dog.name} has been deleted.', 'success')
     return redirect(url_for('admin.appointment_management'))
+
+
+
+
+
+
+
+
+
+
+#################    Database Backup Routes   ##############################
+
+
+
+
+@bp.route('/backup', methods=['GET', 'POST'])
+@login_required
+def backup_restore():
+    if not current_user.is_admin:
+        abort(403)
+
+    if request.method == 'POST':
+        if 'create_backup' in request.form:
+            backup_file = create_backup()
+            flash('Backup created successfully', 'success')
+        elif 'restore_backup' in request.form:
+            if 'backup_file' not in request.files:
+                flash('No file part', 'error')
+            else:
+                file = request.files['backup_file']
+                if file.filename == '':
+                    flash('No selected file', 'error')
+                elif file:
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(current_app.config['BACKUP_DIR'], filename)
+                    file.save(file_path)
+                    restore_backup(file_path)
+                    os.remove(file_path)  # Remove the temporary file
+                    flash('Backup restored successfully', 'success')
+
+    backups = list_backups()
+    return render_template('admin/backup_restore.html', backups=backups)
+
+@bp.route('/download_backup/<filename>')
+@login_required
+def download_backup(filename):
+    if not current_user.is_admin:
+        abort(403)
+
+    return send_file(os.path.join(current_app.config['BACKUP_DIR'], filename), as_attachment=True)
+
+@bp.route('/delete_backup/<filename>', methods=['POST'])
+@login_required
+def delete_backup(filename):
+    if not current_user.is_admin:
+        abort(403)
+
+    file_path = os.path.join(current_app.config['BACKUP_DIR'], filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        flash('Backup deleted successfully', 'success')
+    else:
+        flash('Backup file not found', 'error')
+
+    return redirect(url_for('admin.backup_restore'))
