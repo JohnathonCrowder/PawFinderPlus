@@ -591,5 +591,38 @@ def delete_backup(filename):
 def blog_management():
     if not current_user.is_admin:
         abort(403)
-    posts = BlogPost.query.order_by(BlogPost.created_at.desc()).all()
-    return render_template('admin/blog_management.html', posts=posts)
+    
+    search = request.args.get('search', '')
+    status = request.args.get('status', 'all')
+    author = request.args.get('author', 'all')
+    
+    query = BlogPost.query
+    
+    if search:
+        query = query.filter(or_(BlogPost.title.ilike(f'%{search}%'), BlogPost.content.ilike(f'%{search}%')))
+    
+    if status != 'all':
+        query = query.filter(BlogPost.is_published == (status == 'published'))
+    
+    if author != 'all':
+        query = query.filter(BlogPost.author_id == author)
+    
+    posts = query.order_by(BlogPost.created_at.desc()).all()
+    authors = User.query.all()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(render_template('admin/partials/blog_post_list.html', posts=posts))
+    
+    return render_template('admin/blog_management.html', posts=posts, authors=authors)
+
+@bp.route('/blog_management/toggle_publish/<int:post_id>', methods=['POST'])
+@login_required
+def toggle_publish(post_id):
+    if not current_user.is_admin:
+        abort(403)
+    
+    post = BlogPost.query.get_or_404(post_id)
+    post.is_published = not post.is_published
+    db.session.commit()
+    
+    return jsonify({'success': True, 'is_published': post.is_published})

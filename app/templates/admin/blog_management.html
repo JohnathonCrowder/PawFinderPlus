@@ -1,34 +1,129 @@
 {% extends "base.html" %}
 
+{% block title %}Blog Management - Admin Dashboard{% endblock %}
+
 {% block content %}
-<h1>Blog Management</h1>
-<a href="{{ url_for('blog.new_post') }}" class="btn btn-primary mb-3">New Post</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Created</th>
-            <th>Published</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for post in posts %}
-        <tr>
-            <td>{{ post.title }}</td>
-            <td>{{ post.author.username }}</td>
-            <td>{{ post.created_at.strftime('%Y-%m-%d') }}</td>
-            <td>{{ 'Yes' if post.is_published else 'No' }}</td>
-            <td>
-                <a href="{{ url_for('blog.blog_post', post_id=post.id) }}" class="btn btn-sm btn-info">View</a>
-                <a href="{{ url_for('blog.edit_post', post_id=post.id) }}" class="btn btn-sm btn-secondary">Edit</a>
-                <form action="{{ url_for('blog.delete_post', post_id=post.id) }}" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this post?');">Delete</button>
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Blog Management</h1>
+        <a href="{{ url_for('blog.new_post') }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105">
+            <i class="fas fa-plus mr-2"></i>Add New Post
+        </a>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <!-- Filter Section -->
+        <div class="p-4 border-b">
+            <button id="toggleFilters" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition duration-300 ease-in-out">
+                <i class="fas fa-filter mr-2"></i>Toggle Filters
+            </button>
+            <div id="filterSection" class="hidden mt-4">
+                <form id="filterForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                            <select id="status" name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                <option value="all">All Posts</option>
+                                <option value="published">Published</option>
+                                <option value="draft">Draft</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="author" class="block text-sm font-medium text-gray-700">Author</label>
+                            <select id="author" name="author" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                <option value="all">All Authors</option>
+                                {% for author in authors %}
+                                    <option value="{{ author.id }}">{{ author.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
+                            <input type="text" id="search" name="search" placeholder="Search posts..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                        </div>
+                    </div>
                 </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            </div>
+        </div>
+
+        <!-- Blog Post List Container -->
+        <div id="blogPostListContainer">
+            {% include "admin/partials/blog_post_list.html" %}
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleFilters = document.getElementById('toggleFilters');
+    const filterSection = document.getElementById('filterSection');
+    const filterForm = document.getElementById('filterForm');
+
+    toggleFilters.addEventListener('click', function() {
+        filterSection.classList.toggle('hidden');
+    });
+
+    function submitForm() {
+        const formData = new FormData(filterForm);
+        const searchParams = new URLSearchParams(formData);
+
+        fetch(`{{ url_for('admin.blog_management') }}?${searchParams.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const blogPostListContainer = document.getElementById('blogPostListContainer');
+            blogPostListContainer.innerHTML = html;
+            history.pushState(null, '', `{{ url_for('admin.blog_management') }}?${searchParams.toString()}`);
+        });
+    }
+
+    // Debounce function for search input
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Add event listener for search input with debounce
+    const searchInput = document.getElementById('search');
+    const debouncedSubmit = debounce(() => submitForm(), 300);
+    searchInput.addEventListener('input', debouncedSubmit);
+
+    // Auto-submit form on select changes
+    const selectInputs = document.querySelectorAll('#filterForm select');
+    selectInputs.forEach(input => {
+        input.addEventListener('change', submitForm);
+    });
+
+    // Toggle publish status
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('toggle-publish')) {
+            e.preventDefault();
+            const postId = e.target.dataset.postId;
+            fetch(`{{ url_for('admin.toggle_publish', post_id=0) }}`.replace('0', postId), {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    e.target.textContent = data.is_published ? 'Unpublish' : 'Publish';
+                    e.target.classList.toggle('bg-green-500');
+                    e.target.classList.toggle('bg-yellow-500');
+                }
+            });
+        }
+    });
+});
+</script>
 {% endblock %}
