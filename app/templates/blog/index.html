@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Blog Posts</h1>
+{% if current_user.is_authenticated %}
+<a href="{{ url_for('blog.new_post') }}" class="btn btn-primary">New Post</a>
+{% endif %}
+{% for post in posts %}
+<div class="post-preview">
+    <h2><a href="{{ url_for('blog.blog_post', post_id=post.id) }}">{{ post.title }}</a></h2>
+    <p>By {{ post.author.username }} on {{ post.created_at.strftime('%B %d, %Y') }}</p>
+    <p>{{ post.content[:200] }}...</p>
+</div>
+{% endfor %}
+{% endblock %}
