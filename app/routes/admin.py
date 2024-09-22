@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, abort, request, jsonify
 from flask_login import login_required, current_user
 from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus,AppointmentCategory
 from app.extensions import db
-from sqlalchemy import func, or_, extract
+from sqlalchemy import func, or_, extract, distinct
 from datetime import datetime, timedelta
 
 
@@ -260,16 +260,85 @@ def litter_management():
     breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
     breeds = [breed[0] for breed in breeds if breed[0]]
 
+    # Get data for graphs and statistics
+    total_litters = Litter.query.count()
+    
+    # Count total puppies (dogs associated with litters)
+    total_puppies = db.session.query(func.count(distinct(Dog.id))).\
+        join(Litter.puppies).scalar() or 0
+    
+    # Litters added in the last 30 days
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    new_litters_last_30_days = Litter.query.filter(Litter.date_of_birth >= thirty_days_ago).count()
+    
+    # Average puppies per litter
+    avg_puppies_per_litter = db.session.query(
+        func.avg(
+            db.session.query(func.count(Dog.id))
+            .join(Litter.puppies)
+            .filter(Litter.id == Litter.id)
+            .group_by(Litter.id)
+            .correlate(Litter)
+        )
+    ).scalar() or 0
+
+    # Round to 2 decimal places
+    avg_puppies_per_litter = round(avg_puppies_per_litter, 2)
+    
+    # Top 5 breeds in litters
+    top_breeds = db.session.query(Dog.breed, func.count(distinct(Litter.id)).label('count')).\
+        join(Litter.puppies).\
+        group_by(Dog.breed).\
+        order_by(func.count(distinct(Litter.id)).desc()).\
+        limit(5).all()
+    
+    # Litter registration over time (last 12 months)
+    twelve_months_ago = datetime.utcnow() - timedelta(days=365)
+    litter_growth = db.session.query(
+        func.strftime('%Y-%m', Litter.date_of_birth).label('month'),
+        func.count(Litter.id)
+    ).filter(Litter.date_of_birth >= twelve_months_ago).group_by('month').order_by('month').all()
+
+    litter_growth_formatted = [
+        {
+            'date': datetime.strptime(month, '%Y-%m').strftime('%B %Y'),
+            'count': count
+        }
+        for month, count in litter_growth
+    ]
+
+    # Litter size distribution
+    litter_sizes = db.session.query(
+        func.count(Dog.id).label('size'),
+        func.count(func.distinct(Litter.id)).label('count')
+    ).select_from(Litter).join(Litter.puppies).group_by(Litter.id).all()
+
+    # Process the results to get the distribution
+    size_distribution = {}
+    for size, _ in litter_sizes:
+        if size not in size_distribution:
+            size_distribution[size] = 0
+        size_distribution[size] += 1
+
+    litter_sizes = sorted(size_distribution.items())
+
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render_template('admin/partials/litter_list.html', 
                                litters=litters)
     else:
         return render_template('admin/litter_management.html', 
-                               litters=litters, 
-                               breeds=breeds,
-                               current_breed=breed,
-                               current_age=age,
-                               search=search)
+                           litters=litters, 
+                           breeds=breeds,
+                           current_breed=breed,
+                           current_age=age,
+                           search=search,
+                           total_litters=total_litters,
+                           total_puppies=total_puppies,
+                           new_litters_last_30_days=new_litters_last_30_days,
+                           avg_puppies_per_litter=avg_puppies_per_litter,
+                           top_breeds=top_breeds,
+                           litter_growth=litter_growth_formatted,
+                           litter_sizes=litter_sizes)
 
 @bp.route('/appointments')
 @login_required

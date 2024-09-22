@@ -1,57 +1,208 @@
 {% extends "base.html" %}
 
-{% block title %}Litter Management - Admin Dashboard{% endblock %}
+{% block title %}Litter Management Dashboard - Admin{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">Litter Management</h1>
+<div class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-gray-800">Litter Management Dashboard</h1>
 
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <!-- Filter Section -->
-        <div class="p-4 border-b">
-            <button id="toggleFilters" class="bg-blue-500 text-white px-4 py-2 rounded">
-                <i class="fas fa-filter mr-2"></i>Toggle Filters
-            </button>
-            <div id="filterSection" class="hidden mt-4">
-                <form id="filterForm" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="breed" class="block text-sm font-medium text-gray-700">Breed</label>
-                            <select id="breed" name="breed" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                <option value="">All Breeds</option>
-                                {% for breed in breeds %}
-                                    <option value="{{ breed }}" {% if breed == current_breed %}selected{% endif %}>{{ breed }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="age" class="block text-sm font-medium text-gray-700">Age of Litter</label>
-                            <select id="age" name="age" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                <option value="">All Ages</option>
-                                <option value="0-8 weeks" {% if current_age == '0-8 weeks' %}selected{% endif %}>0-8 weeks</option>
-                                <option value="8-16 weeks" {% if current_age == '8-16 weeks' %}selected{% endif %}>8-16 weeks</option>
-                                <option value="16+ weeks" {% if current_age == '16+ weeks' %}selected{% endif %}>16+ weeks</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
-                            <input type="text" id="search" name="search" placeholder="Search litters..." value="{{ search }}"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                        </div>
+        <!-- Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out transform hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Total Litters</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ total_litters }}</p>
                     </div>
-                </form>
+                    <div class="bg-blue-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out transform hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">New Litters (30 days)</p>
+                        <p class="text-3xl font-bold text-green-600">{{ new_litters_last_30_days }}</p>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out transform hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Total Puppies</p>
+                        <p class="text-3xl font-bold text-purple-600">{{ total_puppies }}</p>
+                    </div>
+                    <div class="bg-purple-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out transform hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Avg Puppies/Litter</p>
+                        <p class="text-3xl font-bold text-orange-600">{{ "%.1f"|format(avg_puppies_per_litter) }}</p>
+                    </div>
+                    <div class="bg-orange-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.871 4A17.926 17.926 0 003 12c0 2.874.673 5.59 1.871 8m14.13 0a17.926 17.926 0 001.87-8c0-2.874-.673-5.59-1.87-8M9 9h1.246a1 1 0 01.961.725l1.586 5.55a1 1 0 00.961.725H15m1-7h-.08a2 2 0 00-1.519.698L9.6 15.302A2 2 0 018.08 16H8"></path></svg>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Litter List Container -->
-        <div id="litterListContainer">
-            {% include "admin/partials/litter_list.html" %}
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Litter Registration (Last 12 Months)</h2>
+                <div class="h-64">
+                    <canvas id="litterGrowthChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Litter Size Distribution</h2>
+                <div class="h-64">
+                    <canvas id="litterSizeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Breeds -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Top 5 Breeds in Litters</h2>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {% for breed, count in top_breeds %}
+                <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-700">{{ breed }}</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ count }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Litter List Section -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Litter List</h2>
+            
+            <!-- Filter Section -->
+            <div class="mb-6">
+                <button id="toggleFilters" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    <i class="fas fa-filter mr-2"></i>Toggle Filters
+                </button>
+                <div id="filterSection" class="hidden mt-4">
+                    <form id="filterForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="breed" class="block text-sm font-medium text-gray-700">Breed</label>
+                                <select id="breed" name="breed" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                    <option value="">All Breeds</option>
+                                    {% for breed in breeds %}
+                                        <option value="{{ breed }}" {% if breed == current_breed %}selected{% endif %}>{{ breed }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="age" class="block text-sm font-medium text-gray-700">Age of Litter</label>
+                                <select id="age" name="age" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                    <option value="">All Ages</option>
+                                    <option value="0-8 weeks" {% if current_age == '0-8 weeks' %}selected{% endif %}>0-8 weeks</option>
+                                    <option value="8-16 weeks" {% if current_age == '8-16 weeks' %}selected{% endif %}>8-16 weeks</option>
+                                    <option value="16+ weeks" {% if current_age == '16+ weeks' %}selected{% endif %}>16+ weeks</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
+                                <input type="text" id="search" name="search" placeholder="Search litters..." value="{{ search }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Litter List Container -->
+            <div id="litterListContainer">
+                {% include "admin/partials/litter_list.html" %}
+            </div>
         </div>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Litter Growth Chart
+    var litterGrowthCtx = document.getElementById('litterGrowthChart').getContext('2d');
+    var litterGrowthChart = new Chart(litterGrowthCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for item in litter_growth %}'{{ item.date }}',{% endfor %}],
+            datasets: [{
+                label: 'New Litters',
+                data: [{% for item in litter_growth %}{{ item.count }},{% endfor %}],
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Litter Size Distribution Chart
+    var litterSizeCtx = document.getElementById('litterSizeChart').getContext('2d');
+    var litterSizeChart = new Chart(litterSizeCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for size, count in litter_sizes %}'{{ size }} puppies',{% endfor %}],
+            datasets: [{
+                label: 'Number of Litters',
+                data: [{% for size, count in litter_sizes %}{{ count }},{% endfor %}],
+                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                borderColor: '#3B82F6',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Filter functionality
     const toggleFilters = document.getElementById('toggleFilters');
     const filterSection = document.getElementById('filterSection');
     const filterForm = document.getElementById('filterForm');
