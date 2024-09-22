@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, abort
+from flask import Blueprint, render_template, abort, request, jsonify
 from flask_login import login_required, current_user
-from app.models import User, Dog, Litter, VetAppointment
+from app.models import User, Dog, Litter, VetAppointment, AccountType
 from app.extensions import db
 from sqlalchemy import func
 from datetime import datetime, timedelta
+
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -53,9 +54,41 @@ def admin_dashboard():
 def user_management():
     if not current_user.is_admin:
         abort(403)
-    users = User.query.all()
-    return render_template('admin/user_management.html', users=users)
 
+    # Get filter parameters from request
+    account_type = request.args.get('account_type')
+    is_admin = request.args.get('is_admin')
+    search = request.args.get('search', '')
+
+    # Start with base query
+    query = User.query
+
+    # Apply filters
+    if account_type:
+        query = query.filter(User.account_type == AccountType[account_type])
+    
+    if is_admin:
+        query = query.filter(User.is_admin == (is_admin.lower() == 'true'))
+
+    if search:
+        query = query.filter(User.username.ilike(f'%{search}%') | User.email.ilike(f'%{search}%'))
+
+    # Execute query
+    users = query.all()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('admin/partials/user_list.html', 
+                               users=users,
+                               AccountType=AccountType)
+    else:
+        return render_template('admin/user_management.html', 
+                               users=users, 
+                               AccountType=AccountType,
+                               current_account_type=account_type,
+                               current_is_admin=is_admin,
+                               search=search)
+    
+    
 @bp.route('/dogs')
 @login_required
 def dog_management():
