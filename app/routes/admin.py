@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, abort, request, jsonify
 from flask_login import login_required, current_user
-from app.models import User, Dog, Litter, VetAppointment, AccountType
+from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus
 from app.extensions import db
 from sqlalchemy import func
 from datetime import datetime, timedelta
@@ -94,8 +94,44 @@ def user_management():
 def dog_management():
     if not current_user.is_admin:
         abort(403)
-    dogs = Dog.query.all()
-    return render_template('admin/dog_management.html', dogs=dogs)
+
+    # Get filter parameters from request
+    breed = request.args.get('breed')
+    status = request.args.get('status')
+    search = request.args.get('search', '')
+
+    # Start with base query
+    query = Dog.query
+
+    # Apply filters
+    if breed:
+        query = query.filter(Dog.breed == breed)
+    
+    if status:
+        query = query.filter(Dog.status == DogStatus[status])
+
+    if search:
+        query = query.filter(Dog.name.ilike(f'%{search}%'))
+
+    # Execute query
+    dogs = query.all()
+
+    # Get unique breeds for filter options
+    breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
+    breeds = [breed[0] for breed in breeds if breed[0]]
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('admin/partials/dog_list.html', 
+                               dogs=dogs,
+                               DogStatus=DogStatus)
+    else:
+        return render_template('admin/dog_management.html', 
+                               dogs=dogs, 
+                               breeds=breeds,
+                               DogStatus=DogStatus,
+                               current_breed=breed,
+                               current_status=status,
+                               search=search)
 
 @bp.route('/litters')
 @login_required
