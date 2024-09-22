@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, abort, request, jsonify
 from flask_login import login_required, current_user
 from app.models import User, Dog, Litter, VetAppointment, AccountType, DogStatus,AppointmentCategory
 from app.extensions import db
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, extract
 from datetime import datetime, timedelta
 
 
@@ -76,6 +76,44 @@ def user_management():
     # Execute query
     users = query.all()
 
+    # Get data for graphs
+    total_users = User.query.count()
+    users_by_account_type = db.session.query(User.account_type, func.count(User.id)).group_by(User.account_type).all()
+    
+    # Users registered in the last 30 days
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    new_users_last_30_days = User.query.filter(User.created_at >= thirty_days_ago).count()
+    
+    # Users with dogs
+    users_with_dogs = db.session.query(func.count(func.distinct(Dog.user_id))).scalar()
+    
+    # Average dogs per user
+    total_dogs = Dog.query.count()
+    if total_users > 0:
+        avg_dogs_per_user = total_dogs / total_users
+    else:
+        avg_dogs_per_user = 0
+    
+    # User registration over time (last 12 months)
+    twelve_months_ago = datetime.utcnow() - timedelta(days=365)
+    user_growth = db.session.query(
+        extract('year', User.created_at).label('year'),
+        extract('month', User.created_at).label('month'),
+        func.count(User.id).label('count')
+    ).filter(User.created_at >= twelve_months_ago)\
+     .group_by('year', 'month')\
+     .order_by('year', 'month')\
+     .all()
+
+    # Format user_growth data for the template
+    user_growth_formatted = [
+        {
+            'date': datetime(year=int(year), month=int(month), day=1).strftime('%B %Y'),
+            'count': count
+        }
+        for year, month, count in user_growth
+    ]
+
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render_template('admin/partials/user_list.html', 
                                users=users,
@@ -86,7 +124,13 @@ def user_management():
                                AccountType=AccountType,
                                current_account_type=account_type,
                                current_is_admin=is_admin,
-                               search=search)
+                               search=search,
+                               total_users=total_users,
+                               users_by_account_type=users_by_account_type,
+                               new_users_last_30_days=new_users_last_30_days,
+                               users_with_dogs=users_with_dogs,
+                               avg_dogs_per_user=avg_dogs_per_user,
+                               user_growth=user_growth_formatted)
     
     
 @bp.route('/dogs')

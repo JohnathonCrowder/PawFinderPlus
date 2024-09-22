@@ -6,6 +6,38 @@
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold mb-6">User Management</h1>
 
+    <!-- User Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-2">Total Users</h2>
+            <p class="text-3xl font-bold text-blue-600">{{ total_users }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-2">New Users (30 days)</h2>
+            <p class="text-3xl font-bold text-green-600">{{ new_users_last_30_days }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-2">Users with Dogs</h2>
+            <p class="text-3xl font-bold text-purple-600">{{ users_with_dogs }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-2">Avg Dogs per User</h2>
+            <p class="text-3xl font-bold text-orange-600">{{ "%.2f"|format(avg_dogs_per_user) }}</p>
+        </div>
+    </div>
+
+    <!-- Graphs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Users by Account Type</h2>
+            <canvas id="accountTypeChart"></canvas>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">User Growth (Last 12 Months)</h2>
+            <canvas id="userGrowthChart"></canvas>
+        </div>
+    </div>
+
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
         <!-- Filter Section -->
         <div class="p-4 border-b">
@@ -99,6 +131,58 @@ document.addEventListener('DOMContentLoaded', function() {
     selectInputs.forEach(select => {
         select.addEventListener('change', submitForm);
     });
+});
+
+// Chart.js configurations
+document.addEventListener('DOMContentLoaded', function() {
+    // Account Type Chart
+    var accountTypeCtx = document.getElementById('accountTypeChart').getContext('2d');
+    var accountTypeChart = new Chart(accountTypeCtx, {
+        type: 'pie',
+        data: {
+            labels: [{% for account_type, count in users_by_account_type %}'{{ account_type.value }}',{% endfor %}],
+            datasets: [{
+                data: [{% for account_type, count in users_by_account_type %}{{ count }},{% endfor %}],
+                backgroundColor: ['#4299E1', '#48BB78', '#ECC94B', '#ED64A6']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+
+    // User Growth Chart
+var userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+var userGrowthChart = new Chart(userGrowthCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for item in user_growth %}'{{ item.date }}',{% endfor %}],
+        datasets: [{
+            label: 'New Users',
+            data: [{% for item in user_growth %}{{ item.count }},{% endfor %}],
+            borderColor: '#4299E1',
+            backgroundColor: 'rgba(66, 153, 225, 0.2)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                }
+            }
+        }
+    }
+});
+
 });
 </script>
 {% endblock %}
