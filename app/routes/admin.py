@@ -164,6 +164,38 @@ def dog_management():
     breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
     breeds = [breed[0] for breed in breeds if breed[0]]
 
+    # Get data for graphs and statistics
+    total_dogs = Dog.query.count()
+    dogs_by_status = db.session.query(Dog.status, func.count(Dog.id)).group_by(Dog.status).all()
+    
+    # Dogs added in the last 30 days
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    new_dogs_last_30_days = Dog.query.filter(Dog.created_at >= thirty_days_ago).count()
+    
+    # Top 5 breeds
+    top_breeds = db.session.query(Dog.breed, func.count(Dog.id).label('count')).\
+        group_by(Dog.breed).\
+        order_by(func.count(Dog.id).desc()).\
+        limit(5).all()
+    
+    # Average age of dogs
+    avg_age = db.session.query(func.avg(func.julianday('now') - func.julianday(Dog.date_of_birth)) / 365.25).scalar()
+    
+    # Dog registration over time (last 12 months)
+    twelve_months_ago = datetime.utcnow() - timedelta(days=365)
+    dog_growth = db.session.query(
+        func.strftime('%Y-%m', Dog.created_at).label('month'),
+        func.count(Dog.id)
+    ).filter(Dog.created_at >= twelve_months_ago).group_by('month').order_by('month').all()
+
+    dog_growth_formatted = [
+        {
+            'date': datetime.strptime(month, '%Y-%m').strftime('%B %Y'),
+            'count': count
+        }
+        for month, count in dog_growth
+    ]
+
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render_template('admin/partials/dog_list.html', 
                                dogs=dogs,
@@ -175,7 +207,13 @@ def dog_management():
                                DogStatus=DogStatus,
                                current_breed=breed,
                                current_status=status,
-                               search=search)
+                               search=search,
+                               total_dogs=total_dogs,
+                               dogs_by_status=dogs_by_status,
+                               new_dogs_last_30_days=new_dogs_last_30_days,
+                               top_breeds=top_breeds,
+                               avg_age=avg_age,
+                               dog_growth=dog_growth_formatted)
 
 @bp.route('/litters')
 @login_required

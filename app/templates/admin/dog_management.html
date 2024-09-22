@@ -1,57 +1,201 @@
 {% extends "base.html" %}
 
-{% block title %}Dog Management - Admin Dashboard{% endblock %}
+{% block title %}Dog Management Dashboard - Admin{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">Dog Management</h1>
+<div class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-gray-800">Dog Management Dashboard</h1>
 
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <!-- Filter Section -->
-        <div class="p-4 border-b">
-            <button id="toggleFilters" class="bg-blue-500 text-white px-4 py-2 rounded">
-                <i class="fas fa-filter mr-2"></i>Toggle Filters
-            </button>
-            <div id="filterSection" class="hidden mt-4">
-                <form id="filterForm" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="breed" class="block text-sm font-medium text-gray-700">Breed</label>
-                            <select id="breed" name="breed" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                <option value="">All Breeds</option>
-                                {% for breed in breeds %}
-                                    <option value="{{ breed }}" {% if breed == current_breed %}selected{% endif %}>{{ breed }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                            <select id="status" name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                <option value="">All Statuses</option>
-                                {% for status in DogStatus %}
-                                    <option value="{{ status.name }}" {% if status.name == current_status %}selected{% endif %}>{{ status.value }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
-                            <input type="text" id="search" name="search" placeholder="Search dogs..." value="{{ search }}"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                        </div>
+        <!-- Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out transform hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Total Dogs</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ total_dogs }}</p>
                     </div>
-                </form>
+                    <div class="bg-blue-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out transform hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">New Dogs (30 days)</p>
+                        <p class="text-3xl font-bold text-green-600">{{ new_dogs_last_30_days }}</p>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out transform hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Average Age</p>
+                        <p class="text-3xl font-bold text-purple-600">{{ "%.1f"|format(avg_age) }} years</p>
+                    </div>
+                    <div class="bg-purple-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out transform hover:scale-105">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Available Dogs</p>
+                        <p class="text-3xl font-bold text-orange-600">
+                            {{ dogs_by_status|selectattr('0', 'equalto', DogStatus.AVAILABLE_NOW)|sum(attribute='1') }}
+                        </p>
+                    </div>
+                    <div class="bg-orange-100 rounded-full p-3">
+                        <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Dog List Container -->
-        <div id="dogListContainer">
-            {% include "admin/partials/dog_list.html" %}
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Dogs by Status</h2>
+                <div class="h-64">
+                    <canvas id="dogStatusChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Dog Registration (Last 12 Months)</h2>
+                <div class="h-64">
+                    <canvas id="dogGrowthChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Breeds -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Top 5 Breeds</h2>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {% for breed, count in top_breeds %}
+                <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-700">{{ breed }}</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ count }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Dog List Section -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Dog List</h2>
+            
+            <!-- Filter Section -->
+            <div class="mb-6">
+                <button id="toggleFilters" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    <i class="fas fa-filter mr-2"></i>Toggle Filters
+                </button>
+                <div id="filterSection" class="hidden mt-4">
+                    <form id="filterForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="breed" class="block text-sm font-medium text-gray-700">Breed</label>
+                                <select id="breed" name="breed" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                    <option value="">All Breeds</option>
+                                    {% for breed in breeds %}
+                                        <option value="{{ breed }}" {% if breed == current_breed %}selected{% endif %}>{{ breed }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                                <select id="status" name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                    <option value="">All Statuses</option>
+                                    {% for status in DogStatus %}
+                                        <option value="{{ status.name }}" {% if status.name == current_status %}selected{% endif %}>{{ status.value }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
+                                <input type="text" id="search" name="search" placeholder="Search dogs..." value="{{ search }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dog List Container -->
+            <div id="dogListContainer">
+                {% include "admin/partials/dog_list.html" %}
+            </div>
         </div>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Dog Status Chart
+    var dogStatusCtx = document.getElementById('dogStatusChart').getContext('2d');
+    var dogStatusChart = new Chart(dogStatusCtx, {
+        type: 'pie',
+        data: {
+            labels: [{% for status, count in dogs_by_status %}'{{ status.value }}',{% endfor %}],
+            datasets: [{
+                data: [{% for status, count in dogs_by_status %}{{ count }},{% endfor %}],
+                backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#6B7280'],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+
+    // Dog Growth Chart
+    var dogGrowthCtx = document.getElementById('dogGrowthChart').getContext('2d');
+    var dogGrowthChart = new Chart(dogGrowthCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for item in dog_growth %}'{{ item.date }}',{% endfor %}],
+            datasets: [{
+                label: 'New Dogs',
+                data: [{% for item in dog_growth %}{{ item.count }},{% endfor %}],
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Filter functionality
     const toggleFilters = document.getElementById('toggleFilters');
     const filterSection = document.getElementById('filterSection');
     const filterForm = document.getElementById('filterForm');
