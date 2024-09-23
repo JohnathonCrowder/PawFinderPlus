@@ -93,13 +93,13 @@ class User(UserMixin, db.Model):
         else:  # PREMIUM
             return self.public_litters_count < 20
 
-    def can_make_litter_public(self):
+    def can_make_dog_public(self):
         if self.account_type == AccountType.FREE:
-            return False
+            return self.public_dogs_count < 5
         elif self.account_type == AccountType.BASIC:
-            return self.public_litters_count < 8
+            return self.public_dogs_count < 20
         else:  # PREMIUM
-            return self.public_litters_count < 20
+            return True
 
     def can_sell_dogs(self):
         return self.account_type != AccountType.FREE

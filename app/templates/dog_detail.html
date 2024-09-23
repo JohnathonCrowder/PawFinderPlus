@@ -244,11 +244,14 @@
                            class="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
-            <div class="mb-4">
-                <label class="flex items-center">
-                    <input type="checkbox" name="is_public" class="form-checkbox" {% if dog.is_public %}checked{% endif %}>
-                    <span class="ml-2">Make this dog public</span>
-                </label>
+            <div class="visibility-toggle mt-6">
+                <input type="checkbox" id="is_public" name="is_public" 
+                       {% if dog and dog.is_public %}checked{% endif %}
+                       {% if not dog and not current_user.can_make_dog_public() %}disabled{% endif %}>
+                <label for="is_public">Make this dog's profile public</label>
+                {% if not dog and not current_user.can_make_dog_public() %}
+                    <p class="text-sm text-red-500 mt-1">You have reached the maximum number of public dogs for your account type.</p>
+                {% endif %}
             </div>
             <div class="mb-4">
                 <label for="status" class="block text-sm font-medium text-gray-700">Status</label>

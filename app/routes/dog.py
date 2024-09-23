@@ -82,21 +82,15 @@ def add_dog():
         father_id = request.form.get('father_id')
         mother_id = request.form.get('mother_id')
         is_public = 'is_public' in request.form
-        status = DogStatus(request.form['status'])
+        
+        # Change this line
+        status = DogStatus[request.form['status']]
+        
         price = float(request.form['price']) if request.form['price'] else None
         
-        ########## Account Restrictions #######################
-        is_public = 'is_public' in request.form
-        status = DogStatus(request.form['status'])
-
         if is_public and not current_user.can_make_dog_public():
             flash('You have reached the maximum number of public dogs for your account type.', 'error')
             return redirect(url_for('dog.add_dog'))
-
-        if status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] and not current_user.can_sell_dogs():
-            flash('Your account type does not allow selling dogs.', 'error')
-            return redirect(url_for('dog.add_dog'))
-        #########################################################
 
         new_dog = Dog(
             name=name, 
@@ -130,9 +124,9 @@ def add_dog():
 
     breeds = load_json_data('dog_breeds.json')
     colors = load_json_data('dog_colors.json')
-    statuses = [status.value for status in DogStatus]
+    statuses = [status for status in DogStatus]
     all_dogs = Dog.query.filter_by(user_id=current_user.id).all()
-    return render_template('add_dog.html', all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses, AccountType=AccountType, DogStatus=DogStatus)
+    return render_template('add_dog.html', all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses, AccountType=AccountType, DogStatus=DogStatus, dog=None)
 
 @bp.route('/dog/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -185,7 +179,7 @@ def dog_detail(id):
 
     breeds = load_json_data('dog_breeds.json')
     colors = load_json_data('dog_colors.json')
-    statuses = [status.value for status in DogStatus]
+    statuses = [status for status in DogStatus]
     all_dogs = Dog.query.filter(Dog.id != id, Dog.user_id == current_user.id).all()
     return render_template('dog_detail.html', dog=dog, all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses, AccountType=AccountType, DogStatus=DogStatus)
 
