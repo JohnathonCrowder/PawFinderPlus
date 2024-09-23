@@ -104,42 +104,50 @@ class User(UserMixin, db.Model):
     def can_sell_dogs(self):
         return self.account_type != AccountType.FREE
     
-    def switch_to_free_account(self):
-        self.account_type = AccountType.FREE
-        
-        # Set all dogs to private except for 5
-        public_dogs = Dog.query.filter_by(user_id=self.id, is_public=True).all()
-        for i, dog in enumerate(public_dogs):
-            if i >= 5:
-                dog.is_public = False
-
-        # Set all dogs that are for sale to not for sale
-        for dog in self.dogs:
-            if dog.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON]:
-                dog.status = DogStatus.NOT_FOR_SALE
-
-        # Set all litters to private
-        for litter in self.litters:
-            litter.is_public = False
-
-        db.session.commit()
-
     def switch_to_basic_account(self):
         self.account_type = AccountType.BASIC
         
-        # Set all but 20 dogs to private
+        dogs_affected = 0
         public_dogs = Dog.query.filter_by(user_id=self.id, is_public=True).order_by(Dog.created_at.desc()).all()
         for i, dog in enumerate(public_dogs):
             if i >= 20:
                 dog.is_public = False
+                dogs_affected += 1
 
-        # Set all but 8 litters to private
+        litters_affected = 0
         public_litters = Litter.query.filter_by(user_id=self.id, is_public=True).order_by(Litter.date_of_birth.desc()).all()
         for i, litter in enumerate(public_litters):
             if i >= 8:
                 litter.is_public = False
+                litters_affected += 1
 
         db.session.commit()
+        return dogs_affected, litters_affected
+
+    def switch_to_free_account(self):
+        self.account_type = AccountType.FREE
+        
+        dogs_affected = 0
+        public_dogs = Dog.query.filter_by(user_id=self.id, is_public=True).all()
+        for i, dog in enumerate(public_dogs):
+            if i >= 5:
+                dog.is_public = False
+                dogs_affected += 1
+
+        for dog in self.dogs:
+            if dog.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON]:
+                dog.status = DogStatus.NOT_FOR_SALE
+                if not dogs_affected:
+                    dogs_affected += 1
+
+        litters_affected = 0
+        for litter in self.litters:
+            if litter.is_public:
+                litter.is_public = False
+                litters_affected += 1
+
+        db.session.commit()
+        return dogs_affected, litters_affected
     
 
 

@@ -140,7 +140,11 @@ def user_profile(username):
 @bp.route('/account_management')
 @login_required
 def account_management():
-    return render_template('account_management.html', user=current_user, AccountType=AccountType)
+    user_data = {
+        'account_type': current_user.account_type,
+        # Add other user data as needed
+    }
+    return render_template('account_management.html', user_data=user_data, AccountType=AccountType)
 
 @bp.route('/change_account_type', methods=['POST'])
 @login_required
@@ -150,15 +154,22 @@ def change_account_type():
         old_type = current_user.account_type
         new_account_type = AccountType[new_type]
         
+        dogs_affected = 0
+        litters_affected = 0
+        
         if old_type == AccountType.PREMIUM and new_account_type == AccountType.BASIC:
-            current_user.switch_to_basic_account()
-        elif old_type != AccountType.FREE and new_account_type == AccountType.FREE:
-            current_user.switch_to_free_account()
+            dogs_affected, litters_affected = current_user.switch_to_basic_account()
+        elif new_account_type == AccountType.FREE:
+            dogs_affected, litters_affected = current_user.switch_to_free_account()
         else:
             current_user.account_type = new_account_type
             db.session.commit()
         
         flash(f'Account type changed to {new_type}', 'success')
+        
+        if dogs_affected > 0 or litters_affected > 0:
+            flash(f'{dogs_affected} dogs and {litters_affected} litters were set to private due to the account downgrade.', 'info')
     else:
         flash('Invalid account type', 'error')
+    
     return redirect(url_for('user.account_management'))
