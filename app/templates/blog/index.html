@@ -8,32 +8,13 @@
         <h1 class="text-4xl font-bold text-center mb-12 text-gray-800">DogBreederPlus Blog</h1>
 
         {% if featured_post %}
-        <!-- Featured Post -->
-        <div class="mb-12">
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div class="md:flex">
-                    <div class="md:flex-shrink-0">
-                        {% if featured_post.image %}
-                        <img class="h-48 w-full object-cover md:w-48" src="{{ url_for('static', filename='uploads/' + featured_post.image) }}" alt="{{ featured_post.title }}">
-                        {% else %}
-                        <div class="h-48 w-full md:w-48 bg-gray-300 flex items-center justify-center">
-                            <span class="text-gray-500 text-2xl">No Image</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="p-8">
-                        <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">Featured Post</div>
-                        <a href="{{ url_for('blog.blog_post', post_id=featured_post.id) }}" class="block mt-1 text-2xl leading-tight font-bold text-gray-900 hover:underline">{{ featured_post.title }}</a>
-                        <p class="mt-2 text-gray-600">{{ featured_post.content|truncate(200) }}</p>
-                        <div class="mt-4">
-                            <span class="text-gray-500"><i class="far fa-user mr-2"></i>{{ featured_post.author.username }}</span>
-                            <span class="ml-4 text-gray-500"><i class="far fa-calendar mr-2"></i>{{ featured_post.created_at.strftime('%B %d, %Y') }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
+<div class="featured-post mb-8 bg-blue-100 p-6 rounded-lg">
+    <h2 class="text-2xl font-bold mb-2">Featured Post</h2>
+    <h3 class="text-xl font-semibold mb-2">{{ featured_post.title }}</h3>
+    <p class="text-gray-600 mb-4">{{ featured_post.content|truncate(200) }}</p>
+    <a href="{{ url_for('blog.blog_post', post_id=featured_post.id) }}" class="text-blue-500 hover:underline">Read more</a>
+</div>
+{% endif %}
 
         <div class="flex flex-wrap -mx-4">
             <!-- Main Content -->

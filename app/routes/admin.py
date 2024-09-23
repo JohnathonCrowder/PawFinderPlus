@@ -609,15 +609,34 @@ def blog_management():
     
     posts = query.order_by(BlogPost.created_at.desc()).all()
     authors = User.query.all()
+    featured_post = BlogPost.query.filter_by(is_featured=True).first()
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render_template('admin/partials/blog_post_list.html', 
                                posts=posts,
-                               authors=authors)
+                               featured_post=featured_post)
     
     return render_template('admin/blog_management.html', 
-                           posts=posts,
-                           authors=authors)
+                           posts=posts, 
+                           authors=authors,
+                           featured_post=featured_post)
+
+@bp.route('/toggle_featured/<int:post_id>', methods=['POST'])
+@login_required
+def toggle_featured(post_id):
+    if not current_user.is_admin:
+        abort(403)
+    
+    post = BlogPost.query.get_or_404(post_id)
+    
+    # Remove featured status from all posts
+    BlogPost.query.update({BlogPost.is_featured: False})
+    
+    # Set the selected post as featured
+    post.is_featured = True
+    db.session.commit()
+    
+    return jsonify({'success': True, 'featured': post.is_featured})
 
 @bp.route('/blog_management/toggle_publish/<int:post_id>', methods=['POST'])
 @login_required

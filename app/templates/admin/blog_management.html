@@ -52,6 +52,7 @@
         </div>
     </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const toggleFilters = document.getElementById('toggleFilters');
@@ -63,29 +64,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function submitForm() {
-    const formData = new FormData(filterForm);
-    const searchParams = new URLSearchParams(formData);
+        const formData = new FormData(filterForm);
+        const searchParams = new URLSearchParams(formData);
 
-    fetch(`{{ url_for('admin.blog_management') }}?${searchParams.toString()}`, {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.text())
-    .then(html => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const blogPostListContainer = document.getElementById('blogPostListContainer');
-        const newContent = doc.getElementById('blogPostListContainer');
-        if (newContent) {
-            blogPostListContainer.innerHTML = newContent.innerHTML;
-        } else {
-            console.error('Could not find blogPostListContainer in the response');
-        }
-        history.pushState(null, '', `{{ url_for('admin.blog_management') }}?${searchParams.toString()}`);
-    })
-    .catch(error => console.error('Error:', error));
-}
+        fetch(`{{ url_for('admin.blog_management') }}?${searchParams.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const blogPostListContainer = document.getElementById('blogPostListContainer');
+            blogPostListContainer.innerHTML = html;
+            history.pushState(null, '', `{{ url_for('admin.blog_management') }}?${searchParams.toString()}`);
+        });
+    }
 
     // Debounce function for search input
     function debounce(func, wait) {
@@ -128,6 +121,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     e.target.textContent = data.is_published ? 'Unpublish' : 'Publish';
                     e.target.classList.toggle('bg-green-500');
                     e.target.classList.toggle('bg-yellow-500');
+                }
+            });
+        }
+    });
+
+    // Toggle featured status
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('toggle-featured')) {
+            e.preventDefault();
+            const postId = e.target.dataset.postId;
+            fetch(`{{ url_for('admin.toggle_featured', post_id=0) }}`.replace('0', postId), {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update all buttons to non-featured state
+                    document.querySelectorAll('.toggle-featured').forEach(btn => {
+                        btn.classList.remove('bg-purple-500');
+                        btn.classList.add('bg-gray-500');
+                        btn.textContent = 'Set as Featured';
+                    });
+                    
+                    // Update the clicked button to featured state
+                    e.target.classList.remove('bg-gray-500');
+                    e.target.classList.add('bg-purple-500');
+                    e.target.textContent = 'Featured';
                 }
             });
         }

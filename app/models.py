@@ -191,6 +191,8 @@ class BlogPost(db.Model):
     author = db.relationship('User', backref='blog_posts')
     categories = db.relationship('Category', secondary=blog_post_category, back_populates='posts')
 
+    is_featured = db.Column(db.Boolean, default=False)
+
     def __repr__(self):
         return f'<BlogPost {self.title}>'
     
