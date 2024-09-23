@@ -611,9 +611,13 @@ def blog_management():
     authors = User.query.all()
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify(render_template('admin/partials/blog_post_list.html', posts=posts))
+        return render_template('admin/partials/blog_post_list.html', 
+                               posts=posts,
+                               authors=authors)
     
-    return render_template('admin/blog_management.html', posts=posts, authors=authors)
+    return render_template('admin/blog_management.html', 
+                           posts=posts,
+                           authors=authors)
 
 @bp.route('/blog_management/toggle_publish/<int:post_id>', methods=['POST'])
 @login_required

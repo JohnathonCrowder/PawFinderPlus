@@ -63,21 +63,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function submitForm() {
-        const formData = new FormData(filterForm);
-        const searchParams = new URLSearchParams(formData);
+    const formData = new FormData(filterForm);
+    const searchParams = new URLSearchParams(formData);
 
-        fetch(`{{ url_for('admin.blog_management') }}?${searchParams.toString()}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            const blogPostListContainer = document.getElementById('blogPostListContainer');
-            blogPostListContainer.innerHTML = html;
-            history.pushState(null, '', `{{ url_for('admin.blog_management') }}?${searchParams.toString()}`);
-        });
-    }
+    fetch(`{{ url_for('admin.blog_management') }}?${searchParams.toString()}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const blogPostListContainer = document.getElementById('blogPostListContainer');
+        const newContent = doc.getElementById('blogPostListContainer');
+        if (newContent) {
+            blogPostListContainer.innerHTML = newContent.innerHTML;
+        } else {
+            console.error('Could not find blogPostListContainer in the response');
+        }
+        history.pushState(null, '', `{{ url_for('admin.blog_management') }}?${searchParams.toString()}`);
+    })
+    .catch(error => console.error('Error:', error));
+}
 
     // Debounce function for search input
     function debounce(func, wait) {
