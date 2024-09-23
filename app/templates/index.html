@@ -233,30 +233,71 @@
     </div>
 </section>
 
-<!-- Testimonials Section -->
-<section class="py-20">
-    <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold mb-12 text-center">Success Stories</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <p class="mb-4 italic">"Since using DogBreederPlus, our kennel's efficiency has increased by 40%. The genetic tracking feature alone has been a game-changer for our breeding decisions."</p>
-                <div class="flex items-center">
-                    <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Sarah Johnson" class="w-12 h-12 rounded-full mr-4">
-                    <div>
-                        <h4 class="font-semibold">Sarah Johnson</h4>
-                        <p class="text-sm">Owner, Elite Canine Breeders</p>
+<!-- Success Stories Section -->
+<section class="py-20 bg-blue-50 relative overflow-hidden">
+    <!-- Dog paw print background -->
+    <div class="absolute inset-0 opacity-5">
+        <img src="{{ url_for('static', filename='img/paw-print-pattern.png') }}" alt="Paw Print Pattern" class="w-full h-full object-cover">
+    </div>
+    
+    <div class="container mx-auto px-4 relative z-10">
+        <h2 class="text-4xl font-bold mb-4 text-center text-blue-800">Tail-Wagging Success Stories</h2>
+        <p class="text-xl text-center mb-16 text-gray-600">Hear the woofs of joy from our happy breeders and puppy parents</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <!-- Breeder Success Story -->
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden transform transition duration-500 hover:scale-105 border-4 border-blue-200">
+                <div class="p-8">
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold text-blue-800">Sarah Johnson</h3>
+                        <p class="text-gray-600">Golden Retriever Breeder</p>
+                    </div>
+                    <p class="text-gray-600 mb-6">"DogBreederPlus has been a game-changer for our kennel. We've seen healthier litters and happier puppy families. It's like having an expert breeder assistant at our fingertips!"</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-green-600 font-semibold">40% increase in breeding success</span>
+                        <i class="fas fa-certificate text-yellow-500 text-4xl"></i>
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <p class="mb-4 italic">"The customer support team at DogBreederPlus is exceptional. They've helped us customize the software to fit our specific needs, improving our breeding program tenfold."</p>
-                <div class="flex items-center">
-                    <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Michael Chen" class="w-12 h-12 rounded-full mr-4">
-                    <div>
-                        <h4 class="font-semibold">Michael Chen</h4>
-                        <p class="text-sm">Founder, Pacific Pups Kennel</p>
+
+            <!-- Puppy Buyer Success Story -->
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden transform transition duration-500 hover:scale-105 border-4 border-blue-200">
+                <div class="p-8">
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold text-blue-800">Michael Chen</h3>
+                        <p class="text-gray-600">Happy Puppy Parent</p>
+                    </div>
+                    <p class="text-gray-600 mb-6">"Thanks to DogBreederPlus, we found our furry soulmate! The platform made it easy to connect with reputable breeders and find our perfect pup. Best decision ever!"</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex">
+                            <i class="fas fa-bone text-yellow-500 text-2xl mr-1"></i>
+                            <i class="fas fa-bone text-yellow-500 text-2xl mr-1"></i>
+                            <i class="fas fa-bone text-yellow-500 text-2xl mr-1"></i>
+                            <i class="fas fa-bone text-yellow-500 text-2xl mr-1"></i>
+                            <i class="fas fa-bone text-yellow-500 text-2xl"></i>
+                        </div>
+                        <i class="fas fa-heart text-red-500 text-4xl"></i>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Playful Success Metrics with Icons -->
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div class="bg-white p-6 rounded-3xl shadow-md border-4 border-blue-200 transform transition duration-500 hover:scale-105">
+                <i class="fas fa-heart text-6xl text-red-500 mb-4"></i>
+                <h3 class="text-3xl font-bold text-blue-800 mb-2">10,000+</h3>
+                <p class="text-gray-600">Tail-Wagging Families</p>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-md border-4 border-blue-200 transform transition duration-500 hover:scale-105">
+                <i class="fas fa-medal text-6xl text-yellow-500 mb-4"></i>
+                <h3 class="text-3xl font-bold text-blue-800 mb-2">500+</h3>
+                <p class="text-gray-600">Top-Notch Kennels</p>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-md border-4 border-blue-200 transform transition duration-500 hover:scale-105">
+                <i class="fas fa-paw text-6xl text-blue-500 mb-4"></i>
+                <h3 class="text-3xl font-bold text-blue-800 mb-2">50,000+</h3>
+                <p class="text-gray-600">Pups in Forever Homes</p>
             </div>
         </div>
     </div>
@@ -265,51 +306,183 @@
 <!-- Blog Preview Section -->
 <section class="py-20 bg-gray-100">
     <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold mb-12 text-center">Latest from Our Blog</h2>
+        <h2 class="text-4xl font-bold mb-4 text-center text-blue-800">Paw-some Insights</h2>
+        <p class="text-xl text-center mb-12 text-gray-600">Dive into our latest articles on dog breeding, puppy care, and more</p>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             {% for post in recent_blog_posts %}
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
                 {% if post.image_filename %}
                 <img src="{{ url_for('blog.get_blog_image', post_id=post.id) }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+                {% else %}
+                <div class="w-full h-48 bg-blue-100 flex items-center justify-center">
+                    <i class="fas fa-paw text-blue-300 text-5xl"></i>
+                </div>
                 {% endif %}
                 <div class="p-6">
-                    <h3 class="text-xl font-semibold mb-2">{{ post.title }}</h3>
-                    <p class="mb-4">{{ post.content|truncate(100) }}</p>
-                    <a href="{{ url_for('blog.blog_post', post_id=post.id) }}" class="text-blue-500 hover:text-blue-700">Read More</a>
+                    <div class="flex items-center mb-4">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
+                            {{ post.categories[0].name if post.categories else 'General' }}
+                        </span>
+                        <span class="text-gray-500 text-sm">
+                            {{ post.created_at.strftime('%B %d, %Y') }}
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-800 hover:text-blue-600 transition duration-300">
+                        <a href="{{ url_for('blog.blog_post', post_id=post.id) }}">{{ post.title }}</a>
+                    </h3>
+                    <p class="text-gray-600 mb-4">{{ post.content|truncate(100) }}</p>
+                    <div class="flex items-center justify-between">
+                        <a href="{{ url_for('blog.blog_post', post_id=post.id) }}" class="text-blue-500 hover:text-blue-700 font-semibold transition duration-300">
+                            Read More <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                        <div class="flex items-center text-gray-500">
+                            <i class="far fa-comment mr-1"></i>
+                            <span>{{ post.comments|length }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-        <div class="text-center mt-8">
-            <a href="{{ url_for('blog.blog_index') }}" class="cta-button text-white font-bold py-2 px-4 rounded-full">Visit Our Blog</a>
+
+        <div class="text-center mt-12">
+            <a href="{{ url_for('blog.blog_index') }}" class="inline-block bg-blue-500 text-white font-bold py-3 px-6 rounded-full hover:bg-blue-600 transition duration-300 transform hover:-translate-y-1">
+                Fetch More Articles <i class="fas fa-paw ml-2"></i>
+            </a>
         </div>
     </div>
 </section>
 
 <!-- FAQ Section -->
-<section class="py-20">
+<section class="py-20 bg-gray-100">
     <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+        <h2 class="text-4xl font-bold mb-4 text-center text-blue-800">Frequently Asked Questions</h2>
+        <p class="text-xl text-center mb-12 text-gray-600">Find answers to common questions for both breeders and puppy buyers</p>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Breeder FAQs -->
             <div>
-                <h3 class="text-xl font-semibold mb-2">How does the free account work?</h3>
-                <p>Our free account allows you to manage up to 5 dogs with basic breeding tracking features. It's perfect for small-scale breeders or those just starting out.</p>
+                <h3 class="text-2xl font-semibold mb-6 text-blue-700">For Breeders</h3>
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="flex justify-between items-center w-full px-4 py-3 text-left text-gray-800 font-semibold hover:bg-gray-50 focus:outline-none" onclick="toggleFAQ(this)">
+                            <span>How can DogBreederPlus help me manage my breeding program?</span>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="hidden px-4 py-3 text-gray-600 border-t border-gray-200">
+                            DogBreederPlus offers comprehensive tools to streamline your breeding program. You can track pedigrees, manage health records, schedule breeding events, and monitor litter development. Our platform also helps you connect with potential puppy buyers and manage sales, all in one place.
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="flex justify-between items-center w-full px-4 py-3 text-left text-gray-800 font-semibold hover:bg-gray-50 focus:outline-none" onclick="toggleFAQ(this)">
+                            <span>What genetic health tracking features are available?</span>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="hidden px-4 py-3 text-gray-600 border-t border-gray-200">
+                            Our genetic health tracking system allows you to record and analyze genetic test results, track inherited conditions, and make informed breeding decisions. You can input test results for common breed-specific conditions, calculate coefficient of inbreeding, and receive alerts for potential genetic incompatibilities when planning breedings.
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="flex justify-between items-center w-full px-4 py-3 text-left text-gray-800 font-semibold hover:bg-gray-50 focus:outline-none" onclick="toggleFAQ(this)">
+                            <span>Can I list my puppies for sale on the platform?</span>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="hidden px-4 py-3 text-gray-600 border-t border-gray-200">
+                            Yes, you can list your available puppies on our platform. You can create detailed listings with photos, health information, and pedigrees. Our system allows you to manage inquiries, communicate with potential buyers, and track the status of each puppy. This feature is available on all paid plans.
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="flex justify-between items-center w-full px-4 py-3 text-left text-gray-800 font-semibold hover:bg-gray-50 focus:outline-none" onclick="toggleFAQ(this)">
+                            <span>How does the breeding cycle management work?</span>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="hidden px-4 py-3 text-gray-600 border-t border-gray-200">
+                            Our breeding cycle management tool allows you to track heat cycles, plan breedings, and monitor pregnancies. You can set reminders for important dates like progesterone testing, breeding windows, and due dates. The system also provides a timeline view of all your breeding activities, helping you plan and manage multiple litters efficiently.
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="flex justify-between items-center w-full px-4 py-3 text-left text-gray-800 font-semibold hover:bg-gray-50 focus:outline-none" onclick="toggleFAQ(this)">
+                            <span>Is there a limit to the number of dogs I can manage?</span>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="hidden px-4 py-3 text-gray-600 border-t border-gray-200">
+                            The number of dogs you can manage depends on your subscription plan. Our Free plan allows management of up to 5 dogs. The Starter plan increases this to 20 dogs. Our Professional and Enterprise plans offer unlimited dog management. You can upgrade your plan at any time as your breeding program grows.
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- Buyer FAQs -->
             <div>
-                <h3 class="text-xl font-semibold mb-2">Can I upgrade my account later?</h3>
-                <p>Absolutely! You can upgrade your account at any time to access more features and increase your dog limit.</p>
+                <h3 class="text-2xl font-semibold mb-6 text-blue-700">For Puppy Buyers</h3>
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="flex justify-between items-center w-full px-4 py-3 text-left text-gray-800 font-semibold hover:bg-gray-50 focus:outline-none" onclick="toggleFAQ(this)">
+                            <span>How do I search for available puppies?</span>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="hidden px-4 py-3 text-gray-600 border-t border-gray-200">
+                            You can easily search for puppies using our advanced search features. Filter by breed, location, age, and more. You can also save your search preferences and receive notifications when new puppies matching your criteria become available. Creating a free account allows you to save favorite listings and contact breeders directly.
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="flex justify-between items-center w-full px-4 py-3 text-left text-gray-800 font-semibold hover:bg-gray-50 focus:outline-none" onclick="toggleFAQ(this)">
+                            <span>Are all breeders on the platform verified?</span>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="hidden px-4 py-3 text-gray-600 border-t border-gray-200">
+                            While we can't personally verify every breeder, we have measures in place to promote responsible breeding. Breeders must agree to our code of ethics, and we encourage them to provide documentation of health testing and breed club memberships. We also have a review system where buyers can rate their experiences with breeders.
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="flex justify-between items-center w-full px-4 py-3 text-left text-gray-800 font-semibold hover:bg-gray-50 focus:outline-none" onclick="toggleFAQ(this)">
+                            <span>Can I communicate directly with breeders?</span>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="hidden px-4 py-3 text-gray-600 border-t border-gray-200">
+                            Yes, our platform facilitates direct communication between buyers and breeders. Once you create a free account, you can send messages to breeders, ask questions about their puppies, and even schedule visits. All communication is logged in our system for your security and convenience.
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="flex justify-between items-center w-full px-4 py-3 text-left text-gray-800 font-semibold hover:bg-gray-50 focus:outline-none" onclick="toggleFAQ(this)">
+                            <span>What information is provided about each puppy?</span>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="hidden px-4 py-3 text-gray-600 border-t border-gray-200">
+                            Puppy listings typically include photos, date of birth, breed, gender, and color. Many breeders also provide information about the puppy's parents, including health clearances and pedigrees. Some listings may include temperament assessments, vaccination records, and information about early socialization and training.
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg">
+                        <button class="flex justify-between items-center w-full px-4 py-3 text-left text-gray-800 font-semibold hover:bg-gray-50 focus:outline-none" onclick="toggleFAQ(this)">
+                            <span>How do I know if a breeder is reputable?</span>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="hidden px-4 py-3 text-gray-600 border-t border-gray-200">
+                            Look for breeders who provide comprehensive health information, are transparent about their breeding practices, and are willing to answer all your questions. Check their reviews from previous buyers on our platform. Reputable breeders often belong to breed clubs and participate in dog shows or sporting events. They should also encourage you to visit and see their facilities in person.
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div>
-                <h3 class="text-xl font-semibold mb-2">Is my data secure?</h3>
-                <p>Yes, we take data security very seriously. All your information is encrypted and stored securely on our servers.</p>
-            </div>
-            <div>
-                <h3 class="text-xl font-semibold mb-2">Do you offer customer support?</h3>
-                <p>We offer community support for free accounts and priority support for paid plans. Our Enterprise plan includes 24/7 premium support.</p>
-            </div>
+        </div>
+
+        <div class="text-center mt-12">
+            <a href="#" class="inline-block bg-blue-500 text-white font-bold py-3 px-6 rounded-full hover:bg-blue-600 transition duration-300">
+                View All FAQs <i class="fas fa-question-circle ml-2"></i>
+            </a>
         </div>
     </div>
 </section>
+
+<script>
+function toggleFAQ(element) {
+    const answer = element.nextElementSibling;
+    const icon = element.querySelector('svg');
+    
+    answer.classList.toggle('hidden');
+    icon.classList.toggle('rotate-180');
+}
+</script>
 
 <!-- Call to Action Section -->
 <section class="bg-blue-600 text-white py-20">
