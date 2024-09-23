@@ -104,6 +104,26 @@ class User(UserMixin, db.Model):
     def can_sell_dogs(self):
         return self.account_type != AccountType.FREE
     
+    def switch_to_free_account(self):
+        self.account_type = AccountType.FREE
+        
+        # Set all dogs to private except for 5
+        public_dogs = Dog.query.filter_by(user_id=self.id, is_public=True).all()
+        for i, dog in enumerate(public_dogs):
+            if i >= 5:
+                dog.is_public = False
+
+        # Set all dogs that are for sale to not for sale
+        for dog in self.dogs:
+            if dog.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON]:
+                dog.status = DogStatus.NOT_FOR_SALE
+
+        # Set all litters to private
+        for litter in self.litters:
+            litter.is_public = False
+
+        db.session.commit()
+    
 
 
 

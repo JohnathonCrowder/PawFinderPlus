@@ -147,8 +147,15 @@ def account_management():
 def change_account_type():
     new_type = request.form.get('account_type')
     if new_type in AccountType.__members__:
-        current_user.account_type = AccountType[new_type]
-        db.session.commit()
+        old_type = current_user.account_type
+        new_account_type = AccountType[new_type]
+        
+        if old_type != AccountType.FREE and new_account_type == AccountType.FREE:
+            current_user.switch_to_free_account()
+        else:
+            current_user.account_type = new_account_type
+            db.session.commit()
+        
         flash(f'Account type changed to {new_type}', 'success')
     else:
         flash('Invalid account type', 'error')
