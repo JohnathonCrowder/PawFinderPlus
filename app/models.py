@@ -71,6 +71,46 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    @property
+    def public_dogs_count(self):
+        return Dog.query.filter_by(user_id=self.id, is_public=True).count()
+
+    @property
+    def public_litters_count(self):
+        return Litter.query.filter_by(user_id=self.id, is_public=True).count()
+
+    @property
+    def dogs_for_sale_count(self):
+        return Dog.query.filter(Dog.user_id == self.id, 
+                                Dog.is_public == True, 
+                                Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])).count()
+
+    def can_make_dog_public(self):
+        if self.account_type == AccountType.FREE:
+            return self.public_dogs_count < 5
+        elif self.account_type == AccountType.BASIC:
+            return self.public_dogs_count < 20
+        else:  # PREMIUM
+            return True
+
+    def can_make_litter_public(self):
+        if self.account_type == AccountType.FREE:
+            return False
+        elif self.account_type == AccountType.BASIC:
+            return self.public_litters_count < 8
+        else:  # PREMIUM
+            return self.public_litters_count < 20
+
+    def can_sell_dogs(self):
+        return self.account_type != AccountType.FREE
+    
+
+
+
+
+
+
+
 class Dog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     id = db.Column(db.Integer, primary_key=True)
@@ -97,6 +137,8 @@ class Dog(db.Model):
         return Litter.query.filter(
             (Litter.puppies.any(id=self.id))
         ).first()
+    
+    
 
 class DogImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -105,6 +147,10 @@ class DogImage(db.Model):
     mimetype = db.Column(db.String(50), nullable=False)  # Store mimetype
     dog_id = db.Column(db.Integer, db.ForeignKey('dog.id'), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+
+
 
 
 class Message(db.Model):

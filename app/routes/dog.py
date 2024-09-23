@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, request, jsonify
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from app.models import Dog, DogImage, DogStatus, Litter
+from app.models import Dog, DogImage, DogStatus, Litter, AccountType
 from app.extensions import db
 from app.utils import allowed_file, load_json_data, generate_shareable_link, generate_social_links
 from io import BytesIO
@@ -85,6 +85,19 @@ def add_dog():
         status = DogStatus(request.form['status'])
         price = float(request.form['price']) if request.form['price'] else None
         
+        ########## Account Restrictions #######################
+        is_public = 'is_public' in request.form
+        status = DogStatus(request.form['status'])
+
+        if is_public and not current_user.can_make_dog_public():
+            flash('You have reached the maximum number of public dogs for your account type.', 'error')
+            return redirect(url_for('dog.add_dog'))
+
+        if status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] and not current_user.can_sell_dogs():
+            flash('Your account type does not allow selling dogs.', 'error')
+            return redirect(url_for('dog.add_dog'))
+        #########################################################
+
         new_dog = Dog(
             name=name, 
             breed=breed, 
@@ -119,7 +132,7 @@ def add_dog():
     colors = load_json_data('dog_colors.json')
     statuses = [status.value for status in DogStatus]
     all_dogs = Dog.query.filter_by(user_id=current_user.id).all()
-    return render_template('add_dog.html', all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses)
+    return render_template('add_dog.html', all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses, AccountType=AccountType, DogStatus=DogStatus)
 
 @bp.route('/dog/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -141,6 +154,20 @@ def dog_detail(id):
         dog.father_id = int(father_id) if father_id else None
         dog.mother_id = int(mother_id) if mother_id else None
 
+
+        #### Account Restrictions #######################
+        new_is_public = 'is_public' in request.form
+        new_status = DogStatus(request.form['status'])
+
+        if new_is_public != dog.is_public and new_is_public and not current_user.can_make_dog_public():
+            flash('You have reached the maximum number of public dogs for your account type.', 'error')
+            return redirect(url_for('dog.dog_detail', id=dog.id))
+
+        if new_status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] and not current_user.can_sell_dogs():
+            flash('Your account type does not allow selling dogs.', 'error')
+            return redirect(url_for('dog.dog_detail', id=dog.id))
+        #################################################
+
         if 'images' in request.files:
             for image in request.files.getlist('images'):
                 if image and allowed_file(image.filename):
@@ -150,6 +177,8 @@ def dog_detail(id):
                     new_image = DogImage(filename=filename, data=image_data, mimetype=mimetype, dog_id=dog.id)
                     db.session.add(new_image)
 
+        dog.is_public = new_is_public
+        dog.status = new_status
         db.session.commit()
         flash('Dog updated successfully!', 'success')
         return redirect(url_for('dog.dog_detail', id=dog.id))
@@ -158,7 +187,7 @@ def dog_detail(id):
     colors = load_json_data('dog_colors.json')
     statuses = [status.value for status in DogStatus]
     all_dogs = Dog.query.filter(Dog.id != id, Dog.user_id == current_user.id).all()
-    return render_template('dog_detail.html', dog=dog, all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses)
+    return render_template('dog_detail.html', dog=dog, all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses, AccountType=AccountType, DogStatus=DogStatus)
 
 @bp.route('/dog/<int:id>/profile')
 def dog_profile(id):

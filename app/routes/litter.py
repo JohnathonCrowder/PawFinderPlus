@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from app.models import Litter, LitterImage, Dog, DogStatus
+from app.models import Litter, LitterImage, Dog, DogStatus, AccountType
 from app.extensions import db
 from app.utils import allowed_file, generate_shareable_link, generate_social_links
 from datetime import datetime, timedelta
@@ -88,6 +88,10 @@ def add_litter():
         puppy_ids = request.form.getlist('puppies')
         is_public = 'is_public' in request.form
 
+        if is_public and not current_user.can_make_litter_public():
+            flash('You have reached the maximum number of public litters for your account type.', 'error')
+            return redirect(url_for('litter.add_litter'))
+
         new_litter = Litter(
             name=name,
             date_of_birth=date_of_birth,
@@ -117,7 +121,7 @@ def add_litter():
         return redirect(url_for('litter.litter_management'))
 
     all_dogs = Dog.query.filter(Dog.user_id == current_user.id).order_by(Dog.date_of_birth).all()
-    return render_template('add_litter.html', dogs=all_dogs)
+    return render_template('add_litter.html', dogs=all_dogs, AccountType=AccountType, litter=None)
 
 @bp.route('/edit_litter/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -130,6 +134,12 @@ def edit_litter(id):
         litter.mother_id = request.form['mother_id']
         litter.is_public = 'is_public' in request.form
         puppy_ids = request.form.getlist('puppies')
+        new_is_public = 'is_public' in request.form
+
+        if new_is_public != litter.is_public:
+            if new_is_public and not current_user.can_make_litter_public():
+                flash('You have reached the maximum number of public litters for your account type.', 'error')
+                return redirect(url_for('litter.edit_litter', id=litter.id))
         
         litter.puppies = []
         for puppy_id in puppy_ids:
@@ -145,12 +155,13 @@ def edit_litter(id):
                     new_image = LitterImage(filename=filename, data=image_data, mimetype=mimetype, litter_id=litter.id)
                     db.session.add(new_image)
 
+        litter.is_public = new_is_public
         db.session.commit()
         flash('Litter updated successfully!', 'success')
         return redirect(url_for('litter.litter_management'))
 
     all_dogs = Dog.query.filter(Dog.user_id == current_user.id).order_by(Dog.date_of_birth).all()
-    return render_template('edit_litter.html', litter=litter, dogs=all_dogs)
+    return render_template('edit_litter.html', litter=litter, dogs=all_dogs, AccountType=AccountType)
 
 
 

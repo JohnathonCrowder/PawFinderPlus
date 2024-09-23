@@ -247,8 +247,19 @@
             <div class="mb-4">
                 <label class="flex items-center">
                     <input type="checkbox" name="is_public" class="form-checkbox" {% if dog.is_public %}checked{% endif %}>
-                    <span class="ml-2">Publicly Visible</span>
+                    <span class="ml-2">Make this dog public</span>
                 </label>
+            </div>
+            <div class="mb-4">
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <select id="status" name="status" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    {% for status in DogStatus %}
+                        <option value="{{ status.name }}" {% if status == dog.status %}selected{% endif %} 
+                                {% if status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] and not current_user.can_sell_dogs() %}disabled{% endif %}>
+                            {{ status.value }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
             
 
