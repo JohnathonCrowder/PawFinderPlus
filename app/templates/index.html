@@ -5,160 +5,256 @@
 {% block head %}
 {{ super() }}
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
 <style>
     body {
         font-family: 'Poppins', sans-serif;
     }
     .hero {
-        position: relative;
-        height: 100vh;
-        overflow: hidden;
         background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ url_for('static', filename='img/hero-home.jpg') }}');
         background-size: cover;
         background-position: center;
-        animation: zoomBackground 20s ease infinite;
-    }
-    @keyframes zoomBackground {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-    }
-    .hero-content {
-        background: rgba(0, 50, 100, 0.8);
-        padding: 3rem;
-        border-radius: 15px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
     .cta-button {
         background-color: #FF6B35;
-        color: white;
-        padding: 1rem 2rem;
-        font-size: 1.2rem;
-        font-weight: bold;
-        border-radius: 50px;
         transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 1px;
     }
     .cta-button:hover {
         background-color: #FF8C61;
         transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(255, 107, 53, 0.4);
     }
     .feature-icon {
-        font-size: 3rem;
+        font-size: 2.5rem;
         color: #0080ff;
-        transition: all 0.3s ease;
     }
-    .feature-card:hover .feature-icon {
-        transform: scale(1.2);
+    .slick-prev:before, .slick-next:before {
+        color: #0080ff;
     }
-    .testimonial-card {
-        transition: all 0.3s ease;
-        border-radius: 15px;
-        overflow: hidden;
-    }
-    .testimonial-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-    }
-    .pricing-card {
-        transition: all 0.3s ease;
-        border: 2px solid #e2e8f0;
-    }
-    .pricing-card:hover {
-        border-color: #0080ff;
-        transform: scale(1.05);
-    }
-    .trusted-by {
-        filter: grayscale(100%);
-        opacity: 0.7;
-        transition: all 0.3s ease;
-    }
-    .trusted-by:hover {
-        filter: grayscale(0%);
-        opacity: 1;
+    .litter-carousel .slick-slide {
+        padding: 0 10px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero flex items-center justify-center text-white text-center">
-    <div class="hero-content max-w-4xl mx-auto">
-        <h1 class="text-5xl sm:text-6xl font-bold mb-6 animate__animated animate__fadeInDown">Revolutionize Your Dog Breeding Program</h1>
-        <p class="text-xl sm:text-2xl mb-8 animate__animated animate__fadeInUp">DogBreederPlus: The All-in-One Solution for Professional Dog Breeders</p>
-        <div class="mb-8 animate__animated animate__fadeIn">
-            <a href="{{ url_for('auth.register') }}" class="cta-button inline-block">Start Your Free Trial</a>
-        </div>
-        <p class="text-sm mb-4">No credit card required • 14-day free trial • Cancel anytime</p>
+<section class="hero text-white py-32">
+    <div class="container mx-auto px-4 text-center">
+        <h1 class="text-5xl font-bold mb-6">Revolutionize Your Dog Breeding Program</h1>
+        <p class="text-xl mb-8">DogBreederPlus: The All-in-One Solution for Professional Dog Breeders</p>
+        <a href="{{ url_for('auth.register') }}" class="cta-button text-white font-bold py-3 px-6 rounded-full text-lg">Start Your Free Trial</a>
+        <p class="mt-4 text-sm">No credit card required • 14-day free trial • Cancel anytime</p>
     </div>
 </section>
 
-<!-- Trusted By Section -->
-<section class="py-12 bg-gray-100">
+<!-- Find Your Puppy Section -->
+<section class="py-20 bg-gray-100">
     <div class="container mx-auto px-4">
-        <h2 class="text-2xl font-semibold text-center mb-8">Trusted by Top Kennels Worldwide</h2>
-        <div class="flex flex-wrap justify-center items-center gap-8">
-            <img src="{{ url_for('static', filename='img/kennel1-logo.png') }}" alt="Kennel 1" class="h-12 trusted-by">
-            <img src="{{ url_for('static', filename='img/kennel2-logo.png') }}" alt="Kennel 2" class="h-12 trusted-by">
-            <img src="{{ url_for('static', filename='img/kennel3-logo.png') }}" alt="Kennel 3" class="h-12 trusted-by">
-            <img src="{{ url_for('static', filename='img/kennel4-logo.png') }}" alt="Kennel 4" class="h-12 trusted-by">
+        <h2 class="text-4xl font-bold mb-4 text-center">Find Your Perfect Puppy</h2>
+        <p class="text-xl text-center mb-12">Discover adorable puppies from reputable breeders across the country</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {% for litter in featured_litters %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                {% if litter.images %}
+                <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" alt="{{ litter.name }}" class="w-full h-64 object-cover">
+                {% else %}
+                <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
+                    <i class="fas fa-paw text-gray-400 text-5xl"></i>
+                </div>
+                {% endif %}
+                <div class="p-6">
+                    <h3 class="text-2xl font-semibold mb-2 text-blue-700">{{ litter.name }}</h3>
+                    <p class="text-gray-600 mb-2"><i class="fas fa-birthday-cake mr-2 text-blue-500"></i>Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
+                    <p class="text-gray-600 mb-2"><i class="fas fa-dog mr-2 text-blue-500"></i>Breed: {{ litter.father.breed }}</p>
+                    <p class="text-gray-600 mb-4"><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>Location: {{ litter.user.location or 'Not specified' }}</p>
+                    <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300 inline-block">View Litter</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center">
+            <a href="{{ url_for('litter.public_litters') }}" class="bg-green-500 text-white text-xl font-bold px-10 py-4 rounded-full hover:bg-green-600 transition duration-300 inline-block shadow-lg transform hover:-translate-y-1 hover:shadow-xl">
+                View All Available Puppies <i class="fas fa-paw ml-2"></i>
+            </a>
         </div>
     </div>
 </section>
 
-<!-- Features Section -->
-<section class="py-20">
+<!-- Powerful Features Section -->
+<section class="py-20 bg-gradient-to-b from-blue-50 to-white">
     <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold mb-16 text-center">Powerful Features for Serious Breeders</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div class="feature-card bg-white p-8 rounded-lg shadow-lg text-center">
-                <i class="fas fa-dna feature-icon mb-6"></i>
-                <h3 class="text-2xl font-semibold mb-4">Advanced Genetic Tracking</h3>
-                <p class="text-gray-600">Monitor and analyze your dogs' genetic health with our state-of-the-art tracking system.</p>
+        <h2 class="text-4xl font-bold mb-4 text-center text-blue-800">Powerful Features for Everyone</h2>
+        <p class="text-xl text-center mb-16 text-gray-600">Whether you're a professional breeder or looking for your perfect puppy, we've got you covered</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            <!-- Feature 1: For Breeders -->
+            <div class="bg-white rounded-lg shadow-lg p-8 transform transition duration-500 hover:scale-105">
+                <div class="text-center mb-4">
+                    <i class="fas fa-dna text-5xl text-blue-500"></i>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4 text-center">Advanced Genetic Tracking</h3>
+                <p class="text-gray-600 mb-4">Monitor and analyze your dogs' genetic health with our state-of-the-art tracking system. Make informed breeding decisions to produce healthier litters.</p>
+                <p class="text-blue-600 font-semibold">Perfect for: Professional Breeders</p>
             </div>
-            <div class="feature-card bg-white p-8 rounded-lg shadow-lg text-center">
-                <i class="fas fa-calendar-alt feature-icon mb-6"></i>
-                <h3 class="text-2xl font-semibold mb-4">Breeding Cycle Management</h3>
-                <p class="text-gray-600">Never miss a critical date with our intelligent breeding cycle alerts and predictions.</p>
+
+            <!-- Feature 2: For Buyers -->
+            <div class="bg-white rounded-lg shadow-lg p-8 transform transition duration-500 hover:scale-105">
+                <div class="text-center mb-4">
+                    <i class="fas fa-search-location text-5xl text-green-500"></i>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4 text-center">Smart Puppy Matching</h3>
+                <p class="text-gray-600 mb-4">Find your ideal puppy with our intelligent matching system. Filter by breed, temperament, and lifestyle compatibility to ensure the perfect fit for your family.</p>
+                <p class="text-green-600 font-semibold">Perfect for: Puppy Buyers</p>
             </div>
-            <div class="feature-card bg-white p-8 rounded-lg shadow-lg text-center">
-                <i class="fas fa-chart-line feature-icon mb-6"></i>
-                <h3 class="text-2xl font-semibold mb-4">Performance Analytics</h3>
-                <p class="text-gray-600">Gain insights into your breeding program with comprehensive data analysis and reporting.</p>
+
+            <!-- Feature 3: For Both -->
+            <div class="bg-white rounded-lg shadow-lg p-8 transform transition duration-500 hover:scale-105">
+                <div class="text-center mb-4">
+                    <i class="fas fa-comments text-5xl text-purple-500"></i>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4 text-center">Seamless Communication</h3>
+                <p class="text-gray-600 mb-4">Connect directly through our platform. Breeders can showcase their litters, while buyers can ask questions and arrange visits easily and securely.</p>
+                <p class="text-purple-600 font-semibold">Perfect for: Breeders & Buyers</p>
             </div>
+
+            <!-- Feature 4: For Breeders -->
+            <div class="bg-white rounded-lg shadow-lg p-8 transform transition duration-500 hover:scale-105">
+                <div class="text-center mb-4">
+                    <i class="fas fa-calendar-alt text-5xl text-red-500"></i>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4 text-center">Breeding Cycle Management</h3>
+                <p class="text-gray-600 mb-4">Never miss a critical date with our intelligent breeding cycle alerts and predictions. Optimize your breeding program for success.</p>
+                <p class="text-red-600 font-semibold">Perfect for: Professional Breeders</p>
+            </div>
+
+            <!-- Feature 5: For Buyers -->
+            <div class="bg-white rounded-lg shadow-lg p-8 transform transition duration-500 hover:scale-105">
+                <div class="text-center mb-4">
+                    <i class="fas fa-shield-alt text-5xl text-yellow-500"></i>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4 text-center">Verified Breeders Network</h3>
+                <p class="text-gray-600 mb-4">Browse puppies from our network of verified, responsible breeders. Enjoy peace of mind knowing you're supporting ethical breeding practices.</p>
+                <p class="text-yellow-600 font-semibold">Perfect for: Puppy Buyers</p>
+            </div>
+
+            <!-- Feature 6: For Both -->
+            <div class="bg-white rounded-lg shadow-lg p-8 transform transition duration-500 hover:scale-105">
+                <div class="text-center mb-4">
+                    <i class="fas fa-mobile-alt text-5xl text-indigo-500"></i>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4 text-center">Mobile-Friendly Platform</h3>
+                <p class="text-gray-600 mb-4">Access all features on-the-go with our mobile-responsive design. Manage your breeding program or search for puppies anytime, anywhere.</p>
+                <p class="text-indigo-600 font-semibold">Perfect for: Breeders & Buyers</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Choose the Perfect Plan Section -->
+<section class="py-20 bg-gray-100">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold mb-4 text-center text-blue-800">Choose the Perfect Plan</h2>
+        <p class="text-xl text-center mb-8 text-gray-600">Find your ideal puppy with our free account or unlock powerful breeding tools with our premium plans</p>
+        
+        <!-- Puppy Buyer Callout -->
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-12 rounded-lg shadow-md">
+            <p class="font-bold">Looking to buy a puppy?</p>
+            <p>Our free account gives you full access to search and connect with breeders. No payment required!</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {% for plan in ['Free', 'Starter', 'Professional', 'Enterprise'] %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <div class="p-6 {% if plan == 'Professional' %}bg-blue-50{% endif %}">
+                    <h3 class="text-2xl font-semibold mb-4 {% if plan == 'Professional' %}text-blue-700{% endif %}">{{ plan }}</h3>
+                    <p class="text-4xl font-bold mb-6">
+                        {% if plan == 'Free' %}$0
+                        {% elif plan == 'Starter' %}$29
+                        {% elif plan == 'Professional' %}$79
+                        {% else %}Custom
+                        {% endif %}
+                        {% if plan != 'Enterprise' %}<span class="text-lg font-normal">/month</span>{% endif %}
+                    </p>
+                    <ul class="mb-8 text-left">
+                        {% if plan == 'Free' %}
+                        <li class="mb-2 flex items-start">
+                            <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                            <span>Full access to puppy listings</span>
+                        </li>
+                        <li class="mb-2 flex items-start">
+                            <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                            <span>Direct messaging with breeders</span>
+                        </li>
+                        <li class="mb-2 flex items-start">
+                            <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                            <span>Save favorite listings</span>
+                        </li>
+                        {% else %}
+                        <li class="mb-2 flex items-start">
+                            <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                            <span>
+                                {% if plan == 'Starter' %}Up to 20 dogs
+                                {% elif plan == 'Professional' %}Unlimited dogs
+                                {% else %}Custom dog limit
+                                {% endif %}
+                            </span>
+                        </li>
+                        <li class="mb-2 flex items-start">
+                            <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                            <span>
+                                {% if plan == 'Starter' %}Basic genetic tracking
+                                {% else %}Advanced genetic tracking
+                                {% endif %}
+                            </span>
+                        </li>
+                        <li class="mb-2 flex items-start">
+                            <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                            <span>
+                                {% if plan == 'Starter' %}Breeding cycle management
+                                {% elif plan == 'Professional' %}Advanced analytics
+                                {% else %}Custom features
+                                {% endif %}
+                            </span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="px-6 pb-6">
+                    <a href="{{ url_for('auth.register') }}" class="block text-center bg-blue-500 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-600 transition duration-300">
+                        {% if plan == 'Enterprise' %}Contact Sales{% else %}Get Started{% endif %}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
 </section>
 
 <!-- Testimonials Section -->
-<section class="bg-gray-100 py-20">
+<section class="py-20">
     <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-center mb-16">Success Stories from Our Users</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div class="testimonial-card bg-white shadow-lg">
-                <div class="p-8">
-                    <p class="text-gray-600 mb-6 text-lg italic">"Since using DogBreederPlus, our kennel's efficiency has increased by 40%. The genetic tracking feature alone has been a game-changer for our breeding decisions."</p>
-                    <div class="flex items-center">
-                        <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Sarah Johnson" class="w-16 h-16 rounded-full mr-4">
-                        <div>
-                            <h4 class="font-bold text-lg">Sarah Johnson</h4>
-                            <p class="text-gray-600">Owner, Elite Canine Breeders</p>
-                        </div>
+        <h2 class="text-4xl font-bold mb-12 text-center">Success Stories</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <p class="mb-4 italic">"Since using DogBreederPlus, our kennel's efficiency has increased by 40%. The genetic tracking feature alone has been a game-changer for our breeding decisions."</p>
+                <div class="flex items-center">
+                    <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Sarah Johnson" class="w-12 h-12 rounded-full mr-4">
+                    <div>
+                        <h4 class="font-semibold">Sarah Johnson</h4>
+                        <p class="text-sm">Owner, Elite Canine Breeders</p>
                     </div>
                 </div>
             </div>
-            <div class="testimonial-card bg-white shadow-lg">
-                <div class="p-8">
-                    <p class="text-gray-600 mb-6 text-lg italic">"The customer support team at DogBreederPlus is exceptional. They've helped us customize the software to fit our specific needs, improving our breeding program tenfold."</p>
-                    <div class="flex items-center">
-                        <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Michael Chen" class="w-16 h-16 rounded-full mr-4">
-                        <div>
-                            <h4 class="font-bold text-lg">Michael Chen</h4>
-                            <p class="text-gray-600">Founder, Pacific Pups Kennel</p>
-                        </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <p class="mb-4 italic">"The customer support team at DogBreederPlus is exceptional. They've helped us customize the software to fit our specific needs, improving our breeding program tenfold."</p>
+                <div class="flex items-center">
+                    <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Michael Chen" class="w-12 h-12 rounded-full mr-4">
+                    <div>
+                        <h4 class="font-semibold">Michael Chen</h4>
+                        <p class="text-sm">Founder, Pacific Pups Kennel</p>
                     </div>
                 </div>
             </div>
@@ -166,42 +262,50 @@
     </div>
 </section>
 
-<!-- Pricing Section -->
+<!-- Blog Preview Section -->
+<section class="py-20 bg-gray-100">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold mb-12 text-center">Latest from Our Blog</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for post in recent_blog_posts %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                {% if post.image_filename %}
+                <img src="{{ url_for('blog.get_blog_image', post_id=post.id) }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+                {% endif %}
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">{{ post.title }}</h3>
+                    <p class="mb-4">{{ post.content|truncate(100) }}</p>
+                    <a href="{{ url_for('blog.blog_post', post_id=post.id) }}" class="text-blue-500 hover:text-blue-700">Read More</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-8">
+            <a href="{{ url_for('blog.blog_index') }}" class="cta-button text-white font-bold py-2 px-4 rounded-full">Visit Our Blog</a>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
 <section class="py-20">
     <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-center mb-16">Choose the Perfect Plan for Your Kennel</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="pricing-card p-8 rounded-lg text-center">
-                <h3 class="text-2xl font-semibold mb-4">Starter</h3>
-                <p class="text-4xl font-bold mb-6">$29<span class="text-lg font-normal">/month</span></p>
-                <ul class="mb-8 text-left">
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Up to 20 dogs</li>
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Basic genetic tracking</li>
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Breeding cycle management</li>
-                </ul>
-                <a href="#" class="cta-button inline-block">Get Started</a>
+        <h2 class="text-4xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h3 class="text-xl font-semibold mb-2">How does the free account work?</h3>
+                <p>Our free account allows you to manage up to 5 dogs with basic breeding tracking features. It's perfect for small-scale breeders or those just starting out.</p>
             </div>
-            <div class="pricing-card p-8 rounded-lg text-center bg-blue-50 border-blue-500">
-                <h3 class="text-2xl font-semibold mb-4">Professional</h3>
-                <p class="text-4xl font-bold mb-6">$79<span class="text-lg font-normal">/month</span></p>
-                <ul class="mb-8 text-left">
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Unlimited dogs</li>
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Advanced genetic tracking</li>
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Performance analytics</li>
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Priority support</li>
-                </ul>
-                <a href="#" class="cta-button inline-block">Get Started</a>
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Can I upgrade my account later?</h3>
+                <p>Absolutely! You can upgrade your account at any time to access more features and increase your dog limit.</p>
             </div>
-            <div class="pricing-card p-8 rounded-lg text-center">
-                <h3 class="text-2xl font-semibold mb-4">Enterprise</h3>
-                <p class="text-4xl font-bold mb-6">Custom</p>
-                <ul class="mb-8 text-left">
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>All Professional features</li>
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Customizable solutions</li>
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Dedicated account manager</li>
-                    <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>24/7 premium support</li>
-                </ul>
-                <a href="#" class="cta-button inline-block">Contact Sales</a>
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Is my data secure?</h3>
+                <p>Yes, we take data security very seriously. All your information is encrypted and stored securely on our servers.</p>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Do you offer customer support?</h3>
+                <p>We offer community support for free accounts and priority support for paid plans. Our Enterprise plan includes 24/7 premium support.</p>
             </div>
         </div>
     </div>
@@ -212,8 +316,45 @@
     <div class="container mx-auto text-center px-4">
         <h2 class="text-4xl font-bold mb-6">Ready to Transform Your Breeding Program?</h2>
         <p class="text-xl mb-8">Join thousands of successful breeders who trust DogBreederPlus</p>
-        <a href="{{ url_for('auth.register') }}" class="cta-button inline-block">Start Your Free 14-Day Trial</a>
+        <a href="{{ url_for('auth.register') }}" class="cta-button text-white font-bold py-3 px-6 rounded-full text-lg">Start Your Free 14-Day Trial</a>
         <p class="mt-4 text-sm">No credit card required • Full access to all features • Cancel anytime</p>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('.litter-carousel').slick({
+            dots: true,
+            infinite: true,
+            speed: 300,
+            slidesToShow: 3,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 3000,
+            responsive: [
+                {
+                    breakpoint: 1024,
+                    settings: {
+                        slidesToShow: 2,
+                        slidesToScroll: 1,
+                        infinite: true,
+                        dots: true
+                    }
+                },
+                {
+                    breakpoint: 600,
+                    settings: {
+                        slidesToShow: 1,
+                        slidesToScroll: 1
+                    }
+                }
+            ]
+        });
+    });
+</script>
 {% endblock %}
