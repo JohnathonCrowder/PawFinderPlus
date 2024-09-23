@@ -65,8 +65,10 @@
             <!-- Desktop Menu -->
             <ul class="hidden md:flex space-x-4 items-center">
                 <li><a href="{{ url_for('main.home') }}" class="hover:underline">Home</a></li>
-                <li><a href="{{ url_for('litter.public_litters') }}" class="hover:underline">Puppies</a></li>
-                <li><a href="{{ url_for('blog.blog_index') }}" class="hover:underline">Blog</a></li>
+    <li><a href="{{ url_for('litter.public_litters') }}" class="hover:underline">Puppies</a></li>
+    <li><a href="{{ url_for('blog.blog_index') }}" class="hover:underline">Blog</a></li>
+    <li><a href="{{ url_for('main.about') }}" class="hover:underline">About</a></li>
+    <li><a href="{{ url_for('main.contact') }}" class="hover:underline">Contact</a></li>
                 {% if current_user.is_authenticated %}
                     <li class="dropdown relative">
                         <a href="#" class="hover:underline flex items-center">
@@ -122,9 +124,12 @@
         </div>
         
         <ul class="text-gray-800 text-lg">
-            <li><a href="{{ url_for('main.home') }}" class="block py-2 px-4 hover:bg-gray-100">Home</a></li>
-            <li><a href="{{ url_for('litter.public_litters') }}" class="block py-2 px-4 hover:bg-gray-100">Puppies</a></li>
-            <li><a href="{{ url_for('blog.blog_index') }}" class="block py-2 px-4 hover:bg-gray-100">Blog</a></li>
+            <ul class="text-gray-800 text-lg">
+                <li><a href="{{ url_for('main.home') }}" class="block py-2 px-4 hover:bg-gray-100">Home</a></li>
+                <li><a href="{{ url_for('litter.public_litters') }}" class="block py-2 px-4 hover:bg-gray-100">Puppies</a></li>
+                <li><a href="{{ url_for('blog.blog_index') }}" class="block py-2 px-4 hover:bg-gray-100">Blog</a></li>
+                <li><a href="{{ url_for('main.about') }}" class="block py-2 px-4 hover:bg-gray-100">About</a></li>
+                <li><a href="{{ url_for('main.contact') }}" class="block py-2 px-4 hover:bg-gray-100">Contact</a></li>
             {% if current_user.is_authenticated %}
                 <li><a href="{{ url_for('dog.dog_management') }}" class="block py-2 px-4 hover:bg-gray-100">Dogs</a></li>
                 <li><a href="{{ url_for('litter.litter_management') }}" class="block py-2 px-4 hover:bg-gray-100">Litters</a></li>
@@ -157,6 +162,7 @@
                     <li><a href="{{ url_for('litter.public_litters') }}" class="hover:underline">Puppies</a></li>
                     <li><a href="{{ url_for('blog.blog_index') }}" class="hover:underline">Blog</a></li>
                     <li><a href="{{ url_for('main.about') }}" class="hover:underline">About Us</a></li>
+                    <li><a href="{{ url_for('main.contact') }}" class="hover:underline">Contact</a></li>
                 </ul>
             </div>
             <div>
@@ -227,5 +233,6 @@
             });
         }
         </script>
+        
 </body>
 </html>
