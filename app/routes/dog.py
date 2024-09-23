@@ -140,27 +140,20 @@ def dog_detail(id):
         dog.weight = float(request.form['weight']) if request.form['weight'] else None
         dog.color = request.form['color']
         dog.is_public = 'is_public' in request.form
-        dog.status = DogStatus(request.form['status'])
+        
+        # Change this line
+        new_status = DogStatus[request.form['status']]
+        
+        if new_status != dog.status:
+            if new_status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] and not current_user.can_sell_dogs():
+                flash('Your account type does not allow selling dogs.', 'error')
+                return redirect(url_for('dog.dog_detail', id=dog.id))
+            dog.status = new_status
+        
         dog.price = float(request.form['price']) if request.form['price'] else None
         
-        father_id = request.form.get('father_id')
-        mother_id = request.form.get('mother_id')
-        dog.father_id = int(father_id) if father_id else None
-        dog.mother_id = int(mother_id) if mother_id else None
-
-
-        #### Account Restrictions #######################
-        new_is_public = 'is_public' in request.form
-        new_status = DogStatus(request.form['status'])
-
-        if new_is_public != dog.is_public and new_is_public and not current_user.can_make_dog_public():
-            flash('You have reached the maximum number of public dogs for your account type.', 'error')
-            return redirect(url_for('dog.dog_detail', id=dog.id))
-
-        if new_status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] and not current_user.can_sell_dogs():
-            flash('Your account type does not allow selling dogs.', 'error')
-            return redirect(url_for('dog.dog_detail', id=dog.id))
-        #################################################
+        dog.father_id = int(request.form.get('father_id')) if request.form.get('father_id') else None
+        dog.mother_id = int(request.form.get('mother_id')) if request.form.get('mother_id') else None
 
         if 'images' in request.files:
             for image in request.files.getlist('images'):
@@ -171,8 +164,6 @@ def dog_detail(id):
                     new_image = DogImage(filename=filename, data=image_data, mimetype=mimetype, dog_id=dog.id)
                     db.session.add(new_image)
 
-        dog.is_public = new_is_public
-        dog.status = new_status
         db.session.commit()
         flash('Dog updated successfully!', 'success')
         return redirect(url_for('dog.dog_detail', id=dog.id))
