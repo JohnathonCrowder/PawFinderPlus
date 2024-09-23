@@ -24,9 +24,7 @@ def blog_index():
     pagination = query.paginate(page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     posts = pagination.items
     
-    # Get the most recent post for the featured section
-    featured_post = BlogPost.query.filter_by(is_published=True).order_by(BlogPost.created_at.desc()).first()
-    
+    featured_post = BlogPost.query.filter_by(is_published=True, is_featured=True).first()
     recent_posts = BlogPost.query.filter_by(is_published=True).order_by(BlogPost.created_at.desc()).limit(5).all()
     categories = Category.query.all()
     
