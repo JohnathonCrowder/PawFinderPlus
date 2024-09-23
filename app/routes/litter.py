@@ -136,10 +136,15 @@ def edit_litter(id):
         puppy_ids = request.form.getlist('puppies')
         new_is_public = 'is_public' in request.form
 
-        if new_is_public != litter.is_public:
-            if new_is_public and not current_user.can_make_litter_public():
+        # Check if the user is trying to make the litter public
+        if new_is_public and not litter.is_public:
+            # Check if the user can make another litter public
+            if not current_user.can_make_litter_public():
                 flash('You have reached the maximum number of public litters for your account type.', 'error')
                 return redirect(url_for('litter.edit_litter', id=litter.id))
+
+        # Update the litter's public status
+        litter.is_public = new_is_public
         
         litter.puppies = []
         for puppy_id in puppy_ids:
@@ -155,7 +160,6 @@ def edit_litter(id):
                     new_image = LitterImage(filename=filename, data=image_data, mimetype=mimetype, litter_id=litter.id)
                     db.session.add(new_image)
 
-        litter.is_public = new_is_public
         db.session.commit()
         flash('Litter updated successfully!', 'success')
         return redirect(url_for('litter.litter_management'))

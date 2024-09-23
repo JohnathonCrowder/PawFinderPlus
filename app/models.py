@@ -85,13 +85,13 @@ class User(UserMixin, db.Model):
                                 Dog.is_public == True, 
                                 Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])).count()
 
-    def can_make_dog_public(self):
+    def can_make_litter_public(self):
         if self.account_type == AccountType.FREE:
-            return self.public_dogs_count < 5
+            return False
         elif self.account_type == AccountType.BASIC:
-            return self.public_dogs_count < 20
+            return self.public_litters_count < 8
         else:  # PREMIUM
-            return True
+            return self.public_litters_count < 20
 
     def can_make_litter_public(self):
         if self.account_type == AccountType.FREE:
@@ -138,7 +138,7 @@ class Dog(db.Model):
             (Litter.puppies.any(id=self.id))
         ).first()
     
-    
+
 
 class DogImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)

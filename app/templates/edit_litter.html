@@ -172,8 +172,13 @@
             </div>
             {% if current_user.account_type != AccountType.FREE %}
 <div class="visibility-toggle">
-    <input type="checkbox" id="is_public" name="is_public" {% if litter and litter.is_public %}checked{% endif %}>
+    <input type="checkbox" id="is_public" name="is_public" 
+           {% if litter.is_public %}checked{% endif %}
+           {% if not litter.is_public and not current_user.can_make_litter_public() %}disabled{% endif %}>
     <label for="is_public">Make this litter public</label>
+    {% if not litter.is_public and not current_user.can_make_litter_public() %}
+        <p class="text-sm text-red-500 mt-1">You have reached the maximum number of public litters for your account type.</p>
+    {% endif %}
 </div>
 {% endif %}
             
