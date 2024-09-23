@@ -123,6 +123,23 @@ class User(UserMixin, db.Model):
             litter.is_public = False
 
         db.session.commit()
+
+    def switch_to_basic_account(self):
+        self.account_type = AccountType.BASIC
+        
+        # Set all but 20 dogs to private
+        public_dogs = Dog.query.filter_by(user_id=self.id, is_public=True).order_by(Dog.created_at.desc()).all()
+        for i, dog in enumerate(public_dogs):
+            if i >= 20:
+                dog.is_public = False
+
+        # Set all but 8 litters to private
+        public_litters = Litter.query.filter_by(user_id=self.id, is_public=True).order_by(Litter.date_of_birth.desc()).all()
+        for i, litter in enumerate(public_litters):
+            if i >= 8:
+                litter.is_public = False
+
+        db.session.commit()
     
 
 

@@ -150,7 +150,9 @@ def change_account_type():
         old_type = current_user.account_type
         new_account_type = AccountType[new_type]
         
-        if old_type != AccountType.FREE and new_account_type == AccountType.FREE:
+        if old_type == AccountType.PREMIUM and new_account_type == AccountType.BASIC:
+            current_user.switch_to_basic_account()
+        elif old_type != AccountType.FREE and new_account_type == AccountType.FREE:
             current_user.switch_to_free_account()
         else:
             current_user.account_type = new_account_type
