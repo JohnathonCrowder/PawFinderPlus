@@ -193,9 +193,9 @@
 
         <div class="settings-container p-8 mb-8">
             <h2 class="text-2xl font-bold mb-6 section-title">Following</h2>
-            {% if following %}
+            {% if followed %}
                 <ul>
-                    {% for followed_user in following %}
+                    {% for followed_user in followed %}
                         <li class="mb-2">
                             <a href="{{ url_for('user.user_profile', username=followed_user.username) }}" class="text-blue-500 hover:underline">{{ followed_user.username }}</a>
                             <button onclick="toggleFollow({{ followed_user.id }})" class="ml-2 text-red-500 hover:underline">Unfollow</button>
@@ -396,22 +396,36 @@ profileForm.addEventListener('submit', function(e) {
 </script>
 <script>
     function toggleFollow(userId) {
-        fetch(`/unfollow/${userId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert(data.error);
-            }
-        })
-        .catch(error => console.error('Error:', error));
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        return;
     }
+
+    const button = document.getElementById('followButton');
+    const isFollowing = button.textContent.trim() === 'Unfollow';
+    const url = isFollowing ? `/unfollow/${userId}` : `/follow/${userId}`;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken.content,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            button.textContent = isFollowing ? 'Follow' : 'Unfollow';
+        } else {
+            alert(data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while processing your request.');
+    });
+}
     </script>
 {% endblock %}

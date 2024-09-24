@@ -4,6 +4,7 @@ from .config import Config
 from flask_migrate import Migrate
 from flask_socketio import SocketIO
 from flask_login import LoginManager
+from flask_wtf.csrf import CSRFProtect
 from .routes import init_app as init_routes
 from flask.cli import with_appcontext
 from .models import User
@@ -12,6 +13,7 @@ import click
 migrate = Migrate()
 socketio = SocketIO()
 login_manager = LoginManager()
+csrf = CSRFProtect()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -23,6 +25,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     socketio.init_app(app)
     login_manager.init_app(app)
+    csrf.init_app(app)
 
     # Set up login manager
     login_manager.login_view = 'auth.login'

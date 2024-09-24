@@ -27,8 +27,8 @@ def user_settings():
         'country': current_user.country,
         'account_type': current_user.account_type,  
     }
-    following = current_user.following.all()
-    return render_template('user_settings.html', user_data=user_data, AccountType=AccountType, following=following)
+    followed = current_user.followed.all()
+    return render_template('user_settings.html', user_data=user_data, AccountType=AccountType, followed=followed)
 
 @bp.route('/update_profile', methods=['POST'])
 @login_required
@@ -139,20 +139,40 @@ def user_profile(username):
 def follow(user_id):
     user_to_follow = User.query.get_or_404(user_id)
     if user_to_follow == current_user:
-        return jsonify({'error': 'You cannot follow yourself'}), 400
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'error': 'You cannot follow yourself'}), 400
+        else:
+            flash('You cannot follow yourself', 'error')
+            return redirect(url_for('user.user_profile', username=user_to_follow.username))
+
     current_user.follow(user_to_follow)
     db.session.commit()
-    return jsonify({'success': True, 'message': f'You are now following {user_to_follow.username}'})
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'message': f'You are now following {user_to_follow.username}'})
+    else:
+        flash(f'You are now following {user_to_follow.username}', 'success')
+        return redirect(url_for('user.user_profile', username=user_to_follow.username))
 
 @bp.route('/unfollow/<int:user_id>', methods=['POST'])
 @login_required
 def unfollow(user_id):
     user_to_unfollow = User.query.get_or_404(user_id)
     if user_to_unfollow == current_user:
-        return jsonify({'error': 'You cannot unfollow yourself'}), 400
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'error': 'You cannot unfollow yourself'}), 400
+        else:
+            flash('You cannot unfollow yourself', 'error')
+            return redirect(url_for('user.user_profile', username=user_to_unfollow.username))
+
     current_user.unfollow(user_to_unfollow)
     db.session.commit()
-    return jsonify({'success': True, 'message': f'You have unfollowed {user_to_unfollow.username}'})
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': True, 'message': f'You have unfollowed {user_to_unfollow.username}'})
+    else:
+        flash(f'You have unfollowed {user_to_unfollow.username}', 'success')
+        return redirect(url_for('user.user_profile', username=user_to_unfollow.username))
 
 
 

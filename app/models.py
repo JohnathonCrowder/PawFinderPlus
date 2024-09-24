@@ -26,7 +26,14 @@ class AccountType(Enum):
     BASIC = "Basic"
     PREMIUM = "Premium"
 
-# Add User model
+
+## Follower Data Table ##
+followers = db.Table('followers',
+    db.Column('follower_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
+)
+
+## User Model ##
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -151,34 +158,29 @@ class User(UserMixin, db.Model):
     
     ##### User Follower Code ##########
 
-    followers = db.relationship(
-        'User', secondary='followers',
-        primaryjoin=(id == db.Column('follower_id', db.Integer, db.ForeignKey('user.id'))),
-        secondaryjoin=(id == db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))),
-        backref=db.backref('following', lazy='dynamic'),
-        lazy='dynamic'
-    )
+    followed = db.relationship(
+        'User', secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
 
     def follow(self, user):
         if not self.is_following(user):
-            self.following.append(user)
+            self.followed.append(user)
 
     def unfollow(self, user):
         if self.is_following(user):
-            self.following.remove(user)
+            self.followed.remove(user)
 
     def is_following(self, user):
-        return self.following.filter(followers.c.followed_id == user.id).count() > 0
+        return self.followed.filter(
+            followers.c.followed_id == user.id).count() > 0
     
     ###################################
 
 
 
-## Followers Data Table ##
-followers = db.Table('followers',
-    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
-)
+
     
 
 
