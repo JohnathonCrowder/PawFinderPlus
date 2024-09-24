@@ -132,6 +132,7 @@
                                  alt="{{ dog.name }}" 
                                  class="image-preview">
                             <form action="{{ url_for('dog.delete_image', id=dog.id, image_id=image.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="delete-image" onclick="return confirm('Are you sure you want to delete this image?')">
                                     &times;
                                 </button>
@@ -146,6 +147,7 @@
 
         <!-- Dog Details Form -->
         <form action="{{ url_for('dog.dog_detail', id=dog.id) }}" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="input-group">
                     <i class="fas fa-dog icon"></i>
@@ -272,6 +274,7 @@
         
         <!-- Delete Dog Form -->
         <form action="{{ url_for('dog.delete_dog', id=dog.id) }}" method="POST" class="mt-8 text-center">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="bone-button delete-button" 
                     onclick="return confirm('Are you sure you want to delete this dog? This action cannot be undone.')">
                 <i class="fas fa-trash-alt mr-2"></i> Delete Dog
