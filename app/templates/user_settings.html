@@ -192,6 +192,22 @@
         </div>
 
         <div class="settings-container p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6 section-title">Following</h2>
+            {% if following %}
+                <ul>
+                    {% for followed_user in following %}
+                        <li class="mb-2">
+                            <a href="{{ url_for('user.user_profile', username=followed_user.username) }}" class="text-blue-500 hover:underline">{{ followed_user.username }}</a>
+                            <button onclick="toggleFollow({{ followed_user.id }})" class="ml-2 text-red-500 hover:underline">Unfollow</button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>You are not following anyone yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="settings-container p-8 mb-8">
             <h2 class="text-2xl font-bold mb-6 section-title">Change Email</h2>
             <form action="{{ url_for('auth.change_email') }}" method="POST">
                 <div class="mb-4">
@@ -378,4 +394,24 @@ profileForm.addEventListener('submit', function(e) {
     }
 });
 </script>
+<script>
+    function toggleFollow(userId) {
+        fetch(`/unfollow/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    </script>
 {% endblock %}

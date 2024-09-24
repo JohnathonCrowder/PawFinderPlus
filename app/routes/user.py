@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, jsonify
 from flask_login import login_required, current_user
 from app.models import User, Dog, Litter, DogStatus, AccountType
 from app.extensions import db
@@ -27,7 +27,8 @@ def user_settings():
         'country': current_user.country,
         'account_type': current_user.account_type,  
     }
-    return render_template('user_settings.html', user_data=user_data, AccountType=AccountType)
+    following = current_user.following.all()
+    return render_template('user_settings.html', user_data=user_data, AccountType=AccountType, following=following)
 
 @bp.route('/update_profile', methods=['POST'])
 @login_required
@@ -130,7 +131,28 @@ def user_profile(username):
 
 
 
+####################   Changing Followers Code    #########################
 
+
+@bp.route('/follow/<int:user_id>', methods=['POST'])
+@login_required
+def follow(user_id):
+    user_to_follow = User.query.get_or_404(user_id)
+    if user_to_follow == current_user:
+        return jsonify({'error': 'You cannot follow yourself'}), 400
+    current_user.follow(user_to_follow)
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'You are now following {user_to_follow.username}'})
+
+@bp.route('/unfollow/<int:user_id>', methods=['POST'])
+@login_required
+def unfollow(user_id):
+    user_to_unfollow = User.query.get_or_404(user_id)
+    if user_to_unfollow == current_user:
+        return jsonify({'error': 'You cannot unfollow yourself'}), 400
+    current_user.unfollow(user_to_unfollow)
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'You have unfollowed {user_to_unfollow.username}'})
 
 
 

@@ -149,12 +149,40 @@ class User(UserMixin, db.Model):
         db.session.commit()
         return dogs_affected, litters_affected
     
+    ##### User Follower Code ##########
+
+    followers = db.relationship(
+        'User', secondary='followers',
+        primaryjoin=(id == db.Column('follower_id', db.Integer, db.ForeignKey('user.id'))),
+        secondaryjoin=(id == db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))),
+        backref=db.backref('following', lazy='dynamic'),
+        lazy='dynamic'
+    )
+
+    def follow(self, user):
+        if not self.is_following(user):
+            self.following.append(user)
+
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.following.remove(user)
+
+    def is_following(self, user):
+        return self.following.filter(followers.c.followed_id == user.id).count() > 0
+    
+    ###################################
 
 
 
+## Followers Data Table ##
+followers = db.Table('followers',
+    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
+)
+    
 
 
-
+#### Dog Data Model ####    
 
 class Dog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
