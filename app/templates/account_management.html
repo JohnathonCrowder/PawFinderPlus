@@ -115,6 +115,7 @@
                     <button disabled class="w-full bg-gray-300 text-gray-800 px-6 py-3 rounded-full font-bold">Current Plan</button>
                     {% else %}
                     <form action="{{ url_for('user.change_account_type') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="account_type" value="{{ plan.name }}">
                         <button type="submit" class="w-full bg-blue-500 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-600 transition duration-300">
                             {% if plan.value > user_data.account_type.value %}

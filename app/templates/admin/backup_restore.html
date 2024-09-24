@@ -7,6 +7,7 @@
     <div class="bg-white shadow-md rounded-lg p-6 mb-8">
         <h2 class="text-2xl font-semibold mb-4">Create Backup</h2>
         <form action="{{ url_for('admin.backup_restore') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" name="create_backup" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                 Create Backup
             </button>
@@ -16,6 +17,7 @@
     <div class="bg-white shadow-md rounded-lg p-6 mb-8">
         <h2 class="text-2xl font-semibold mb-4">Restore Backup</h2>
         <form action="{{ url_for('admin.backup_restore') }}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-4">
                 <input type="file" name="backup_file" accept=".zip" required class="border rounded p-2">
             </div>
@@ -45,6 +47,7 @@
                     <td>
                         <a href="{{ url_for('admin.download_backup', filename=backup.filename) }}" class="text-blue-500 hover:text-blue-600">Download</a>
                         <form action="{{ url_for('admin.delete_backup', filename=backup.filename) }}" method="post" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="text-red-500 hover:text-red-600 ml-2" onclick="return confirm('Are you sure you want to delete this backup?')">Delete</button>
                         </form>
                     </td>

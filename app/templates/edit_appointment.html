@@ -56,6 +56,7 @@
                 </h1>
                 
                 <form action="{{ url_for('vet.edit_appointment', appointment_id=appointment.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-6 input-group">
                         <i class="fas fa-calendar-alt icon"></i>
                         <input type="datetime-local" id="date" name="date" required 

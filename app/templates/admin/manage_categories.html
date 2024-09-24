@@ -5,6 +5,7 @@
     <h1 class="text-3xl font-bold mb-8">Manage Categories</h1>
 
     <form action="{{ url_for('admin.add_category') }}" method="post" class="mb-8">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="flex">
             <input type="text" name="name" placeholder="New category name" required
                    class="flex-grow px-4 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -19,6 +20,7 @@
         <li class="flex justify-between items-center bg-white p-4 rounded-md shadow">
             <span>{{ category.name }}</span>
             <form action="{{ url_for('admin.delete_category', id=category.id) }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="text-red-500 hover:text-red-700" onclick="return confirm('Are you sure you want to delete this category?')">
                     Delete
                 </button>
