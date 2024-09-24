@@ -217,10 +217,12 @@
         function submitForm() {
     const formData = new FormData(document.getElementById('filterForm'));
     const searchParams = new URLSearchParams(formData);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     fetch(`${filterForm.action}?${searchParams.toString()}`, {
         headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken
         }
     })
     .then(response => response.text())

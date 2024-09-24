@@ -272,13 +272,15 @@ document.getElementById('date_of_birth').addEventListener('change', updatePuppyS
 
 // Initial call to set up puppy selection
 updatePuppySelection();
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 function deleteLitterImage(litterId, imageId) {
     if (confirm('Are you sure you want to delete this image?')) {
         fetch(`/litter/${litterId}/delete_image/${imageId}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
             }
         }).then(response => {
             if (response.ok) {

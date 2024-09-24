@@ -54,6 +54,8 @@
 </div>
 
 <script>
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
 document.addEventListener('DOMContentLoaded', function() {
     const toggleFilters = document.getElementById('toggleFilters');
     const filterSection = document.getElementById('filterSection');
@@ -69,7 +71,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch(`{{ url_for('admin.blog_management') }}?${searchParams.toString()}`, {
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
             }
         })
         .then(response => response.text())
@@ -112,7 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch(`{{ url_for('admin.toggle_publish', post_id=0) }}`.replace('0', postId), {
                 method: 'POST',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
                 }
             })
             .then(response => response.json())
@@ -134,7 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch(`{{ url_for('admin.toggle_featured', post_id=0) }}`.replace('0', postId), {
                 method: 'POST',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
                 }
             })
             .then(response => response.json())

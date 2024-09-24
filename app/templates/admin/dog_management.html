@@ -207,10 +207,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function submitForm() {
         const formData = new FormData(filterForm);
         const searchParams = new URLSearchParams(formData);
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
 
         fetch(`{{ url_for('admin.dog_management') }}?${searchParams.toString()}`, {
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
             }
         })
         .then(response => response.text())

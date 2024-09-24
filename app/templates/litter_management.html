@@ -225,14 +225,18 @@ document.addEventListener('DOMContentLoaded', function() {
             viewToggle.querySelector('i').classList.add('fa-list');
         }
     }
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
 
     function submitForm() {
         const formData = new FormData(filterForm);
         const searchParams = new URLSearchParams(formData);
 
+
         fetch(`${filterForm.action}?${searchParams.toString()}`, {
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
             }
         })
         .then(response => response.text())
