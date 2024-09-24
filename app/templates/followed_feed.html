@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Your Followed Feed{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8 text-center text-gray-800">Your Followed Feed</h1>
+
+    {% if feed_items %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item, item_type in feed_items %}
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-1">
+                    {% if item_type == 'dog' %}
+                        <div class="bg-blue-100 text-blue-800 px-4 py-2 text-sm font-semibold">New Dog</div>
+                        <div class="p-6">
+                            <h2 class="text-xl font-bold mb-2 text-gray-800">{{ item.name }}</h2>
+                            <p class="text-gray-600 mb-2"><span class="font-semibold">Breed:</span> {{ item.breed }}</p>
+                            <p class="text-gray-600 mb-2"><span class="font-semibold">Added by:</span> {{ item.owner.username }}</p>
+                            <p class="text-gray-600 mb-4"><span class="font-semibold">Added on:</span> {{ item.created_at.strftime('%B %d, %Y') }}</p>
+                            <a href="{{ url_for('dog.dog_profile', id=item.id) }}" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">View Dog</a>
+                        </div>
+                    {% elif item_type == 'litter' %}
+                        <div class="bg-green-100 text-green-800 px-4 py-2 text-sm font-semibold">New Litter</div>
+                        <div class="p-6">
+                            <h2 class="text-xl font-bold mb-2 text-gray-800">{{ item.name }}</h2>
+                            <p class="text-gray-600 mb-2"><span class="font-semibold">Date of Birth:</span> {{ item.date_of_birth.strftime('%B %d, %Y') }}</p>
+                            <p class="text-gray-600 mb-2"><span class="font-semibold">Added by:</span> {{ item.user.username }}</p>
+                            <p class="text-gray-600 mb-4"><span class="font-semibold">Number of Puppies:</span> {{ item.puppies|length }}</p>
+                            <a href="{{ url_for('litter.litter_detail', id=item.id) }}" class="inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300">View Litter</a>
+                        </div>
+                    {% elif item_type == 'blog_post' %}
+                        <div class="bg-purple-100 text-purple-800 px-4 py-2 text-sm font-semibold">New Blog Post</div>
+                        <div class="p-6">
+                            <h2 class="text-xl font-bold mb-2 text-gray-800">{{ item.title }}</h2>
+                            <p class="text-gray-600 mb-2"><span class="font-semibold">Author:</span> {{ item.author.username }}</p>
+                            <p class="text-gray-600 mb-4"><span class="font-semibold">Published on:</span> {{ item.created_at.strftime('%B %d, %Y') }}</p>
+                            <a href="{{ url_for('blog.blog_post', post_id=item.id) }}" class="inline-block bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition duration-300">Read Post</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <nav class="mt-8">
+            <ul class="flex justify-center space-x-2">
+                {% if pagination.has_prev %}
+                    <li>
+                        <a href="{{ url_for('user.followed_feed', page=pagination.page-1) }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                            Previous
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for page in pagination.iter_pages() %}
+                    {% if page %}
+                        {% if page != pagination.page %}
+                            <li>
+                                <a href="{{ url_for('user.followed_feed', page=page) }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                                    {{ page }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li>
+                                <span class="px-3 py-2 bg-blue-500 text-white rounded">
+                                    {{ page }}
+                                </span>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li>
+                            <span class="px-3 py-2">…</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                    <li>
+                        <a href="{{ url_for('user.followed_feed', page=pagination.page+1) }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                            Next
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="bg-white shadow-lg rounded-lg p-8 text-center">
+            <i class="fas fa-rss text-6xl text-gray-300 mb-4"></i>
+            <p class="text-xl text-gray-600 mb-4">Your feed is empty! Start following more users to see their updates here.</p>
+            <a href="{{ url_for('user.user_management') }}" class="inline-block bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition duration-300">Find Users to Follow</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

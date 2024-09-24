@@ -1,11 +1,15 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, jsonify, current_app
 from flask_login import login_required, current_user
-from app.models import User, Dog, Litter, DogStatus, AccountType
+from app.models import User, Dog, Litter, DogStatus, AccountType, BlogPost
 from app.extensions import db
 from app.utils import format_url, generate_shareable_link, generate_social_links
 from werkzeug.utils import secure_filename
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, timedelta
+from sqlalchemy import or_
+from itertools import chain
+
+
 
 bp = Blueprint('user', __name__)
 
@@ -186,8 +190,95 @@ def unfollow(user_id):
     else:
         flash(f'You have unfollowed {user_to_unfollow.username}', 'success')
         return redirect(url_for('user.user_profile', username=user_to_unfollow.username))
+    
 
+####################   Follower Feed Route      ###########################        
 
+@bp.route('/followed_feed')
+@login_required
+def followed_feed():
+    page = request.args.get('page', 1, type=int)
+    per_page = current_app.config['POSTS_PER_PAGE']
+    
+    # Get the IDs of users that the current user is following
+    followed_users = [user.id for user in current_user.followed]
+    
+    # Set the time range for recent posts (e.g., last 30 days)
+    recent_time = datetime.utcnow() - timedelta(days=30)
+    
+    # Fetch recent dogs
+    dogs = Dog.query.filter(
+        Dog.user_id.in_(followed_users),
+        Dog.created_at > recent_time,
+        Dog.is_public == True
+    ).all()
+
+    # Fetch recent litters
+    litters = Litter.query.filter(
+        Litter.user_id.in_(followed_users),
+        Litter.date_of_birth > recent_time,
+        Litter.is_public == True
+    ).all()
+
+    # Fetch recent blog posts
+    blog_posts = BlogPost.query.filter(
+        BlogPost.author_id.in_(followed_users),
+        BlogPost.created_at > recent_time,
+        BlogPost.is_published == True
+    ).all()
+
+    # Combine all items
+    all_items = list(chain(
+        ((item, 'dog') for item in dogs),
+        ((item, 'litter') for item in litters),
+        ((item, 'blog_post') for item in blog_posts)
+    ))
+
+    # Sort combined items by date
+    all_items.sort(key=lambda x: getattr(x[0], 'created_at', getattr(x[0], 'date_of_birth', datetime.min)), reverse=True)
+
+    # Manual pagination
+    total_items = len(all_items)
+    start = (page - 1) * per_page
+    end = start + per_page
+    feed_items = all_items[start:end]
+
+    # Create a pagination object
+    class Pagination:
+        def __init__(self, items, page, per_page, total):
+            self.items = items
+            self.page = page
+            self.per_page = per_page
+            self.total = total
+
+        @property
+        def pages(self):
+            return (self.total + self.per_page - 1) // self.per_page
+
+        @property
+        def has_prev(self):
+            return self.page > 1
+
+        @property
+        def has_next(self):
+            return self.page < self.pages
+
+        def iter_pages(self, left_edge=2, left_current=2, right_current=5, right_edge=2):
+            last = 0
+            for num in range(1, self.pages + 1):
+                if num <= left_edge or \
+                   (num > self.page - left_current - 1 and num < self.page + right_current) or \
+                   num > self.pages - right_edge:
+                    if last + 1 != num:
+                        yield None
+                    yield num
+                    last = num
+
+    pagination = Pagination(feed_items, page, per_page, total_items)
+
+    return render_template('followed_feed.html', 
+                           feed_items=feed_items, 
+                           pagination=pagination)
 
 
 ####################   Changing Account Types    ##########################

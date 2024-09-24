@@ -90,6 +90,7 @@
                             <li><a href="{{ url_for('user.user_profile', username=current_user.username) }}" class="rounded-t hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">My Profile</a></li>
                             <li><a href="{{ url_for('user.user_settings') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Settings</a></li>
                             <li><a href="{{ url_for('message.messages') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Messages</a></li>
+                            <a href="{{ url_for('user.followed_feed') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Followed Feed</a>
                             <li><a href="{{ url_for('auth.logout') }}" class="rounded-b hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Logout</a></li>
                         </ul>
                     </li>
