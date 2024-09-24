@@ -308,6 +308,7 @@
                     Edit
                 </a>
                 <form id="modalDeleteForm" method="POST" class="inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="modal-button modal-button-delete" onclick="return confirm('Are you sure you want to delete this appointment?')">
                         Delete
                     </button>

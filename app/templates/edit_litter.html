@@ -134,6 +134,7 @@
         {% endwith %}
         
         <form id="litterForm" action="{{ url_for('litter.edit_litter', id=litter.id) }}" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="input-group">
                     <i class="fas fa-tag icon"></i>
