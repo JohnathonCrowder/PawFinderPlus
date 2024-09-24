@@ -60,6 +60,8 @@
         {% endwith %}
         
         <form action="{{ url_for('auth.login') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <div class="mb-4 input-group">
                 <i class="fas fa-user icon"></i>
                 <input type="text" id="username" name="username" 
