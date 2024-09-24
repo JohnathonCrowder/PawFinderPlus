@@ -143,6 +143,17 @@
                         <p class="text-lg">Member since {{ user.created_at.strftime('%Y') }}</p>
                     </div>
                 </div>
+
+
+                <div class="flex space-x-4 mt-2">
+                    <span class="text-gray-600">
+                        <i class="fas fa-users mr-1"></i> Followers: <span id="followers-count">{{ followers_count }}</span>
+                    </span>
+                    <span class="text-gray-600">
+                        <i class="fas fa-user-friends mr-1"></i> Following: <span id="following-count">{{ following_count }}</span>
+                    </span>
+                </div>
+
                 <div class="flex space-x-4">
                     <button id="followButton" class="paw-button" onclick="toggleFollow({{ user.id }})">
                         {% if current_user.is_following(user) %}
@@ -388,6 +399,22 @@
     .then(data => {
         if (data.success) {
             button.textContent = isFollowing ? 'Follow' : 'Unfollow';
+            
+            // Update follower count
+            const followersCount = document.getElementById('followers-count');
+            if (followersCount) {
+                let count = parseInt(followersCount.textContent);
+                followersCount.textContent = isFollowing ? count - 1 : count + 1;
+            }
+            
+            // Update following count for the current user if on their own profile
+            if ({{ 'true' if is_own_profile else 'false' }}) {
+                const followingCount = document.getElementById('following-count');
+                if (followingCount) {
+                    let count = parseInt(followingCount.textContent);
+                    followingCount.textContent = isFollowing ? count - 1 : count + 1;
+                }
+            }
         } else {
             alert(data.error);
         }

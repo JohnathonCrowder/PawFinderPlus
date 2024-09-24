@@ -126,7 +126,10 @@ def user_profile(username):
                            is_own_profile=is_own_profile,
                            DogStatus=DogStatus,
                            user_data=user_data,
-                           shareable_link=shareable_link, social_links=social_links)
+                           shareable_link=shareable_link, 
+                           social_links=social_links,
+                           followers_count=user.followers_count,
+                           following_count=user.following_count)
 
 
 
@@ -149,7 +152,12 @@ def follow(user_id):
     db.session.commit()
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify({'success': True, 'message': f'You are now following {user_to_follow.username}'})
+        return jsonify({
+            'success': True, 
+            'message': f'You are now following {user_to_follow.username}',
+            'followers_count': user_to_follow.followers_count,
+            'following_count': current_user.following_count
+        })
     else:
         flash(f'You are now following {user_to_follow.username}', 'success')
         return redirect(url_for('user.user_profile', username=user_to_follow.username))
@@ -169,7 +177,12 @@ def unfollow(user_id):
     db.session.commit()
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify({'success': True, 'message': f'You have unfollowed {user_to_unfollow.username}'})
+        return jsonify({
+            'success': True, 
+            'message': f'You have unfollowed {user_to_unfollow.username}',
+            'followers_count': user_to_unfollow.followers_count,
+            'following_count': current_user.following_count
+        })
     else:
         flash(f'You have unfollowed {user_to_unfollow.username}', 'success')
         return redirect(url_for('user.user_profile', username=user_to_unfollow.username))
