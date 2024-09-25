@@ -90,6 +90,21 @@
             max-width: none;
         }
     }
+
+    @keyframes attention-pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+    }
+
+    .animate-pulse {
+        animation: attention-pulse 2s infinite;
+    }
 </style>
 {% endblock %}
 
@@ -137,8 +152,6 @@
                     </div>
                 </form>
             </div>
-
-
         </div>
     </div>
 
@@ -326,5 +339,4 @@ function updateResults() {
 // Add event listener for sort dropdown
 document.getElementById('sort').addEventListener('change', updateResults);
 </script>
-
 {% endblock %}

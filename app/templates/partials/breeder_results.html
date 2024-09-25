@@ -6,14 +6,19 @@
                 <img src="{{ url_for('user.get_profile_picture', user_id=breeder.id) }}" alt="{{ breeder.full_name or breeder.username }}" class="w-16 h-16 rounded-full object-cover mr-4">
                 <div>
                     <h3 class="text-xl font-semibold text-gray-800">{{ breeder.full_name or breeder.username }}</h3>
-                    <p class="text-sm text-gray-600">
+                    <div class="flex items-center mt-1">
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
                             {{ breeder.account_type.value }}
                         </span>
-                    </p>
+                        {% if breeder_info[breeder.id]['available_dogs_count'] > 0 %}
+                        <span class="bg-green-500 text-white text-xs font-medium px-2.5 py-0.5 rounded animate-pulse">
+                            Dogs Available!
+                        </span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            <div class="h-6 mb-4"> <!-- This div ensures consistent spacing -->
+            <div class="h-6 mb-4">
                 {% if breeder.city and breeder.country %}
                 <p class="text-sm text-gray-600">
                     <i class="fas fa-map-marker-alt mr-1"></i>
@@ -42,8 +47,11 @@
                     {% endif %}
                 </div>
             </div>
-            {% else %}
-            <div class="mb-4 h-[62px]"></div> <!-- Placeholder for breeds section -->
+            {% endif %}
+            {% if breeder_info[breeder.id]['available_dogs_count'] > 0 %}
+            <p class="text-green-600 font-semibold mt-2">
+                {{ breeder_info[breeder.id]['available_dogs_count'] }} dog(s) available now or soon
+            </p>
             {% endif %}
         </div>
         <div class="p-6 bg-gray-50">
@@ -72,3 +80,48 @@
     </div>
     {% endfor %}
 </div>
+
+{% if not breeders.items %}
+<div class="text-center py-12">
+    <i class="fas fa-search text-6xl text-gray-400 mb-4"></i>
+    <p class="text-xl text-gray-600">No breeders found matching your criteria.</p>
+</div>
+{% endif %}
+
+{% if breeders.pages > 1 %}
+<div class="mt-8">
+    <nav class="pagination" aria-label="Pagination">
+        <ul class="flex justify-center space-x-2">
+            {% if breeders.has_prev %}
+            <li>
+                <a href="{{ url_for('main.breeder_network', page=breeders.prev_num, **request.args) }}" class="px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">Previous</a>
+            </li>
+            {% endif %}
+
+            {% for page in breeders.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page %}
+                    {% if page != breeders.page %}
+                    <li>
+                        <a href="{{ url_for('main.breeder_network', page=page, **request.args) }}" class="px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">{{ page }}</a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <span class="px-3 py-2 rounded-md bg-blue-500 text-white">{{ page }}</span>
+                    </li>
+                    {% endif %}
+                {% else %}
+                <li>
+                    <span class="px-3 py-2">...</span>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if breeders.has_next %}
+            <li>
+                <a href="{{ url_for('main.breeder_network', page=breeders.next_num, **request.args) }}" class="px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endif %}
