@@ -109,6 +109,19 @@
                 <input type="text" name="location" placeholder="City, State, or Country" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
         </div>
+        <div class="w-full md:w-1/4 px-2 mb-4">
+            <select id="sort" name="sort" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="relevance" {% if request.args.get('sort') == 'relevance' %}selected{% endif %}>Sort by: Relevance</option>
+                <option value="dogs_desc" {% if request.args.get('sort') == 'dogs_desc' %}selected{% endif %}>Most Dogs</option>
+                <option value="dogs_asc" {% if request.args.get('sort') == 'dogs_asc' %}selected{% endif %}>Least Dogs</option>
+                <option value="litters_desc" {% if request.args.get('sort') == 'litters_desc' %}selected{% endif %}>Most Litters</option>
+                <option value="litters_asc" {% if request.args.get('sort') == 'litters_asc' %}selected{% endif %}>Least Litters</option>
+                <option value="followers_desc" {% if request.args.get('sort') == 'followers_desc' %}selected{% endif %}>Most Followers</option>
+                <option value="followers_asc" {% if request.args.get('sort') == 'followers_asc' %}selected{% endif %}>Least Followers</option>
+                <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest Members</option>
+                <option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>Oldest Members</option>
+            </select>
+        </div>
         <div class="flex items-center justify-end">
             <label for="show_free" class="checkbox-label cursor-pointer bg-white bg-opacity-70 px-3 py-2 rounded-lg">
                 <input type="checkbox" id="show_free" name="show_free" value="true" {% if show_free %}checked{% endif %} class="form-checkbox h-5 w-5 text-blue-600 rounded">
@@ -284,6 +297,27 @@ function toggleFollow(userId, button) {
         alert('An error occurred while processing your request.');
     });
 }
+function updateResults() {
+    const formData = new FormData(filterForm);
+    const searchParams = new URLSearchParams(formData);
+
+    fetch(`{{ url_for('main.breeder_network') }}?${searchParams.toString()}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        breederResults.innerHTML = doc.getElementById('breederResults').innerHTML;
+        pagination.innerHTML = doc.getElementById('pagination').innerHTML;
+        history.pushState(null, '', `{{ url_for('main.breeder_network') }}?${searchParams.toString()}`);
+    });
+}
+
+// Add event listener for sort dropdown
+document.getElementById('sort').addEventListener('change', updateResults);
 </script>
 
 {% endblock %}

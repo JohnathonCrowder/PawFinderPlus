@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request   
 from flask_login import current_user
-from app.models import Litter, BlogPost, DogStatus, User, Dog, AccountType
-from sqlalchemy import or_, func
+from app.models import Litter, BlogPost, DogStatus, User, Dog, AccountType, followers
+from sqlalchemy import or_, func, asc, desc
 from app.extensions import db
 
 
@@ -38,6 +38,7 @@ def breeder_network():
     breed = request.args.get('breed', '')
     location = request.args.get('location', '')
     show_free = request.args.get('show_free', 'false') == 'true'
+    sort = request.args.get('sort', 'relevance')
 
     query = User.query
 
@@ -57,6 +58,26 @@ def breeder_network():
             User.state.ilike(f'%{location}%'),
             User.country.ilike(f'%{location}%')
         ))
+
+    # Apply sorting
+    if sort == 'dogs_desc':
+        query = query.outerjoin(User.dogs).group_by(User.id).order_by(desc(func.count(Dog.id)))
+    elif sort == 'dogs_asc':
+        query = query.outerjoin(User.dogs).group_by(User.id).order_by(asc(func.count(Dog.id)))
+    elif sort == 'litters_desc':
+        query = query.outerjoin(User.litters).group_by(User.id).order_by(desc(func.count(Litter.id)))
+    elif sort == 'litters_asc':
+        query = query.outerjoin(User.litters).group_by(User.id).order_by(asc(func.count(Litter.id)))
+    elif sort == 'followers_desc':
+        subquery = db.session.query(followers.c.followed_id, func.count('*').label('follower_count')).group_by(followers.c.followed_id).subquery()
+        query = query.outerjoin(subquery, User.id == subquery.c.followed_id).order_by(desc(subquery.c.follower_count))
+    elif sort == 'followers_asc':
+        subquery = db.session.query(followers.c.followed_id, func.count('*').label('follower_count')).group_by(followers.c.followed_id).subquery()
+        query = query.outerjoin(subquery, User.id == subquery.c.followed_id).order_by(asc(subquery.c.follower_count))
+    elif sort == 'newest':
+        query = query.order_by(desc(User.created_at))
+    elif sort == 'oldest':
+        query = query.order_by(asc(User.created_at))
 
     query = query.options(
         db.joinedload(User.dogs),
