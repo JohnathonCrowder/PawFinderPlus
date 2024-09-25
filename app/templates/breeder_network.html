@@ -79,6 +79,17 @@
     .checkbox-label:hover .form-checkbox {
         border-color: rgba(0, 0, 0, 0.8);
     }
+
+    .search-input {
+        width: 100%;
+    }
+    
+    @media (min-width: 768px) {
+        .search-container {
+            width: 100%;
+            max-width: none;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -91,45 +102,41 @@
             <p class="text-xl md:text-2xl text-center mb-8">Find passionate breeders and build your network</p>
             
             <!-- Search Form -->
-<div class="search-container p-6 max-w-4xl mx-auto">
-    <form id="filterForm" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <input type="text" name="search" placeholder="Search by name" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="search-container p-6 max-w-4xl mx-auto">
+                <form id="filterForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" name="search" placeholder="Search by name" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select name="breed" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Breeds</option>
+                            {% for breed in breeds %}
+                            <option value="{{ breed }}">{{ breed }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="text" name="location" placeholder="City, State, or Country" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                        <div class="col-span-2">
+                            <select id="sort" name="sort" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="relevance" {% if request.args.get('sort') == 'relevance' %}selected{% endif %}>Sort by: Relevance</option>
+                                <option value="dogs_desc" {% if request.args.get('sort') == 'dogs_desc' %}selected{% endif %}>Most Dogs</option>
+                                <option value="dogs_asc" {% if request.args.get('sort') == 'dogs_asc' %}selected{% endif %}>Least Dogs</option>
+                                <option value="litters_desc" {% if request.args.get('sort') == 'litters_desc' %}selected{% endif %}>Most Litters</option>
+                                <option value="litters_asc" {% if request.args.get('sort') == 'litters_asc' %}selected{% endif %}>Least Litters</option>
+                                <option value="followers_desc" {% if request.args.get('sort') == 'followers_desc' %}selected{% endif %}>Most Followers</option>
+                                <option value="followers_asc" {% if request.args.get('sort') == 'followers_asc' %}selected{% endif %}>Least Followers</option>
+                                <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest Members</option>
+                                <option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>Oldest Members</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-end">
+                            <label for="show_free" class="flex items-center cursor-pointer bg-white bg-opacity-70 px-3 py-2 rounded-lg">
+                                <input type="checkbox" id="show_free" name="show_free" value="true" {% if show_free %}checked{% endif %} class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                                <span class="ml-2 text-gray-700">Show Free Users</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div>
-                <select name="breed" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Breeds</option>
-                    {% for breed in breeds %}
-                    <option value="{{ breed }}">{{ breed }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <input type="text" name="location" placeholder="City, State, or Country" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-        </div>
-        <div class="w-full md:w-1/4 px-2 mb-4">
-            <select id="sort" name="sort" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="relevance" {% if request.args.get('sort') == 'relevance' %}selected{% endif %}>Sort by: Relevance</option>
-                <option value="dogs_desc" {% if request.args.get('sort') == 'dogs_desc' %}selected{% endif %}>Most Dogs</option>
-                <option value="dogs_asc" {% if request.args.get('sort') == 'dogs_asc' %}selected{% endif %}>Least Dogs</option>
-                <option value="litters_desc" {% if request.args.get('sort') == 'litters_desc' %}selected{% endif %}>Most Litters</option>
-                <option value="litters_asc" {% if request.args.get('sort') == 'litters_asc' %}selected{% endif %}>Least Litters</option>
-                <option value="followers_desc" {% if request.args.get('sort') == 'followers_desc' %}selected{% endif %}>Most Followers</option>
-                <option value="followers_asc" {% if request.args.get('sort') == 'followers_asc' %}selected{% endif %}>Least Followers</option>
-                <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest Members</option>
-                <option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>Oldest Members</option>
-            </select>
-        </div>
-        <div class="flex items-center justify-end">
-            <label for="show_free" class="checkbox-label cursor-pointer bg-white bg-opacity-70 px-3 py-2 rounded-lg">
-                <input type="checkbox" id="show_free" name="show_free" value="true" {% if show_free %}checked{% endif %} class="form-checkbox h-5 w-5 text-blue-600 rounded">
-                <span class="ml-2">Show Free Users</span>
-            </label>
-        </div>
-    </form>
-</div>
 
 
         </div>
