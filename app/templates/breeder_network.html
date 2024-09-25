@@ -53,29 +53,24 @@
             <p class="text-xl md:text-2xl text-center mb-8">Find passionate breeders and build your network</p>
             
             <!-- Search Form -->
-<div class="search-container p-6 max-w-4xl mx-auto">
-    <form action="{{ url_for('main.breeder_network') }}" method="GET" class="flex flex-wrap -mx-2">
-        <div class="w-full md:w-1/3 px-2 mb-4">
-            <input type="text" name="search" placeholder="Search by name" value="{{ request.args.get('search', '') }}" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div class="w-full md:w-1/3 px-2 mb-4">
-            <select name="breed" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">All Breeds</option>
-                {% for breed in breeds %}
-                <option value="{{ breed }}" {% if breed == request.args.get('breed') %}selected{% endif %}>{{ breed }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="w-full md:w-1/3 px-2 mb-4">
-            <input type="text" name="location" placeholder="City, State, or Country" value="{{ request.args.get('location', '') }}" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div class="w-full px-2">
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                <i class="fas fa-search mr-2"></i>Search
-            </button>
-        </div>
-    </form>
-</div>
+            <div class="search-container p-6 max-w-4xl mx-auto">
+                <form id="filterForm" class="flex flex-wrap -mx-2">
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input type="text" name="search" placeholder="Search by name" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <select name="breed" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Breeds</option>
+                            {% for breed in breeds %}
+                            <option value="{{ breed }}">{{ breed }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="w-full md:w-1/3 px-2 mb-4">
+                        <input type="text" name="location" placeholder="City, State, or Country" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -83,85 +78,63 @@
     <div class="container mx-auto px-4 py-8">
         <h2 class="text-3xl font-semibold mb-8 text-center text-gray-800">Breeder Directory</h2>
         
-        {% if breeders.items %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {% for breeder in breeders.items %}
-            <div class="breeder-card bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-6">
-                    <div class="flex items-center mb-4">
-                        <img src="{{ url_for('user.get_profile_picture', user_id=breeder.id) }}" alt="{{ breeder.full_name or breeder.username }}" class="profile-image mr-4">
-                        <div>
-                            <h3 class="text-xl font-semibold text-gray-800">{{ breeder.full_name or breeder.username }}</h3>
-                            {% if breeder.city or breeder.state or breeder.country %}
-                            <p class="text-sm text-gray-600">
-                                <i class="fas fa-map-marker-alt mr-1"></i>
-                                {% if breeder.city %}{{ breeder.city }}{% endif %}
-                                {% if breeder.state %}, {{ breeder.state }}{% endif %}
-                                {% if breeder.country %}, {{ breeder.country }}{% endif %}
-                            </p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="flex justify-between mb-4">
-                        <p class="text-gray-600"><i class="fas fa-dog mr-2"></i>{{ breeder.dogs|length }} dogs</p>
-                        <p class="text-gray-600"><i class="fas fa-paw mr-2"></i>{{ breeder.litters|length }} litters</p>
-                    </div>
-                    {% if breeder.breeds %}
-                    <div class="mb-4">
-                        <p class="text-sm text-gray-600 mb-2">Breeds:</p>
-                        <div class="flex flex-wrap">
-                            {% for breed in breeder.breeds[:3] %}
-                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">{{ breed }}</span>
-                            {% endfor %}
-                            {% if breeder.breeds|length > 3 %}
-                            <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">+{{ breeder.breeds|length - 3 }} more</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    <div class="flex justify-between items-center">
-                        <a href="{{ url_for('user.user_profile', username=breeder.username) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">
-                            View Profile
-                        </a>
-                        {% if current_user.is_authenticated and current_user != breeder %}
-                        <button onclick="toggleFollow({{ breeder.id }})" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300">
-                            {% if current_user.is_following(breeder) %}
-                            Unfollow
-                            {% else %}
-                            Follow
-                            {% endif %}
-                        </button>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
+        <div id="breederResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Breeder cards will be dynamically inserted here -->
         </div>
 
         <!-- Pagination -->
-        <div class="mt-12 flex justify-center">
-            {% for page in breeders.iter_pages() %}
-                {% if page %}
-                    {% if page != breeders.page %}
-                    <a href="{{ url_for('main.breeder_network', page=page, **request.args) }}" class="px-4 py-2 mx-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">{{ page }}</a>
-                    {% else %}
-                    <span class="px-4 py-2 mx-1 bg-blue-700 text-white rounded-md">{{ page }}</span>
-                    {% endif %}
-                {% else %}
-                    <span class="px-4 py-2 mx-1">...</span>
-                {% endif %}
-            {% endfor %}
+        <div id="pagination" class="mt-12 flex justify-center">
+            <!-- Pagination will be dynamically inserted here -->
         </div>
-        {% else %}
-        <div class="text-center py-12">
-            <i class="fas fa-search text-6xl text-gray-400 mb-4"></i>
-            <p class="text-xl text-gray-600">No breeders found matching your criteria. Try adjusting your search.</p>
-        </div>
-        {% endif %}
     </div>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    const breederResults = document.getElementById('breederResults');
+    const pagination = document.getElementById('pagination');
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    function updateResults() {
+        const formData = new FormData(filterForm);
+        const searchParams = new URLSearchParams(formData);
+
+        fetch(`{{ url_for('main.breeder_network') }}?${searchParams.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            breederResults.innerHTML = doc.getElementById('breederResults').innerHTML;
+            pagination.innerHTML = doc.getElementById('pagination').innerHTML;
+        });
+    }
+
+    const debouncedUpdate = debounce(updateResults, 300);
+
+    filterForm.querySelectorAll('input, select').forEach(input => {
+        input.addEventListener('input', debouncedUpdate);
+    });
+
+    // Initial load
+    updateResults();
+});
+
 function toggleFollow(userId) {
     fetch(`/follow/${userId}`, {
         method: 'POST',

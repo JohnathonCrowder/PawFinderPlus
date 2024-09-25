@@ -34,15 +34,12 @@ def terms_of_service():
 
 @bp.route('/breeder-network')
 def breeder_network():
-    # Get query parameters
     search = request.args.get('search', '')
     breed = request.args.get('breed', '')
     location = request.args.get('location', '')
 
-    # Base query
     query = User.query
 
-    # Apply filters
     if search:
         query = query.filter(or_(
             User.username.ilike(f'%{search}%'),
@@ -57,12 +54,13 @@ def breeder_network():
             User.country.ilike(f'%{location}%')
         ))
 
-    # Paginate results
     page = request.args.get('page', 1, type=int)
     breeders = query.paginate(page=page, per_page=20, error_out=False)
 
-    # Get all unique breeds for the filter
     breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
     breeds = [breed[0] for breed in breeds]
 
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('partials/breeder_results.html', breeders=breeders)
+    
     return render_template('breeder_network.html', breeders=breeders, breeds=breeds)

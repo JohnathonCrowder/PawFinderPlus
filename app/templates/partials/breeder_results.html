@@ -1,0 +1,67 @@
+<div id="breederResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% for breeder in breeders.items %}
+    <div class="breeder-card bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center mb-4">
+                <img src="{{ url_for('user.get_profile_picture', user_id=breeder.id) }}" alt="{{ breeder.full_name or breeder.username }}" class="profile-image mr-4">
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-800">{{ breeder.full_name or breeder.username }}</h3>
+                    {% if breeder.city or breeder.state or breeder.country %}
+                    <p class="text-sm text-gray-600">
+                        <i class="fas fa-map-marker-alt mr-1"></i>
+                        {% if breeder.city %}{{ breeder.city }}{% endif %}
+                        {% if breeder.state %}, {{ breeder.state }}{% endif %}
+                        {% if breeder.country %}, {{ breeder.country }}{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex justify-between mb-4">
+                <p class="text-gray-600"><i class="fas fa-dog mr-2"></i>{{ breeder.dogs|length }} dogs</p>
+                <p class="text-gray-600"><i class="fas fa-paw mr-2"></i>{{ breeder.litters|length }} litters</p>
+            </div>
+            {% if breeder.breeds %}
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-2">Breeds:</p>
+                <div class="flex flex-wrap">
+                    {% for breed in breeder.breeds[:3] %}
+                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">{{ breed }}</span>
+                    {% endfor %}
+                    {% if breeder.breeds|length > 3 %}
+                    <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">+{{ breeder.breeds|length - 3 }} more</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            <div class="flex justify-between items-center">
+                <a href="{{ url_for('user.user_profile', username=breeder.username) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+                    View Profile
+                </a>
+                {% if current_user.is_authenticated and current_user != breeder %}
+                <button onclick="toggleFollow({{ breeder.id }})" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+                    {% if current_user.is_following(breeder) %}
+                    Unfollow
+                    {% else %}
+                    Follow
+                    {% endif %}
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="pagination" class="mt-12 flex justify-center">
+    {% for page in breeders.iter_pages() %}
+        {% if page %}
+            {% if page != breeders.page %}
+            <a href="{{ url_for('main.breeder_network', page=page, **request.args) }}" class="px-4 py-2 mx-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">{{ page }}</a>
+            {% else %}
+            <span class="px-4 py-2 mx-1 bg-blue-700 text-white rounded-md">{{ page }}</span>
+            {% endif %}
+        {% else %}
+            <span class="px-4 py-2 mx-1">...</span>
+        {% endif %}
+    {% endfor %}
+</div>
