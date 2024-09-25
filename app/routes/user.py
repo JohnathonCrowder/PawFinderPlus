@@ -80,7 +80,7 @@ def get_profile_picture(user_id):
         )
     else:
         # Return a default image or 404
-        return send_file('path/to/default/profile/image.png', mimetype='image/png')
+        return send_file('static\img\profile_photo_placeholder.png', mimetype='image/png')
 
 @bp.route('/remove_profile_picture', methods=['POST'])
 @login_required
