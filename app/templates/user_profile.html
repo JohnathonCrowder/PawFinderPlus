@@ -273,47 +273,56 @@
             <div class="md:col-span-2 space-y-8">
 
                 <!-- Dogs Section -->
-<div class="card p-8">
-    <h2 class="text-2xl font-semibold mb-6">Dogs</h2>
+<div class="bg-gray-100 p-8 rounded-lg shadow-inner">
+    <h2 class="text-3xl font-bold mb-6 text-gray-800">Dogs</h2>
     {% if dogs %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {% for dog in dogs %}
             {% if dog.is_public or (current_user.is_authenticated and current_user.id == user.id) %}
-                <div class="dog-card flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                    {% if dog.images %}
-                        <img src="{{ url_for('dog.get_dog_image', image_id=dog.images[0].id) }}" 
-                             alt="{{ dog.name }}" 
-                             class="w-20 h-20 object-cover rounded-full">
-                    {% else %}
-                        <div class="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
-                            <i class="fas fa-paw text-3xl text-gray-400"></i>
+                <div class="dog-card bg-white rounded-xl shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl">
+                    <div class="relative">
+                        {% if dog.images %}
+                            <img src="{{ url_for('dog.get_dog_image', image_id=dog.images[0].id) }}" 
+                                 alt="{{ dog.name }}" 
+                                 class="w-full h-64 object-cover">
+                        {% else %}
+                            <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-paw text-6xl text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                        <div class="absolute top-0 right-0 bg-white bg-opacity-75 m-2 px-2 py-1 rounded-full">
+                            <span class="text-sm font-semibold text-gray-800">{{ dog.breed }}</span>
                         </div>
-                    {% endif %}
-                    <div class="flex-grow">
-                        <h3 class="font-semibold text-lg">{{ dog.name }}</h3>
-                        <p class="text-gray-600 mb-1">{{ dog.breed }}</p>
-                        <p class="text-sm text-gray-500 mb-1">Born: {{ dog.date_of_birth.strftime('%B %d, %Y') }}</p>
-                        <p class="text-sm mb-1">
-                            <span class="status-badge status-{{ dog.status.value.lower().replace(' ', '-') }}">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-xl mb-2 text-gray-800">{{ dog.name }}</h3>
+                        <p class="text-sm text-gray-600 mb-2">Born: {{ dog.date_of_birth.strftime('%B %d, %Y') }}</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="status-badge status-{{ dog.status.value.lower().replace(' ', '-') }} text-xs font-bold px-3 py-1 rounded-full">
                                 {{ dog.status.value }}
                             </span>
-                        </p>
-                        {% if dog.price and dog.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
-                            <p class="text-green-600 font-semibold mb-1">
-                                <i class="fas fa-tag mr-1"></i>${{ "%.2f"|format(dog.price) }}
-                            </p>
-                        {% endif %}
-                        <a href="{{ url_for('dog.dog_profile', id=dog.id) }}" class="text-blue-600 hover:underline text-sm font-medium">View Profile</a>
+                            {% if dog.price and dog.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
+                                <span class="text-green-600 font-bold text-lg">
+                                    ${{ "%.2f"|format(dog.price) }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('dog.dog_profile', id=dog.id) }}" 
+                           class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+                            View Profile
+                        </a>
                     </div>
                 </div>
             {% endif %}
         {% endfor %}
     </div>
     {% else %}
-        <p class="text-gray-500 italic">No public dogs added yet</p>
+        <div class="bg-white p-8 rounded-lg shadow text-center">
+            <i class="fas fa-dog text-5xl text-gray-400 mb-4"></i>
+            <p class="text-xl text-gray-600">No public dogs added yet</p>
+        </div>
     {% endif %}
 </div>
-
                 <!-- Litters Section -->
 <div class="card p-8">
     <h2 class="text-2xl font-semibold mb-6">Litters</h2>
