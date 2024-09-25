@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request   
 from flask_login import current_user
 from app.models import Litter, BlogPost, DogStatus, User, Dog, AccountType
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from app.extensions import db
 
 
@@ -39,10 +39,10 @@ def breeder_network():
     location = request.args.get('location', '')
     show_free = request.args.get('show_free', 'false') == 'true'
 
-    query = User.query.filter(User.account_type.in_([AccountType.BASIC, AccountType.PREMIUM]))
+    query = User.query
 
-    if show_free:
-        query = User.query
+    if not show_free:
+        query = query.filter(User.account_type.in_([AccountType.BASIC, AccountType.PREMIUM]))
 
     if search:
         query = query.filter(or_(
@@ -58,8 +58,23 @@ def breeder_network():
             User.country.ilike(f'%{location}%')
         ))
 
+    query = query.options(
+        db.joinedload(User.dogs),
+        db.joinedload(User.litters)
+    )
+
     page = request.args.get('page', 1, type=int)
     breeders = query.paginate(page=page, per_page=20, error_out=False)
+
+    breeder_info = {}
+    for breeder in breeders.items:
+        breeder_info[breeder.id] = {
+            'breeds': list(set(dog.breed for dog in breeder.dogs)),
+            'followers_count': breeder.followers.count(),
+            'dogs_count': len(breeder.dogs),
+            'litters_count': len(breeder.litters),
+            'available_dogs_count': sum(1 for dog in breeder.dogs if dog.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])
+        }
 
     breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
     breeds = [breed[0] for breed in breeds]
@@ -67,18 +82,33 @@ def breeder_network():
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render_template('partials/breeder_results.html', 
                                breeders=breeders, 
+                               breeder_info=breeder_info,
                                show_free=show_free, 
                                AccountType=AccountType)
     
     return render_template('breeder_network.html', 
                            breeders=breeders, 
+                           breeder_info=breeder_info,
                            breeds=breeds, 
                            show_free=show_free, 
                            AccountType=AccountType)
 
 @bp.route('/breeder-quick-view/<int:breeder_id>')
 def breeder_quick_view(breeder_id):
-    breeder = User.query.get_or_404(breeder_id)
+    breeder = User.query.options(
+        db.joinedload(User.dogs),
+        db.joinedload(User.litters)
+    ).get_or_404(breeder_id)
+
+    breeder_info = {
+        'breeds': list(set(dog.breed for dog in breeder.dogs)),
+        'followers_count': breeder.followers.count(),
+        'dogs_count': len(breeder.dogs),
+        'litters_count': len(breeder.litters),
+        'available_dogs_count': sum(1 for dog in breeder.dogs if dog.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])
+    }
+
     return render_template('partials/breeder_quick_view.html', 
                            breeder=breeder, 
+                           breeder_info=breeder_info,
                            AccountType=AccountType)
