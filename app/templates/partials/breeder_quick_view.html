@@ -3,8 +3,18 @@
         <img src="{{ url_for('user.get_profile_picture', user_id=breeder.id) }}" alt="{{ breeder.full_name or breeder.username }}" class="w-full h-auto rounded-lg shadow-lg object-cover" style="aspect-ratio: 1/1;">
         <div class="mt-4 text-center">
             <h2 class="text-2xl font-bold text-gray-900">{{ breeder.full_name or breeder.username }}</h2>
+            <div class="flex items-center justify-center mt-2">
+                <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
+                    {{ breeder.account_type.value }}
+                </span>
+                {% if breeder_info['available_dogs_count'] > 0 %}
+                <span class="bg-green-500 text-white text-xs font-medium px-2.5 py-0.5 rounded animate-pulse">
+                    Dogs Available!
+                </span>
+                {% endif %}
+            </div>
             {% if breeder.city or breeder.state or breeder.country %}
-            <p class="text-gray-600">
+            <p class="text-gray-600 mt-2">
                 <i class="fas fa-map-marker-alt mr-2"></i>
                 {% if breeder.city %}{{ breeder.city }}{% endif %}
                 {% if breeder.state %}, {{ breeder.state }}{% endif %}
@@ -17,20 +27,20 @@
                 View Full Profile
             </a>
             {% if current_user.is_authenticated and current_user != breeder %}
-<button onclick="toggleFollow({{ breeder.id }}, this)" 
-        class="follow-button inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white {% if current_user.is_following(breeder) %}bg-gray-600 hover:bg-gray-700{% else %}bg-blue-600 hover:bg-blue-700{% endif %} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out w-full justify-center">
-    <svg class="mr-2 -ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-        <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
-    </svg>
-    <span id="followButtonText">
-        {% if current_user.is_following(breeder) %}
-            Unfollow
-        {% else %}
-            Follow
-        {% endif %}
-    </span>
-</button>
-{% endif %}
+            <button onclick="toggleFollow({{ breeder.id }}, this)" 
+                    class="follow-button inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white {% if current_user.is_following(breeder) %}bg-gray-600 hover:bg-gray-700{% else %}bg-blue-600 hover:bg-blue-700{% endif %} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out w-full">
+                <svg class="mr-2 -ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
+                </svg>
+                <span id="followButtonText">
+                    {% if current_user.is_following(breeder) %}
+                        Unfollow
+                    {% else %}
+                        Follow
+                    {% endif %}
+                </span>
+            </button>
+            {% endif %}
         </div>
     </div>
     <div class="md:w-2/3 p-4">
@@ -50,28 +60,37 @@
                 </div>
                 <div class="bg-green-50 p-3 rounded-lg">
                     <p class="text-gray-700">
-                        <i class="fas fa-dog mr-2 text-green-500"></i>{{ breeder.dogs|length }} dogs in kennel
+                        <i class="fas fa-dog mr-2 text-green-500"></i>{{ breeder_info['dogs_count'] }} dogs in kennel
                     </p>
                 </div>
                 <div class="bg-purple-50 p-3 rounded-lg">
                     <p class="text-gray-700">
-                        <i class="fas fa-paw mr-2 text-purple-500"></i>{{ breeder.litters|length }} litters bred
+                        <i class="fas fa-paw mr-2 text-purple-500"></i>{{ breeder_info['litters_count'] }} litters bred
                     </p>
                 </div>
-                {% if breeder.followers_count %}
                 <div class="bg-yellow-50 p-3 rounded-lg">
                     <p class="text-gray-700">
-                        <i class="fas fa-users mr-2 text-yellow-500"></i>{{ breeder.followers_count }} followers
+                        <i class="fas fa-users mr-2 text-yellow-500"></i>{{ breeder_info['followers_count'] }} followers
                     </p>
                 </div>
-                {% endif %}
             </div>
         </div>
-        {% if breeder.breeds %}
+        {% if breeder_info['available_dogs_count'] > 0 %}
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-2 text-gray-800">Available Dogs</h3>
+            <p class="text-green-600 font-semibold">
+                {{ breeder_info['available_dogs_count'] }} dog(s) available now or soon
+            </p>
+            <a href="{{ url_for('user.user_profile', username=breeder.username) }}" class="mt-2 inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                View Available Dogs
+            </a>
+        </div>
+        {% endif %}
+        {% if breeder_info['breeds'] %}
         <div class="mb-6">
             <h3 class="text-xl font-semibold mb-2 text-gray-800">Breeds</h3>
             <div class="flex flex-wrap">
-                {% for breed in breeder.breeds %}
+                {% for breed in breeder_info['breeds'] %}
                 <span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 mb-2 px-2.5 py-0.5 rounded-full">{{ breed }}</span>
                 {% endfor %}
             </div>
