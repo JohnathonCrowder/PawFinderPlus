@@ -1,6 +1,10 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request   
 from flask_login import current_user
-from app.models import Litter, BlogPost, DogStatus
+from app.models import Litter, BlogPost, DogStatus, User, Dog
+from sqlalchemy import or_
+from app.extensions import db
+
+
 
 
 
@@ -27,3 +31,38 @@ def privacy_policy():
 @bp.route('/terms-of-service')
 def terms_of_service():
     return render_template('terms_of_service.html')
+
+@bp.route('/breeder-network')
+def breeder_network():
+    # Get query parameters
+    search = request.args.get('search', '')
+    breed = request.args.get('breed', '')
+    location = request.args.get('location', '')
+
+    # Base query
+    query = User.query
+
+    # Apply filters
+    if search:
+        query = query.filter(or_(
+            User.username.ilike(f'%{search}%'),
+            User.full_name.ilike(f'%{search}%')
+        ))
+    if breed:
+        query = query.join(User.dogs).filter(Dog.breed == breed)
+    if location:
+        query = query.filter(or_(
+            User.city.ilike(f'%{location}%'),
+            User.state.ilike(f'%{location}%'),
+            User.country.ilike(f'%{location}%')
+        ))
+
+    # Paginate results
+    page = request.args.get('page', 1, type=int)
+    breeders = query.paginate(page=page, per_page=20, error_out=False)
+
+    # Get all unique breeds for the filter
+    breeds = db.session.query(Dog.breed).distinct().order_by(Dog.breed).all()
+    breeds = [breed[0] for breed in breeds]
+
+    return render_template('breeder_network.html', breeders=breeders, breeds=breeds)
