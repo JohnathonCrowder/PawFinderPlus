@@ -138,7 +138,7 @@
                 <div class="text-center md:text-left">
                     <h1 class="text-4xl font-bold mb-2">{{ user.full_name or user.username }}</h1>
                     {% if user.city and user.country %}
-                    <p class="text-xl mb-2">
+                    <p class="text-xl mb-3">
                         <i class="fas fa-map-marker-alt mr-2"></i>
                         {% if user.country == 'United States' %}
                             {{ user.city }}, {{ user.state }}, USA
@@ -147,10 +147,9 @@
                         {% endif %}
                     </p>
                     {% endif %}
-                    <p class="text-lg mb-2">Member since {{ user.created_at.strftime('%Y') }}</p>
                     
                     <!-- Subtle Follower/Following Count -->
-                    <div class="text-sm text-gray-300 mt-2">
+                    <div class="text-sm text-gray-300">
                         <span class="mr-4">
                             <i class="fas fa-user-friends mr-1"></i> {{ followers_count }} followers
                         </span>
