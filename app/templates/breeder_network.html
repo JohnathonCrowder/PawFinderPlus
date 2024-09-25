@@ -90,14 +90,11 @@
 </div>
 
 <!-- Quick View Modal -->
-<div id="quickViewModal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-            <div id="quickViewContent" class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <!-- Content will be dynamically inserted here -->
-            </div>
+<div id="quickViewModal" class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex hidden">
+    <div class="relative p-8 bg-white w-full max-w-2xl m-auto flex-col flex rounded-lg">
+        <button class="absolute top-0 right-0 mt-4 mr-4 text-black text-3xl font-bold" onclick="closeQuickView()">&times;</button>
+        <div id="quickViewContent">
+            <!-- Content will be dynamically inserted here -->
         </div>
     </div>
 </div>
@@ -106,8 +103,9 @@
 function openQuickView(breederId) {
     const modal = document.getElementById('quickViewModal');
     const content = document.getElementById('quickViewContent');
-    content.innerHTML = '<div class="flex justify-center items-center h-64"><i class="fas fa-spinner fa-spin fa-3x text-indigo-600"></i></div>';
+    content.innerHTML = '<div class="flex justify-center items-center h-64"><div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24"></div></div>';
     modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 
     fetch(`/breeder-quick-view/${breederId}`)
         .then(response => response.text())
@@ -115,17 +113,45 @@ function openQuickView(breederId) {
             content.innerHTML = html;
         })
         .catch(error => {
-            content.innerHTML = '<p class="text-red-500">Error loading breeder information. Please try again.</p>';
+            content.innerHTML = '<p class="text-red-500 text-center">Error loading breeder information. Please try again.</p>';
             console.error('Error:', error);
         });
 }
 
-document.getElementById('quickViewModal').addEventListener('click', function(event) {
-    if (event.target === this) {
-        this.classList.add('hidden');
-    }
+function closeQuickView() {
+    const modal = document.getElementById('quickViewModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('quickViewModal');
+    
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeQuickView();
+        }
+    });
 });
 </script>
+
+<style>
+.loader {
+    border-top-color: #3498db;
+    -webkit-animation: spinner 1.5s linear infinite;
+    animation: spinner 1.5s linear infinite;
+}
+
+@-webkit-keyframes spinner {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spinner {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -205,4 +231,5 @@ function toggleFollow(userId, button) {
     });
 }
 </script>
+
 {% endblock %}
