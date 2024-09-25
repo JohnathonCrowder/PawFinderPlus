@@ -37,6 +37,9 @@
                 <a href="{{ url_for('user.user_profile', username=breeder.username) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">
                     View Profile
                 </a>
+                <button onclick="openQuickView({{ breeder.id }})" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                    <i class="fas fa-eye mr-2"></i>Quick View
+                </button>
                 {% if current_user.is_authenticated and current_user != breeder %}
     <button onclick="toggleFollow({{ breeder.id }}, this)" 
             class="follow-button inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white {% if current_user.is_following(breeder) %}bg-gray-600 hover:bg-gray-700{% else %}bg-blue-600 hover:bg-blue-700{% endif %} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">

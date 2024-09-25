@@ -64,3 +64,9 @@ def breeder_network():
         return render_template('partials/breeder_results.html', breeders=breeders)
     
     return render_template('breeder_network.html', breeders=breeders, breeds=breeds)
+
+
+@bp.route('/breeder-quick-view/<int:breeder_id>')
+def breeder_quick_view(breeder_id):
+    breeder = User.query.get_or_404(breeder_id)
+    return render_template('partials/breeder_quick_view.html', breeder=breeder)

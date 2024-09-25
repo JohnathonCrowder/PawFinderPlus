@@ -1,0 +1,74 @@
+<div class="flex flex-col md:flex-row">
+    <div class="md:w-1/3 p-4">
+        <img src="{{ url_for('user.get_profile_picture', user_id=breeder.id) }}" alt="{{ breeder.full_name or breeder.username }}" class="w-full h-auto rounded-lg shadow-lg">
+        <div class="mt-4 text-center">
+            <h2 class="text-2xl font-bold text-gray-900">{{ breeder.full_name or breeder.username }}</h2>
+            <p class="text-gray-600">
+                <i class="fas fa-map-marker-alt mr-2"></i>
+                {% if breeder.city %}{{ breeder.city }}{% endif %}
+                {% if breeder.state %}, {{ breeder.state }}{% endif %}
+                {% if breeder.country %}, {{ breeder.country }}{% endif %}
+            </p>
+        </div>
+        <div class="mt-4 flex justify-center space-x-4">
+            <a href="{{ url_for('user.user_profile', username=breeder.username) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+                View Full Profile
+            </a>
+            {% if current_user.is_authenticated and current_user != breeder %}
+            <button onclick="toggleFollow({{ breeder.id }}, this)" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+                {% if current_user.is_following(breeder) %}Unfollow{% else %}Follow{% endif %}
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    <div class="md:w-2/3 p-4">
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-2">About {{ breeder.full_name or breeder.username }}</h3>
+            <p class="text-gray-700">{{ breeder.bio or 'No bio provided.' }}</p>
+        </div>
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-2">Breeding Experience</h3>
+            <p class="text-gray-700">
+                <i class="fas fa-calendar-alt mr-2"></i>Member since {{ breeder.created_at.strftime('%Y') }}
+            </p>
+            <p class="text-gray-700">
+                <i class="fas fa-dog mr-2"></i>{{ breeder.dogs|length }} dogs in kennel
+            </p>
+            <p class="text-gray-700">
+                <i class="fas fa-paw mr-2"></i>{{ breeder.litters|length }} litters bred
+            </p>
+        </div>
+        {% if breeder.breeds %}
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-2">Breeds</h3>
+            <div class="flex flex-wrap">
+                {% for breed in breeder.breeds %}
+                <span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 mb-2 px-2.5 py-0.5 rounded">{{ breed }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% if breeder.website or breeder.facebook or breeder.instagram %}
+        <div>
+            <h3 class="text-xl font-semibold mb-2">Connect</h3>
+            <div class="flex space-x-4">
+                {% if breeder.website %}
+                <a href="{{ breeder.website }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-globe fa-2x"></i>
+                </a>
+                {% endif %}
+                {% if breeder.facebook %}
+                <a href="{{ breeder.facebook }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                    <i class="fab fa-facebook fa-2x"></i>
+                </a>
+                {% endif %}
+                {% if breeder.instagram %}
+                <a href="{{ breeder.instagram }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                    <i class="fab fa-instagram fa-2x"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
