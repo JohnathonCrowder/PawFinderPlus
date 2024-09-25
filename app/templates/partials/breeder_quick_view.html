@@ -3,8 +3,8 @@
         <img src="{{ url_for('user.get_profile_picture', user_id=breeder.id) }}" alt="{{ breeder.full_name or breeder.username }}" class="w-full h-auto rounded-lg shadow-lg object-cover" style="aspect-ratio: 1/1;">
         <div class="mt-4 text-center">
             <h2 class="text-2xl font-bold text-gray-900">{{ breeder.full_name or breeder.username }}</h2>
-            <div class="flex items-center justify-center mt-2">
-                <span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
+            <div class="flex items-center justify-center mt-2 space-x-2">
+                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
                     {{ breeder.account_type.value }}
                 </span>
                 {% if breeder_info['available_dogs_count'] > 0 %}
