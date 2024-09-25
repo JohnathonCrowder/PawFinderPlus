@@ -55,10 +55,10 @@
             <!-- Search Form -->
             <div class="search-container p-6 max-w-4xl mx-auto">
                 <form id="filterForm" class="flex flex-wrap -mx-2">
-                    <div class="w-full md:w-1/3 px-2 mb-4">
+                    <div class="w-full md:w-1/4 px-2 mb-4">
                         <input type="text" name="search" placeholder="Search by name" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <div class="w-full md:w-1/3 px-2 mb-4">
+                    <div class="w-full md:w-1/4 px-2 mb-4">
                         <select name="breed" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">All Breeds</option>
                             {% for breed in breeds %}
@@ -66,8 +66,14 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="w-full md:w-1/3 px-2 mb-4">
+                    <div class="w-full md:w-1/4 px-2 mb-4">
                         <input type="text" name="location" placeholder="City, State, or Country" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="w-full md:w-1/4 px-2 mb-4">
+                        <label for="show_free" class="flex items-center text-gray-700">
+                            <input type="checkbox" id="show_free" name="show_free" value="true" {% if show_free %}checked{% endif %} class="form-checkbox h-5 w-5 text-blue-600">
+                            <span class="ml-2">Show Free Users</span>
+                        </label>
                     </div>
                 </form>
             </div>
@@ -194,6 +200,8 @@ document.addEventListener('DOMContentLoaded', function() {
     filterForm.querySelectorAll('input, select').forEach(input => {
         input.addEventListener('input', debouncedUpdate);
     });
+
+    document.getElementById('show_free').addEventListener('change', debouncedUpdate);
 
     // Initial load
     updateResults();

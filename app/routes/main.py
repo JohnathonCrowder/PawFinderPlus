@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request   
 from flask_login import current_user
-from app.models import Litter, BlogPost, DogStatus, User, Dog
+from app.models import Litter, BlogPost, DogStatus, User, Dog, AccountType
 from sqlalchemy import or_
 from app.extensions import db
 
@@ -37,8 +37,12 @@ def breeder_network():
     search = request.args.get('search', '')
     breed = request.args.get('breed', '')
     location = request.args.get('location', '')
+    show_free = request.args.get('show_free', 'false') == 'true'
 
-    query = User.query
+    query = User.query.filter(User.account_type.in_([AccountType.BASIC, AccountType.PREMIUM]))
+
+    if show_free:
+        query = User.query
 
     if search:
         query = query.filter(or_(
@@ -61,12 +65,20 @@ def breeder_network():
     breeds = [breed[0] for breed in breeds]
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render_template('partials/breeder_results.html', breeders=breeders)
+        return render_template('partials/breeder_results.html', 
+                               breeders=breeders, 
+                               show_free=show_free, 
+                               AccountType=AccountType)
     
-    return render_template('breeder_network.html', breeders=breeders, breeds=breeds)
-
+    return render_template('breeder_network.html', 
+                           breeders=breeders, 
+                           breeds=breeds, 
+                           show_free=show_free, 
+                           AccountType=AccountType)
 
 @bp.route('/breeder-quick-view/<int:breeder_id>')
 def breeder_quick_view(breeder_id):
     breeder = User.query.get_or_404(breeder_id)
-    return render_template('partials/breeder_quick_view.html', breeder=breeder)
+    return render_template('partials/breeder_quick_view.html', 
+                           breeder=breeder, 
+                           AccountType=AccountType)
