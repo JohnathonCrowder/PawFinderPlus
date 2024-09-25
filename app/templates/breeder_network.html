@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function toggleFollow(userId, button) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const isFollowing = button.querySelector('#followButtonText').textContent.trim() === 'Unfollow';
+    const isFollowing = button.classList.contains('bg-gray-600');
     const url = isFollowing ? `/unfollow/${userId}` : `/follow/${userId}`;
 
     fetch(url, {
@@ -216,11 +216,15 @@ function toggleFollow(userId, button) {
     .then(data => {
         if (data.success) {
             const buttonText = button.querySelector('#followButtonText');
-            buttonText.textContent = isFollowing ? 'Follow' : 'Unfollow';
-            button.classList.toggle('bg-gray-600');
-            button.classList.toggle('hover:bg-gray-700');
-            button.classList.toggle('bg-blue-600');
-            button.classList.toggle('hover:bg-blue-700');
+            if (isFollowing) {
+                button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                buttonText.textContent = 'Follow';
+            } else {
+                button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                button.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                buttonText.textContent = 'Unfollow';
+            }
         } else {
             alert(data.error);
         }

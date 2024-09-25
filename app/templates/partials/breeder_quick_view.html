@@ -17,10 +17,20 @@
                 View Full Profile
             </a>
             {% if current_user.is_authenticated and current_user != breeder %}
-            <button onclick="toggleFollow({{ breeder.id }}, this)" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300">
-                {% if current_user.is_following(breeder) %}Unfollow{% else %}Follow{% endif %}
-            </button>
-            {% endif %}
+<button onclick="toggleFollow({{ breeder.id }}, this)" 
+        class="follow-button inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white {% if current_user.is_following(breeder) %}bg-gray-600 hover:bg-gray-700{% else %}bg-blue-600 hover:bg-blue-700{% endif %} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out w-full justify-center">
+    <svg class="mr-2 -ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
+    </svg>
+    <span id="followButtonText">
+        {% if current_user.is_following(breeder) %}
+            Unfollow
+        {% else %}
+            Follow
+        {% endif %}
+    </span>
+</button>
+{% endif %}
         </div>
     </div>
     <div class="md:w-2/3 p-4">
