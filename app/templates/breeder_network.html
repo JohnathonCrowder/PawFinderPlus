@@ -135,22 +135,32 @@ document.addEventListener('DOMContentLoaded', function() {
     updateResults();
 });
 
-function toggleFollow(userId) {
-    fetch(`/follow/${userId}`, {
+function toggleFollow(userId, button) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const isFollowing = button.textContent.trim() === 'Unfollow';
+    const url = isFollowing ? `/unfollow/${userId}` : `/follow/${userId}`;
+
+    fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token() }}'
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
         },
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const button = event.target;
-            button.textContent = data.action === 'follow' ? 'Unfollow' : 'Follow';
+            button.textContent = isFollowing ? 'Follow' : 'Unfollow';
             button.classList.toggle('bg-green-500');
             button.classList.toggle('bg-red-500');
+        } else {
+            alert(data.error);
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while processing your request.');
     });
 }
 </script>

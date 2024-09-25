@@ -38,14 +38,14 @@
                     View Profile
                 </a>
                 {% if current_user.is_authenticated and current_user != breeder %}
-                <button onclick="toggleFollow({{ breeder.id }})" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300">
-                    {% if current_user.is_following(breeder) %}
-                    Unfollow
-                    {% else %}
-                    Follow
-                    {% endif %}
-                </button>
-                {% endif %}
+<button onclick="toggleFollow({{ breeder.id }}, this)" class="follow-button bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+    {% if current_user.is_following(breeder) %}
+    Unfollow
+    {% else %}
+    Follow
+    {% endif %}
+</button>
+{% endif %}
             </div>
         </div>
     </div>
