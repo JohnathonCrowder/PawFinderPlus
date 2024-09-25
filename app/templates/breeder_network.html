@@ -41,6 +41,44 @@
         border: 3px solid #fff;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
+
+    .form-checkbox {
+        appearance: none;
+        -webkit-appearance: none;
+        border: 2px solid rgba(0, 0, 0, 0.5);
+        border-radius: 0.25rem;
+        display: inline-block;
+        height: 1.25rem;
+        width: 1.25rem;
+        vertical-align: middle;
+        background-origin: border-box;
+        user-select: none;
+        flex-shrink: 0;
+        color: currentColor;
+        transition: all 0.2s ease-in-out;
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+    .form-checkbox:checked {
+        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M5.707 7.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4a1 1 0 0 0-1.414-1.414L7 8.586 5.707 7.293z'/%3e%3c/svg%3e");
+        background-color: #3B82F6;
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-color: #3B82F6;
+    }
+    .form-checkbox:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+    }
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        color: black;
+        font-weight: 500;
+    }
+    .checkbox-label:hover .form-checkbox {
+        border-color: rgba(0, 0, 0, 0.8);
+    }
 </style>
 {% endblock %}
 
@@ -53,30 +91,34 @@
             <p class="text-xl md:text-2xl text-center mb-8">Find passionate breeders and build your network</p>
             
             <!-- Search Form -->
-            <div class="search-container p-6 max-w-4xl mx-auto">
-                <form id="filterForm" class="flex flex-wrap -mx-2">
-                    <div class="w-full md:w-1/4 px-2 mb-4">
-                        <input type="text" name="search" placeholder="Search by name" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div class="w-full md:w-1/4 px-2 mb-4">
-                        <select name="breed" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Breeds</option>
-                            {% for breed in breeds %}
-                            <option value="{{ breed }}">{{ breed }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="w-full md:w-1/4 px-2 mb-4">
-                        <input type="text" name="location" placeholder="City, State, or Country" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div class="w-full md:w-1/4 px-2 mb-4">
-                        <label for="show_free" class="flex items-center text-gray-700">
-                            <input type="checkbox" id="show_free" name="show_free" value="true" {% if show_free %}checked{% endif %} class="form-checkbox h-5 w-5 text-blue-600">
-                            <span class="ml-2">Show Free Users</span>
-                        </label>
-                    </div>
-                </form>
+<div class="search-container p-6 max-w-4xl mx-auto">
+    <form id="filterForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <input type="text" name="search" placeholder="Search by name" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
+            <div>
+                <select name="breed" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Breeds</option>
+                    {% for breed in breeds %}
+                    <option value="{{ breed }}">{{ breed }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <input type="text" name="location" placeholder="City, State, or Country" class="search-input w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+        <div class="flex items-center justify-end">
+            <label for="show_free" class="checkbox-label cursor-pointer bg-white bg-opacity-70 px-3 py-2 rounded-lg">
+                <input type="checkbox" id="show_free" name="show_free" value="true" {% if show_free %}checked{% endif %} class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                <span class="ml-2">Show Free Users</span>
+            </label>
+        </div>
+    </form>
+</div>
+
+
         </div>
     </div>
 
