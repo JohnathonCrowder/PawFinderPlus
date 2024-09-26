@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, current_app
 from flask_login import login_required, current_user
-from app.models import Dog, Litter, VetAppointment, Message, DogStatus
+from app.models import Dog, Litter, VetAppointment, Message, DogStatus, AppointmentCategory
 from app.extensions import db
 from sqlalchemy import func, case
 from datetime import datetime, timedelta
@@ -60,5 +60,6 @@ def user_dashboard():
                            age_distribution=age_distribution,
                            litter_size_distribution=litter_size_distribution,
                            upcoming_appointments=upcoming_appointments,
+                           AppointmentCategory=AppointmentCategory,
                            recent_litters=recent_litters,
                            DogStatus=DogStatus)
