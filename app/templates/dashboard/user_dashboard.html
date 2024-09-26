@@ -1,115 +1,179 @@
 {% extends "base.html" %}
 
-{% block title %}Breeder Dashboard - DogBreederPlus{% endblock %}
+{% block title %}Your Dashboard - DogBreederPlus{% endblock %}
 
 {% block head %}
 {{ super() }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
+    body {
+        background-color: #f3f4f6; /* Light gray background */
+    }
     .dashboard-card {
         background-color: white;
-        border-radius: 8px;
+        border-radius: 1rem;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         transition: all 0.3s ease;
     }
     .dashboard-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    .paw-bg {
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23a0aec0' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .quick-action-btn {
+        transition: all 0.3s ease;
+    }
+    .quick-action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="bg-gray-100 min-h-screen py-8">
+<div class="min-h-screen paw-bg py-12">
     <div class="container mx-auto px-4">
-        <h1 class="text-3xl font-bold mb-8 text-gray-800">Breeder Dashboard</h1>
+        <h1 class="text-4xl font-bold mb-8 text-center text-gray-800">
+            Welcome to Your DogBreederPlus Dashboard, {{ current_user.username }}!
+        </h1>
 
-        <!-- Key Statistics -->
+        <!-- Quick Actions -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">Quick Actions</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="{{ url_for('dog.add_dog') }}" class="quick-action-btn bg-blue-500 text-white p-4 rounded-lg text-center hover:bg-blue-600">
+                    <i class="fas fa-plus-circle text-2xl mb-2"></i>
+                    <p>Add New Dog</p>
+                </a>
+                <a href="{{ url_for('litter.add_litter') }}" class="quick-action-btn bg-green-500 text-white p-4 rounded-lg text-center hover:bg-green-600">
+                    <i class="fas fa-paw text-2xl mb-2"></i>
+                    <p>Create Litter</p>
+                </a>
+                <a href="{{ url_for('vet.add_appointment') }}" class="quick-action-btn bg-yellow-500 text-white p-4 rounded-lg text-center hover:bg-yellow-600">
+                    <i class="fas fa-calendar-plus text-2xl mb-2"></i>
+                    <p>Schedule Appointment</p>
+                </a>
+                <a href="{{ url_for('dog.dog_management') }}" class="quick-action-btn bg-purple-500 text-white p-4 rounded-lg text-center hover:bg-purple-600">
+                    <i class="fas fa-tasks text-2xl mb-2"></i>
+                    <p>Manage Dogs</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Overview Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="dashboard-card p-6">
-                <h2 class="text-xl font-semibold mb-2 text-gray-700">Total Dogs</h2>
-                <p class="text-4xl font-bold text-blue-600">{{ total_dogs }}</p>
-            </div>
-            <div class="dashboard-card p-6">
-                <h2 class="text-xl font-semibold mb-2 text-gray-700">Total Litters</h2>
-                <p class="text-4xl font-bold text-green-600">{{ total_litters }}</p>
-            </div>
-            <div class="dashboard-card p-6">
-                <h2 class="text-xl font-semibold mb-2 text-gray-700">Available Dogs</h2>
-                <p class="text-4xl font-bold text-yellow-600">
-                    {{ dog_status_distribution | selectattr('0', 'equalto', DogStatus.AVAILABLE_NOW) | sum(attribute='1') }}
-                </p>
-            </div>
-            <div class="dashboard-card p-6">
-                <h2 class="text-xl font-semibold mb-2 text-gray-700">Upcoming Litters</h2>
-                <p class="text-4xl font-bold text-purple-600">
-                    {{ dog_status_distribution | selectattr('0', 'equalto', DogStatus.AVAILABLE_SOON) | sum(attribute='1') }}
-                </p>
-            </div>
-        </div>
-
-        <!-- Charts -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Dog Status Distribution -->
-            <div class="dashboard-card p-6">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Dog Status Distribution</h2>
-                <canvas id="dogStatusChart"></canvas>
-            </div>
-
-            <!-- Age Distribution -->
-            <div class="dashboard-card p-6">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Age Distribution</h2>
-                <canvas id="ageDistributionChart"></canvas>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Litter Size Distribution -->
-            <div class="dashboard-card p-6">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Litter Size Distribution</h2>
-                <canvas id="litterSizeChart"></canvas>
-            </div>
-
-            <!-- Upcoming Appointments -->
-            <div class="dashboard-card p-6">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Upcoming Appointments</h2>
-                {% if upcoming_appointments %}
-                    <ul class="divide-y divide-gray-200">
-                        {% for appointment in upcoming_appointments %}
-                            <li class="py-3">
-                                <p class="font-medium">{{ appointment.dog.name }} - {{ appointment.description }}</p>
-                                <p class="text-sm text-gray-500">{{ appointment.date.strftime('%Y-%m-%d %H:%M') }}</p>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-gray-500">No upcoming appointments.</p>
-                {% endif %}
-                <div class="mt-4">
-                    <a href="{{ url_for('vet.vet_appointments') }}" class="text-blue-500 hover:underline">View All Appointments</a>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-blue-600 font-medium">Total Dogs</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ total_dogs }}</p>
+                    </div>
+                    <div class="text-blue-500 text-4xl">
+                        <i class="fas fa-dog"></i>
+                    </div>
                 </div>
+            </div>
+            <div class="dashboard-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-green-600 font-medium">Total Litters</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ total_litters }}</p>
+                    </div>
+                    <div class="text-green-500 text-4xl">
+                        <i class="fas fa-paw"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-yellow-600 font-medium">Available Dogs</p>
+                        <p class="text-3xl font-bold text-gray-800">
+                            {{ dog_status_distribution | selectattr('0', 'equalto', DogStatus.AVAILABLE_NOW) | sum(attribute='1') }}
+                        </p>
+                    </div>
+                    <div class="text-yellow-500 text-4xl">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-purple-600 font-medium">Upcoming Litters</p>
+                        <p class="text-3xl font-bold text-gray-800">
+                            {{ dog_status_distribution | selectattr('0', 'equalto', DogStatus.AVAILABLE_SOON) | sum(attribute='1') }}
+                        </p>
+                    </div>
+                    <div class="text-purple-500 text-4xl">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="dashboard-card p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">Upcoming Appointments</h2>
+            {% if upcoming_appointments %}
+                <ul class="space-y-4">
+                    {% for appointment in upcoming_appointments %}
+                        <li class="bg-gray-100 rounded-lg shadow p-4 flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold text-gray-800">{{ appointment.dog.name }} - {{ appointment.description }}</p>
+                                <p class="text-sm text-gray-600">{{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                            </div>
+                            <div class="text-blue-500">
+                                <i class="fas fa-calendar-check text-2xl"></i>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-600 italic">No upcoming appointments.</p>
+            {% endif %}
+            <div class="mt-4 text-right">
+                <a href="{{ url_for('vet.vet_appointments') }}" class="text-blue-600 hover:text-blue-800 font-medium">View All Appointments →</a>
             </div>
         </div>
 
         <!-- Recent Litters -->
-        <div class="dashboard-card p-6">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Recent Litters</h2>
+        <div class="dashboard-card p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">Recent Litters</h2>
             {% if recent_litters %}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {% for litter in recent_litters %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h3 class="font-semibold text-lg mb-2">{{ litter.name }}</h3>
-                            <p class="text-gray-600">Born: {{ litter.date_of_birth.strftime('%Y-%m-%d') }}</p>
+                        <div class="bg-gray-100 rounded-lg shadow p-4 hover:shadow-lg transition duration-300">
+                            <h3 class="font-semibold text-lg text-gray-800 mb-2">{{ litter.name }}</h3>
+                            <p class="text-gray-600">Born: {{ litter.date_of_birth.strftime('%B %d, %Y') }}</p>
                             <p class="text-gray-600">Puppies: {{ litter.puppies|length }}</p>
-                            <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="text-blue-500 hover:underline mt-2 inline-block">View Details</a>
+                            <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="text-blue-600 hover:text-blue-800 mt-2 inline-block">View Details →</a>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="text-gray-500">No recent litters.</p>
+                <p class="text-gray-600 italic">No recent litters.</p>
             {% endif %}
-            <div class="mt-4">
-                <a href="{{ url_for('litter.litter_management') }}" class="text-blue-500 hover:underline">Manage Litters</a>
+            <div class="mt-4 text-right">
+                <a href="{{ url_for('litter.litter_management') }}" class="text-blue-600 hover:text-blue-800 font-medium">Manage Litters →</a>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div class="dashboard-card p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Dog Status Distribution</h2>
+                <canvas id="dogStatusChart"></canvas>
+            </div>
+            <div class="dashboard-card p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Age Distribution</h2>
+                <canvas id="ageDistributionChart"></canvas>
+            </div>
+            <div class="dashboard-card p-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Litter Size Distribution</h2>
+                <canvas id="litterSizeChart"></canvas>
             </div>
         </div>
     </div>
@@ -138,6 +202,9 @@ var dogStatusChart = new Chart(dogStatusCtx, {
         plugins: {
             legend: {
                 position: 'bottom',
+                labels: {
+                    color: '#e2e8f0'
+                }
             }
         }
     }
@@ -161,7 +228,13 @@ var ageDistributionChart = new Chart(ageDistributionCtx, {
             y: {
                 beginAtZero: true,
                 ticks: {
-                    precision: 0
+                    precision: 0,
+                    color: '#e2e8f0'
+                }
+            },
+            x: {
+                ticks: {
+                    color: '#e2e8f0'
                 }
             }
         },
@@ -191,7 +264,13 @@ var litterSizeChart = new Chart(litterSizeCtx, {
             y: {
                 beginAtZero: true,
                 ticks: {
-                    precision: 0
+                    precision: 0,
+                    color: '#e2e8f0'
+                }
+            },
+            x: {
+                ticks: {
+                    color: '#e2e8f0'
                 }
             }
         },

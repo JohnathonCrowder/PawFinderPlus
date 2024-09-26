@@ -31,7 +31,7 @@ def user_dashboard():
     ).filter_by(user_id=current_user.id).group_by('age_group').all()
     
     # Litter size distribution
-    litter_size_subquery = db.session.query(
+    subquery = db.session.query(
         Litter.id,
         func.count(Dog.id).label('puppy_count')
     ).join(Litter.puppies)\
@@ -40,8 +40,8 @@ def user_dashboard():
      .subquery()
 
     litter_size_distribution = db.session.query(
-        litter_size_subquery.c.puppy_count.label('litter_size'),
-        func.count(litter_size_subquery.c.id).label('count')
+        subquery.c.puppy_count.label('litter_size'),
+        func.count(subquery.c.id).label('count')
     ).group_by('litter_size').all()
     
     # Upcoming appointments
