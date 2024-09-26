@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request   
+from flask import Blueprint, render_template, request, current_app, abort
 from flask_login import current_user
 from app.models import Litter, BlogPost, DogStatus, User, Dog, AccountType, followers
 from sqlalchemy import or_, func, asc, desc
@@ -133,3 +133,10 @@ def breeder_quick_view(breeder_id):
                            breeder=breeder, 
                            breeder_info=breeder_info,
                            AccountType=AccountType)
+
+@bp.route('/test-500')
+def test_500():
+    if current_app.config['DEBUG']:  # Only allow this in debug mode
+        abort(500)
+    else:
+        return "This route is only available in debug mode.", 403

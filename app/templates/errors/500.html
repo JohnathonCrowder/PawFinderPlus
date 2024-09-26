@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Internal Server Error - DogBreederPlus{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-blue-50 flex flex-col justify-center items-center px-4 py-12">
+    <div class="max-w-md w-full bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="p-6 sm:p-8">
+            <div class="text-center">
+                <h1 class="text-6xl font-bold text-red-600 mb-4">
+                    500
+                </h1>
+                <h2 class="text-3xl font-semibold text-gray-800 mb-6">
+                    Oops! Our dog ate the server.
+                </h2>
+            </div>
+            <div class="mb-8 text-center">
+                <i class="fas fa-dog text-9xl text-blue-500"></i>
+            </div>
+            <p class="text-gray-600 text-center mb-6">
+                We're having some trouble fetching your data. Our team of experts have been notified and are working on the issue. Please try again later.
+            </p>
+            <div class="flex justify-center">
+                <a href="{{ url_for('main.home') }}" 
+                   class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 flex items-center">
+                    <i class="fas fa-home mr-2"></i> Return to the Doghouse
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="mt-8 text-center">
+        <p class="text-gray-600">
+            If the problem persists, please 
+            <a href="{{ url_for('main.contact') }}" class="text-blue-500 hover:underline">Contact Support</a>.
+        </p>
+    </div>
+</div>
+{% endblock %}
