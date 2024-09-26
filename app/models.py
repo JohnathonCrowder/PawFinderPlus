@@ -161,6 +161,22 @@ class User(UserMixin, db.Model):
         db.session.commit()
         return dogs_affected, litters_affected
     
+    def get_dog_limit(self):
+        if self.account_type == AccountType.FREE:
+            return 5
+        elif self.account_type == AccountType.BASIC:
+            return 20
+        else:  # PREMIUM
+            return float('inf')  # Unlimited
+
+    def get_litter_limit(self):
+        if self.account_type == AccountType.FREE:
+            return 0
+        elif self.account_type == AccountType.BASIC:
+            return 8
+        else:  # PREMIUM
+            return 20
+    
     ##### User Follower Code ##########
 
     followed = db.relationship(

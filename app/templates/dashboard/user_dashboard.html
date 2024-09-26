@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard - DogBreederPlus{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Welcome back, {{ current_user.username }}!</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Overview Cards -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Quick Overview</h2>
+            <p class="mb-2">Total Dogs: {{ total_dogs }}</p>
+            <p class="mb-2">Total Litters: {{ total_litters }}</p>
+            <p>Unread Messages: {{ unread_messages_count }}</p>
+        </div>
+
+        <!-- Account Usage -->
+<div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-xl font-semibold mb-4">Account Usage</h2>
+    <p class="mb-2">Public Dogs: {{ public_dogs_count }} {% if account_limits.dogs != 'Unlimited' %}/ {{ account_limits.dogs }}{% else %} ({{ account_limits.dogs }}){% endif %}</p>
+    <p>Public Litters: {{ public_litters_count }} {% if account_limits.litters != 'Unlimited' %}/ {{ account_limits.litters }}{% else %} ({{ account_limits.litters }}){% endif %}</p>
+    <div class="mt-4">
+        <a href="{{ url_for('user.account_management') }}" class="text-blue-500 hover:underline">Manage Account</a>
+    </div>
+</div>
+
+        <!-- Profile Completion -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Profile Completion</h2>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ profile_completion }}%"></div>
+            </div>
+            <p class="mt-2">{{ profile_completion|int }}% Complete</p>
+            <div class="mt-4">
+                <a href="{{ url_for('user.user_settings') }}" class="text-blue-500 hover:underline">Complete Your Profile</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Recent Dogs -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Recent Dogs</h2>
+            <ul>
+                {% for dog in recent_dogs %}
+                <li class="mb-2">
+                    <a href="{{ url_for('dog.dog_detail', id=dog.id) }}" class="text-blue-500 hover:underline">{{ dog.name }}</a> - {{ dog.breed }}
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="mt-4">
+                <a href="{{ url_for('dog.dog_management') }}" class="text-blue-500 hover:underline">Manage Dogs</a>
+            </div>
+        </div>
+
+        <!-- Recent Litters -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Recent Litters</h2>
+            <ul>
+                {% for litter in recent_litters %}
+                <li class="mb-2">
+                    <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="text-blue-500 hover:underline">{{ litter.name }}</a> - Born: {{ litter.date_of_birth.strftime('%Y-%m-%d') }}
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="mt-4">
+                <a href="{{ url_for('litter.litter_management') }}" class="text-blue-500 hover:underline">Manage Litters</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Upcoming Appointments -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Upcoming Vet Appointments</h2>
+            <ul>
+                {% for appointment in upcoming_appointments %}
+                <li class="mb-2">
+                    {{ appointment.date.strftime('%Y-%m-%d %H:%M') }} - {{ appointment.dog.name }} - {{ appointment.description }}
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="mt-4">
+                <a href="{{ url_for('vet.vet_appointments') }}" class="text-blue-500 hover:underline">View All Appointments</a>
+            </div>
+        </div>
+
+        <!-- Dog Status Distribution -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Dog Status Distribution</h2>
+            <canvas id="dogStatusChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Dog Status Distribution Chart
+    var ctx = document.getElementById('dogStatusChart').getContext('2d');
+    var dogStatusChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: [{% for status, count in dog_status_distribution %}'{{ status.value }}',{% endfor %}],
+            datasets: [{
+                data: [{% for status, count in dog_status_distribution %}{{ count }},{% endfor %}],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)',
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
