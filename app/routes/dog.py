@@ -59,7 +59,7 @@ def dog_management():
                                date=date)
     else:
         # For a full page load, return the entire page
-        return render_template('dog_management.html', 
+        return render_template('dog/dog_management.html', 
                                dogs=dogs, 
                                breeds=breeds, 
                                current_breed=breed,
@@ -126,7 +126,7 @@ def add_dog():
     colors = load_json_data('dog_colors.json')
     statuses = [status for status in DogStatus]
     all_dogs = Dog.query.filter_by(user_id=current_user.id).all()
-    return render_template('add_dog.html', all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses, AccountType=AccountType, DogStatus=DogStatus, dog=None)
+    return render_template('dog/add_dog.html', all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses, AccountType=AccountType, DogStatus=DogStatus, dog=None)
 
 @bp.route('/dog/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -172,7 +172,7 @@ def dog_detail(id):
     colors = load_json_data('dog_colors.json')
     statuses = [status for status in DogStatus]
     all_dogs = Dog.query.filter(Dog.id != id, Dog.user_id == current_user.id).all()
-    return render_template('dog_detail.html', dog=dog, all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses, AccountType=AccountType, DogStatus=DogStatus)
+    return render_template('dog/dog_detail.html', dog=dog, all_dogs=all_dogs, breeds=breeds, colors=colors, statuses=statuses, AccountType=AccountType, DogStatus=DogStatus)
 
 @bp.route('/dog/<int:id>/profile')
 def dog_profile(id):
@@ -182,7 +182,7 @@ def dog_profile(id):
         return redirect(url_for('main.home'))
     shareable_link = generate_shareable_link('dog.dog_profile', id=id)
     social_links = generate_social_links(shareable_link, f"Check out {dog.name}'s profile on DogBreederPlus!")
-    return render_template('dog_profile.html', dog=dog, date=datetime.now().date(), DogStatus=DogStatus, shareable_link=shareable_link, social_links=social_links)
+    return render_template('dog/dog_profile.html', dog=dog, date=datetime.now().date(), DogStatus=DogStatus, shareable_link=shareable_link, social_links=social_links)
 
 @bp.route('/dog_image/<int:image_id>')
 def get_dog_image(image_id):
@@ -239,4 +239,4 @@ def dog_family_tree(id):
 
     litter = Litter.query.filter(Litter.puppies.any(id=dog.id)).first()
 
-    return render_template('family_tree.html', dog=dog, litter=litter)
+    return render_template('dog/family_tree.html', dog=dog, litter=litter)

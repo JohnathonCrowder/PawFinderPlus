@@ -37,7 +37,7 @@ def vet_appointments():
     
     appointments = base_query.order_by(VetAppointment.date).all()
     
-    return render_template('vet_appointments.html', 
+    return render_template('vet_appointments/vet_appointments.html', 
                            user_dogs=user_dogs, 
                            appointments=appointments, 
                            now=now, 
@@ -63,7 +63,7 @@ def dog_appointments(dog_id):
     appointments = appointments_query.order_by(VetAppointment.date).all()
     
     now = datetime.utcnow()
-    return render_template('dog_appointments.html', 
+    return render_template('vet_appointments/dog_appointments.html', 
                            dog=dog, 
                            appointments=appointments, 
                            now=now,
@@ -96,7 +96,7 @@ def add_appointment():
         return redirect(url_for('vet.dog_appointments', dog_id=dog_id))
     
     dogs = Dog.query.filter_by(user_id=current_user.id).all()
-    return render_template('add_appointment.html', dogs=dogs, categories=AppointmentCategory)
+    return render_template('vet_appointments/add_appointment.html', dogs=dogs, categories=AppointmentCategory)
 
 @bp.route('/appointment/<int:appointment_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -117,7 +117,7 @@ def edit_appointment(appointment_id):
         flash('Appointment updated successfully!', 'success')
         return redirect(url_for('vet.dog_appointments', dog_id=appointment.dog_id))
     
-    return render_template('edit_appointment.html', appointment=appointment, categories=AppointmentCategory)
+    return render_template('vet_appointments/edit_appointment.html', appointment=appointment, categories=AppointmentCategory)
 
 @bp.route('/appointment/<int:appointment_id>/delete', methods=['POST'])
 @login_required

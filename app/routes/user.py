@@ -32,7 +32,7 @@ def user_settings():
         'account_type': current_user.account_type,  
     }
     followed = current_user.followed.all()
-    return render_template('user_settings.html', user_data=user_data, AccountType=AccountType, followed=followed)
+    return render_template('user/user_settings.html', user_data=user_data, AccountType=AccountType, followed=followed)
 
 @bp.route('/update_profile', methods=['POST'])
 @login_required
@@ -120,7 +120,7 @@ def user_profile(username):
    
                            
 
-    return render_template('user_profile.html', 
+    return render_template('user/user_profile.html', 
                            user=user, 
                            dogs=dogs,
                            litters=litters,
@@ -276,7 +276,7 @@ def followed_feed():
 
     pagination = Pagination(feed_items, page, per_page, total_items)
 
-    return render_template('followed_feed.html', 
+    return render_template('user/followed_feed.html', 
                            feed_items=feed_items, 
                            pagination=pagination)
 
@@ -290,7 +290,7 @@ def account_management():
         'account_type': current_user.account_type,
         # Add other user data as needed
     }
-    return render_template('account_management.html', user_data=user_data, AccountType=AccountType)
+    return render_template('user/account_management.html', user_data=user_data, AccountType=AccountType)
 
 @bp.route('/change_account_type', methods=['POST'])
 @login_required

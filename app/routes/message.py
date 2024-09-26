@@ -30,7 +30,7 @@ def messages():
 
     current_app.logger.info(f"Retrieved {len(conversations)} conversations for user {current_user.id}")
 
-    return render_template('messages.html', conversations=conversations)
+    return render_template('messages/messages.html', conversations=conversations)
 
 @bp.route('/messages/<int:user_id>', methods=['GET', 'POST'])
 @login_required
@@ -55,7 +55,7 @@ def conversation(user_id):
     
     messages = Message.query.filter_by(conversation_id=conversation_id).order_by(Message.timestamp).all()
     
-    return render_template('conversation.html', messages=messages, other_user=other_user)
+    return render_template('messages/conversation.html', messages=messages, other_user=other_user)
 
 @bp.route('/contact_owner/<int:dog_id>')
 @login_required

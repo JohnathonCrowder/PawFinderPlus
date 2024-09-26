@@ -57,7 +57,7 @@ def litter_management():
                                litters=litters,
                                DogStatus=DogStatus)
     else:
-        return render_template('litter_management.html', 
+        return render_template('litter/litter_management.html', 
                                litters=litters, 
                                breeds=breeds, 
                                current_breed=breed,
@@ -74,7 +74,7 @@ def litter_detail(id):
         return redirect(url_for('main.home'))
     shareable_link = generate_shareable_link('litter.litter_detail', id=id)
     social_links = generate_social_links(shareable_link, f"Check out this litter on DogBreederPlus!")
-    return render_template('litter_detail.html', litter=litter, DogStatus=DogStatus, shareable_link=shareable_link, social_links=social_links)
+    return render_template('litter/litter_detail.html', litter=litter, DogStatus=DogStatus, shareable_link=shareable_link, social_links=social_links)
 
 
 @bp.route('/add_litter', methods=['GET', 'POST'])
@@ -121,7 +121,7 @@ def add_litter():
         return redirect(url_for('litter.litter_management'))
 
     all_dogs = Dog.query.filter(Dog.user_id == current_user.id).order_by(Dog.date_of_birth).all()
-    return render_template('add_litter.html', dogs=all_dogs, AccountType=AccountType, litter=None)
+    return render_template('litter/add_litter.html', dogs=all_dogs, AccountType=AccountType, litter=None)
 
 @bp.route('/edit_litter/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -165,7 +165,7 @@ def edit_litter(id):
         return redirect(url_for('litter.litter_management'))
 
     all_dogs = Dog.query.filter(Dog.user_id == current_user.id).order_by(Dog.date_of_birth).all()
-    return render_template('edit_litter.html', litter=litter, dogs=all_dogs, AccountType=AccountType)
+    return render_template('litter/edit_litter.html', litter=litter, dogs=all_dogs, AccountType=AccountType)
 
 
 
@@ -274,7 +274,7 @@ def public_litters():
     max_price_overall = db.session.query(func.max(Dog.price)).scalar() or 10000
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render_template('public_litters_content.html', 
+        return render_template('litter/public_litters_content.html', 
                             litters=paginated_litters.items,
                             pagination=paginated_litters,
                             DogStatus=DogStatus)
@@ -305,7 +305,7 @@ def public_litters():
             .limit(featured_count)\
             .all()
 
-    return render_template('public_litters.html', 
+    return render_template('litter/public_litters.html', 
                         litters=paginated_litters.items,
                         pagination=paginated_litters,
                         featured_litters=featured_litters,
