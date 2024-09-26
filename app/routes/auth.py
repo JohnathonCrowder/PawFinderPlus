@@ -3,21 +3,22 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import User
 from app.extensions import db
+from sqlalchemy import func
 
 bp = Blueprint('auth', __name__)
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
+        username = request.form['username'].strip().lower()  # Strip whitespace and convert to lowercase
+        email = request.form['email'].strip().lower()  # Strip whitespace and convert to lowercase
         password = request.form['password']
         
-        if User.query.filter_by(username=username).first():
+        if User.query.filter(func.lower(User.username) == username).first():
             flash('Username already exists', 'error')
             return redirect(url_for('auth.register'))
         
-        if User.query.filter_by(email=email).first():
+        if User.query.filter(func.lower(User.email) == email).first():
             flash('Email already exists', 'error')
             return redirect(url_for('auth.register'))
         
@@ -34,9 +35,9 @@ def register():
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        username = request.form['username'].strip().lower()  # Strip whitespace and convert to lowercase
         password = request.form['password']
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter(func.lower(User.username) == username).first()
         
         if user and user.check_password(password):
             login_user(user)

@@ -4,6 +4,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from sqlalchemy import LargeBinary, Table
+from sqlalchemy.orm import validates
 from enum import Enum
 from datetime import datetime
 
@@ -71,6 +72,10 @@ class User(UserMixin, db.Model):
 
     #Admin
     is_admin = db.Column(db.Boolean, default=False)
+
+    @validates('username', 'email')
+    def convert_lower(self, key, value):
+        return value.lower().strip() if value else None
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
