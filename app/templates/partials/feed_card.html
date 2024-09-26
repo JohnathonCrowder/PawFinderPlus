@@ -1,0 +1,108 @@
+<div class="bg-white rounded-2xl shadow-lg overflow-hidden card">
+    {% if item_type == 'dog' %}
+        <div class="relative">
+            {% if item.images %}
+                <img src="{{ url_for('dog.get_dog_image', image_id=item.images[0].id) }}" alt="{{ item.name }}" class="w-full h-48 object-cover">
+            {% else %}
+                <div class="w-full h-48 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                    <i class="fas fa-dog text-indigo-300 text-5xl"></i>
+                </div>
+            {% endif %}
+            <div class="absolute top-0 right-0 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1 m-2 rounded-full text-sm font-semibold">
+                {{ item.status.value }}
+            </div>
+        </div>
+        <div class="p-4">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-semibold text-indigo-800">{{ item.name }}</h3>
+                {% if item.price and item.status in [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON] %}
+                    <span class="text-green-600 font-bold">${{ "%.2f"|format(item.price) }}</span>
+                {% endif %}
+            </div>
+            <p class="text-indigo-600 mb-2">{{ item.breed }}</p>
+            <p class="text-sm text-gray-500 mb-4">
+                Added by 
+                <a href="{{ url_for('user.user_profile', username=item.owner.username) }}" class="text-blue-500 hover:underline">
+                    {{ item.owner.username }}
+                </a> 
+                on {{ item.created_at.strftime('%B %d, %Y') }}
+            </p>
+            <div class="flex justify-between items-center">
+                <a href="{{ url_for('dog.dog_profile', id=item.id) }}" class="inline-block bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-full hover:from-indigo-600 hover:to-purple-700 transition duration-300 transform hover:scale-105">
+                    View Profile
+                </a>
+                <a href="{{ url_for('user.user_profile', username=item.owner.username) }}" class="text-indigo-600 hover:text-indigo-800">
+                    <i class="fas fa-user-circle"></i> Owner Profile
+                </a>
+            </div>
+        </div>
+    {% elif item_type == 'litter' %}
+        <div class="relative">
+            {% if item.images %}
+                <img src="{{ url_for('litter.get_litter_image', image_id=item.images[0].id) }}" alt="{{ item.name }}" class="w-full h-48 object-cover">
+            {% else %}
+                <div class="w-full h-48 bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">
+                    <i class="fas fa-paw text-pink-300 text-5xl"></i>
+                </div>
+            {% endif %}
+            <div class="absolute top-0 right-0 bg-gradient-to-r from-pink-500 to-red-600 text-white px-3 py-1 m-2 rounded-full text-sm font-semibold">
+                New Litter
+            </div>
+        </div>
+        <div class="p-4">
+            <h3 class="text-xl font-semibold text-pink-800 mb-2">{{ item.name }}</h3>
+            <p class="text-pink-600 mb-2">Born on {{ item.date_of_birth.strftime('%B %d, %Y') }}</p>
+            <p class="text-sm text-gray-500 mb-2">
+                Added by 
+                <a href="{{ url_for('user.user_profile', username=item.user.username) }}" class="text-blue-500 hover:underline">
+                    {{ item.user.username }}
+                </a>
+            </p>
+            {% set available_puppies = item.puppies|selectattr("status", "in", [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])|list %}
+            {% if available_puppies %}
+                <p class="text-green-600 font-semibold mb-2">
+                    {{ available_puppies|length }} puppy{% if available_puppies|length > 1 %}ies{% endif %} available
+                </p>
+                {% set prices = available_puppies|map(attribute='price')|list %}
+                {% if prices %}
+                    <p class="text-green-600 font-bold mb-4">
+                        Price range: ${{ "%.2f"|format(prices|min) }} - ${{ "%.2f"|format(prices|max) }}
+                    </p>
+                {% endif %}
+            {% else %}
+                <p class="text-gray-600 mb-4">No puppies available at the moment</p>
+            {% endif %}
+            <div class="flex justify-between items-center">
+                <a href="{{ url_for('litter.litter_detail', id=item.id) }}" class="inline-block bg-gradient-to-r from-pink-500 to-red-600 text-white px-4 py-2 rounded-full hover:from-pink-600 hover:to-red-700 transition duration-300 transform hover:scale-105">
+                    View Litter
+                </a>
+                <a href="{{ url_for('user.user_profile', username=item.user.username) }}" class="text-pink-600 hover:text-pink-800">
+                    <i class="fas fa-user-circle"></i> Breeder Profile
+                </a>
+            </div>
+        </div>
+    {% elif item_type == 'blog_post' %}
+        <div class="p-4">
+            <div class="bg-gradient-to-r from-green-500 to-teal-600 text-white px-3 py-1 rounded-full text-sm font-semibold inline-block mb-2">
+                New Blog Post
+            </div>
+            <h3 class="text-xl font-semibold text-green-800 mb-2">{{ item.title }}</h3>
+            <p class="text-green-600 mb-2">{{ item.content|truncate(100) }}</p>
+            <p class="text-sm text-gray-500 mb-4">
+                Posted by 
+                <a href="{{ url_for('user.user_profile', username=item.author.username) }}" class="text-blue-500 hover:underline">
+                    {{ item.author.username }}
+                </a> 
+                on {{ item.created_at.strftime('%B %d, %Y') }}
+            </p>
+            <div class="flex justify-between items-center">
+                <a href="{{ url_for('blog.blog_post', post_id=item.id) }}" class="inline-block bg-gradient-to-r from-green-500 to-teal-600 text-white px-4 py-2 rounded-full hover:from-green-600 hover:to-teal-700 transition duration-300 transform hover:scale-105">
+                    Read Post
+                </a>
+                <a href="{{ url_for('user.user_profile', username=item.author.username) }}" class="text-green-600 hover:text-green-800">
+                    <i class="fas fa-user-circle"></i> Author Profile
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>

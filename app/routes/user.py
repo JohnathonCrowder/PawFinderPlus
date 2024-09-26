@@ -216,7 +216,7 @@ def followed_feed():
     # Fetch recent litters
     litters = Litter.query.filter(
         Litter.user_id.in_(followed_users),
-        Litter.date_of_birth > recent_time,
+        Litter.date_of_birth > recent_time.date(),
         Litter.is_public == True
     ).all()
 
@@ -234,8 +234,20 @@ def followed_feed():
         ((item, 'blog_post') for item in blog_posts)
     ))
 
+    # Define sorting key function
+    def get_sort_key(item):
+        obj, item_type = item
+        if item_type == 'dog':
+            return obj.created_at
+        elif item_type == 'litter':
+            return datetime.combine(obj.date_of_birth, datetime.min.time())
+        elif item_type == 'blog_post':
+            return obj.created_at
+        else:
+            return datetime.min
+
     # Sort combined items by date
-    all_items.sort(key=lambda x: getattr(x[0], 'created_at', getattr(x[0], 'date_of_birth', datetime.min)), reverse=True)
+    all_items.sort(key=get_sort_key, reverse=True)
 
     # Manual pagination
     total_items = len(all_items)
@@ -278,7 +290,8 @@ def followed_feed():
 
     return render_template('user/followed_feed.html', 
                            feed_items=feed_items, 
-                           pagination=pagination)
+                           pagination=pagination,
+                           DogStatus=DogStatus)  
 
 
 ####################   Changing Account Types    ##########################
