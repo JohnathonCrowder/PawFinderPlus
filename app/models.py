@@ -226,6 +226,13 @@ class Dog(db.Model):
             (Litter.puppies.any(id=self.id))
         ).first()
     
+    #Ensures Dog name starts with capital letter
+    @validates('name')
+    def validate_name(self, key, name):
+        if name:
+            return name.capitalize()
+        return name
+    
 
 
 class DogImage(db.Model):
@@ -286,6 +293,12 @@ class Litter(db.Model):
         backref=db.backref('litters', lazy='dynamic'),
         lazy='joined'  # This will eager load the puppies
     )
+
+    @validates('name')
+    def validate_name(self, key, name):
+        if name:
+            return name.capitalize()
+        return name
 
 litter_puppy = db.Table('litter_puppy',
     db.Column('litter_id', db.Integer, db.ForeignKey('litter.id'), primary_key=True),
