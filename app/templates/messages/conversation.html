@@ -154,6 +154,7 @@
             </div>
 
             <form method="POST" class="mt-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="flex items-center">
                     <input type="text" name="content" class="message-input flex-grow mr-4" placeholder="Type your message..." required>
                     <button type="submit" class="paw-button">
