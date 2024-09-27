@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, current_app, jsonify, request
 from flask_login import login_required, current_user
-from app.models import Dog, Litter, VetAppointment, Message, DogStatus, AppointmentCategory, User
+from app.models import Dog, Litter, VetAppointment, Message, DogStatus, AppointmentCategory, User, BlogPost
 from app.extensions import db
 from sqlalchemy import func, case, or_
 from datetime import datetime, timedelta
+from itertools import chain
 
 bp = Blueprint('dashboard', __name__)
 
@@ -49,6 +50,30 @@ def user_dashboard():
         Dog.user_id == current_user.id,
         VetAppointment.date >= datetime.utcnow()
     ).order_by(VetAppointment.date).limit(5).all()
+
+    # Get feed items
+    followed_users = [user.id for user in current_user.followed]
+    recent_dogs = Dog.query.filter(Dog.user_id.in_(followed_users), Dog.is_public == True).order_by(Dog.created_at.desc()).limit(10).all()
+    recent_litters = Litter.query.filter(Litter.user_id.in_(followed_users), Litter.is_public == True).order_by(Litter.date_of_birth.desc()).limit(10).all()
+    recent_posts = BlogPost.query.filter(BlogPost.author_id.in_(followed_users), BlogPost.is_published == True).order_by(BlogPost.created_at.desc()).limit(10).all()
+
+    def get_datetime(item):
+        if hasattr(item, 'created_at'):
+            return item.created_at
+        elif hasattr(item, 'date_of_birth'):
+            return datetime.combine(item.date_of_birth, datetime.min.time())
+        else:
+            return datetime.min
+
+    feed_items = sorted(
+        chain(
+            ((dog, 'dog') for dog in recent_dogs),
+            ((litter, 'litter') for litter in recent_litters),
+            ((post, 'blog_post') for post in recent_posts)
+        ),
+        key=lambda x: get_datetime(x[0]),
+        reverse=True
+    )
     
     # Get user's conversations
     conversations = db.session.query(
@@ -72,6 +97,16 @@ def user_dashboard():
             'unread_count': conv.unread_count
         })
 
+    # Get breeds of the current user's dogs
+    user_breeds = db.session.query(Dog.breed).filter(Dog.user_id == current_user.id).distinct().all()
+    user_breeds = [breed[0] for breed in user_breeds]
+
+    # Find other breeders with the same breeds
+    similar_breeders = db.session.query(User).join(Dog).filter(
+        User.id != current_user.id,
+        Dog.breed.in_(user_breeds)
+    ).group_by(User.id).order_by(func.count(Dog.id).desc()).limit(5).all()
+
     return render_template('dashboard/user_dashboard.html',
                            total_dogs=total_dogs,
                            total_litters=total_litters,
@@ -81,7 +116,10 @@ def user_dashboard():
                            upcoming_appointments=upcoming_appointments,
                            AppointmentCategory=AppointmentCategory,
                            conversation_details=conversation_details,
-                           DogStatus=DogStatus)
+                           DogStatus=DogStatus,
+                           feed_items=feed_items,
+                           user_breeds=user_breeds,
+                           similar_breeders=similar_breeders)
 
 
 @bp.route('/dashboard/messages/<conversation_id>')
