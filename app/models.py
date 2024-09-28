@@ -27,6 +27,12 @@ class AccountType(Enum):
     BASIC = "Basic"
     PREMIUM = "Premium"
 
+class UserRole(Enum):
+    BUYER = "Buyer"
+    SELLER = "Seller"
+
+
+
 
 ## Follower Data Table ##
 followers = db.Table('followers',
@@ -44,7 +50,8 @@ class User(UserMixin, db.Model):
     dogs = db.relationship('Dog', backref='owner', lazy=True)
 
     #Account Type
-    account_type = db.Column(db.Enum(AccountType), default=AccountType.FREE)
+    account_type = db.Column(db.Enum(AccountType), default=AccountType.FREE)      # (free, basic, premium)
+    role = db.Column(db.Enum(UserRole), nullable=False, default=UserRole.BUYER)   # (buyer, seller)
 
     #Contact Info
     website = db.Column(db.String(200))
@@ -176,6 +183,23 @@ class User(UserMixin, db.Model):
             return 8
         else:  # PREMIUM
             return 20
+        
+    ###### Buyer/Seller Code ######    
+    
+    @property
+    def can_sell(self):
+        return self.role == UserRole.SELLER
+    
+    def switch_role(self):
+        if self.role == UserRole.BUYER:
+            self.role = UserRole.SELLER
+        else:
+            self.role = UserRole.BUYER
+        db.session.commit()
+
+    @property
+    def role_name(self):
+        return self.role.value
     
     ##### User Follower Code ##########
 

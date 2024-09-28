@@ -194,6 +194,56 @@
         </div>
 
         <div class="settings-container p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6 section-title">Account Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Account Type</h3>
+                    <p class="text-gray-600 mb-2">Your current account type is:</p>
+                    <p class="text-2xl font-bold text-blue-600">{{ user_data.account_type.value }}</p>
+                    <p class="text-lg text-gray-700 mt-2">
+                        {% if user_data.account_type == AccountType.FREE %}
+                            Free
+                        {% elif user_data.account_type == AccountType.BASIC %}
+                            $29 per month
+                        {% elif user_data.account_type == AccountType.PREMIUM %}
+                            $59 per month
+                        {% endif %}
+                    </p>
+                    <a href="{{ url_for('user.account_management') }}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        Manage Account Type
+                    </a>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">User Role</h3>
+                    <p class="text-gray-600 mb-2">Your current role is:</p>
+                    <p class="text-2xl font-bold text-green-600">{{ user_data.role.value }}</p>
+                    <form action="{{ url_for('user.switch_role') }}" method="POST" class="mt-4">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                            Switch to {{ 'Seller' if user_data.role == UserRole.BUYER else 'Buyer' }} Mode
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="mt-6 p-6 bg-blue-100 rounded-lg">
+                <h4 class="text-lg font-semibold mb-3 text-blue-800">Understanding Account Types and Roles</h4>
+                <p class="text-blue-700 mb-3">
+                    <strong>Account Type</strong> determines your subscription level and available features.
+                </p>
+                <p class="text-blue-700 mb-3">
+                    <strong>User Role</strong> defines whether you're using the platform as a buyer or a seller:
+                </p>
+                <ul class="list-disc list-inside text-blue-700 mb-3">
+                    <li><strong>Buyer accounts</strong> are optimized to help you find and connect with puppies you're interested in.</li>
+                    <li><strong>Seller accounts</strong> are designed for breeders to list and manage their dogs and litters for sale.</li>
+                </ul>
+                <p class="text-blue-700">
+                    You can switch between buyer and seller roles at any time without affecting your account type. This allows you to easily transition between searching for puppies and listing your own, depending on your current needs.
+                </p>
+            </div>
+        </div>
+
+        <div class="settings-container p-8 mb-8">
             <h2 class="text-2xl font-bold mb-6 section-title">Following</h2>
             {% if followed %}
                 <ul>

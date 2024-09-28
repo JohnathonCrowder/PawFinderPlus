@@ -10,9 +10,10 @@ bp = Blueprint('auth', __name__)
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username'].strip().lower()  # Strip whitespace and convert to lowercase
-        email = request.form['email'].strip().lower()  # Strip whitespace and convert to lowercase
+        username = request.form['username'].strip().lower()
+        email = request.form['email'].strip().lower()
         password = request.form['password']
+        role = UserRole[request.form['role']]
         
         if User.query.filter(func.lower(User.username) == username).first():
             flash('Username already exists', 'error')
@@ -22,7 +23,7 @@ def register():
             flash('Email already exists', 'error')
             return redirect(url_for('auth.register'))
         
-        new_user = User(username=username, email=email)
+        new_user = User(username=username, email=email, role=role)
         new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
@@ -30,7 +31,7 @@ def register():
         flash('Registration successful. Please log in.', 'success')
         return redirect(url_for('auth.login'))
     
-    return render_template('auth/register.html')
+    return render_template('auth/register.html', UserRole=UserRole)
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():

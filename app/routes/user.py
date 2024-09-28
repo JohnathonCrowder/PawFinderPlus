@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, jsonify, current_app
 from flask_login import login_required, current_user
-from app.models import User, Dog, Litter, DogStatus, AccountType, BlogPost
+from app.models import User, Dog, Litter, DogStatus, AccountType, BlogPost, UserRole
 from app.extensions import db
 from app.utils import format_url, generate_shareable_link, generate_social_links
 from werkzeug.utils import secure_filename
@@ -29,10 +29,11 @@ def user_settings():
         'city': current_user.city,
         'state': current_user.state,
         'country': current_user.country,
-        'account_type': current_user.account_type,  
+        'account_type': current_user.account_type,
+        'role': current_user.role,  
     }
     followed = current_user.followed.all()
-    return render_template('user/user_settings.html', user_data=user_data, AccountType=AccountType, followed=followed)
+    return render_template('user/user_settings.html', user_data=user_data, AccountType=AccountType, UserRole=UserRole, followed=followed)
 
 @bp.route('/update_profile', methods=['POST'])
 @login_required
@@ -332,3 +333,11 @@ def change_account_type():
         flash('Invalid account type', 'error')
     
     return redirect(url_for('user.account_management'))
+
+
+@bp.route('/switch_role', methods=['POST'])
+@login_required
+def switch_role():
+    current_user.switch_role()
+    flash(f'Your account has been switched to {current_user.role_name} mode.', 'success')
+    return redirect(url_for('user.user_settings'))
