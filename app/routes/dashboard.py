@@ -1,12 +1,51 @@
 from flask import Blueprint, render_template, current_app, jsonify, request
 from flask_login import login_required, current_user
-from app.models import Dog, Litter, VetAppointment, Message, DogStatus, AppointmentCategory, User, BlogPost
+from app.models import User, Dog, Litter, VetAppointment, Message, DogStatus, AppointmentCategory, BlogPost
 from app.extensions import db
-from sqlalchemy import func, case, or_
+from sqlalchemy import func, or_, extract, distinct
 from datetime import datetime, timedelta
 from itertools import chain
+from sqlalchemy import func, or_, extract, distinct, case
+
 
 bp = Blueprint('dashboard', __name__)
+
+def get_datetime(item):
+    if hasattr(item, 'created_at'):
+        return item.created_at
+    elif hasattr(item, 'date_of_birth'):
+        # Convert date to datetime
+        return datetime.combine(item.date_of_birth, datetime.min.time())
+    else:
+        return datetime.min
+    
+def get_recent_activity(user, limit=5):
+    recent_activity = []
+    
+    # Get recent dogs
+    recent_dogs = Dog.query.filter_by(user_id=user.id).order_by(Dog.created_at.desc()).limit(limit).all()
+    for dog in recent_dogs:
+        recent_activity.append({
+            'type': 'dog',
+            'text': f'Added new dog: {dog.name}',
+            'date': dog.created_at,
+            'icon': 'fas fa-dog'
+        })
+    
+    # Get recent litters
+    recent_litters = Litter.query.filter_by(user_id=user.id).order_by(Litter.date_of_birth.desc()).limit(limit).all()
+    for litter in recent_litters:
+        recent_activity.append({
+            'type': 'litter',
+            'text': f'New litter born: {litter.name}',
+            'date': datetime.combine(litter.date_of_birth, datetime.min.time()),  # Convert date to datetime
+            'icon': 'fas fa-paw'
+        })
+    
+    # Sort all activities by date
+    recent_activity.sort(key=lambda x: x['date'], reverse=True)
+    
+    return recent_activity[:limit]
 
 @bp.route('/dashboard')
 @login_required
@@ -57,14 +96,6 @@ def user_dashboard():
     recent_litters = Litter.query.filter(Litter.user_id.in_(followed_users), Litter.is_public == True).order_by(Litter.date_of_birth.desc()).limit(10).all()
     recent_posts = BlogPost.query.filter(BlogPost.author_id.in_(followed_users), BlogPost.is_published == True).order_by(BlogPost.created_at.desc()).limit(10).all()
 
-    def get_datetime(item):
-        if hasattr(item, 'created_at'):
-            return item.created_at
-        elif hasattr(item, 'date_of_birth'):
-            return datetime.combine(item.date_of_birth, datetime.min.time())
-        else:
-            return datetime.min
-
     feed_items = sorted(
         chain(
             ((dog, 'dog') for dog in recent_dogs),
@@ -107,6 +138,12 @@ def user_dashboard():
         Dog.breed.in_(user_breeds)
     ).group_by(User.id).order_by(func.count(Dog.id).desc()).limit(5).all()
 
+    # Eager load the related data for similar breeders
+    for breeder in similar_breeders:
+        breeder.dogs = Dog.query.filter_by(user_id=breeder.id).all()
+        breeder.litters = Litter.query.filter_by(user_id=breeder.id).all()
+        breeder.follower_count = breeder.followers.count()
+
     return render_template('dashboard/user_dashboard.html',
                            total_dogs=total_dogs,
                            total_litters=total_litters,
@@ -119,8 +156,8 @@ def user_dashboard():
                            DogStatus=DogStatus,
                            feed_items=feed_items,
                            user_breeds=user_breeds,
-                           similar_breeders=similar_breeders)
-
+                           similar_breeders=similar_breeders,
+                           get_recent_activity=get_recent_activity)
 
 @bp.route('/dashboard/messages/<conversation_id>')
 @login_required
