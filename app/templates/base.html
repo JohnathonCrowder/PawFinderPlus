@@ -64,44 +64,46 @@
             </a>
             
             <!-- Desktop Menu -->
-            <ul class="hidden md:flex space-x-4 items-center">
-                <li><a href="{{ url_for('main.home') }}" class="hover:underline">Home</a></li>
+<ul class="hidden md:flex space-x-4 items-center">
+    <li><a href="{{ url_for('main.home') }}" class="hover:underline">Home</a></li>
     <li><a href="{{ url_for('litter.public_litters') }}" class="hover:underline">Puppies</a></li>
     <li><a href="{{ url_for('blog.blog_index') }}" class="hover:underline">Blog</a></li>
+    <li><a href="{{ url_for('main.breeder_network') }}" class="hover:underline">Find Breeders</a></li>
     <li><a href="{{ url_for('main.about') }}" class="hover:underline">About</a></li>
     <li><a href="{{ url_for('main.contact') }}" class="hover:underline">Contact</a></li>
-                {% if current_user.is_authenticated %}
-                    <li class="dropdown relative">
-                        <a href="#" class="hover:underline flex items-center">
-                            Management <i class="fas fa-chevron-down ml-1"></i>
-                        </a>
-                        <ul class="dropdown-menu absolute hidden text-gray-700 pt-1 bg-white rounded-md shadow-xl" style="min-width: 150px;">
-                            <li><a href="{{ url_for('dog.dog_management') }}" class="rounded-t hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Dogs</a></li>
-                            <li><a href="{{ url_for('litter.litter_management') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Litters</a></li>
-                            <li><a href="{{ url_for('vet.vet_appointments') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Vet Appointments</a></li>
-                        </ul>
-                    </li>
-                    
-                    <li class="dropdown relative">
-                        <a href="#" class="hover:underline flex items-center">
-                            <i class="fas fa-user-circle mr-1"></i> {{ current_user.username }} <i class="fas fa-chevron-down ml-1"></i>
-                        </a>
-                        <ul class="dropdown-menu absolute hidden text-gray-700 pt-1 bg-white rounded-md shadow-xl" style="min-width: 150px;">
-                            <li><a href="{{ url_for('user.user_profile', username=current_user.username) }}" class="rounded-t hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">My Profile</a></li>
-                            <li><a href="{{ url_for('user.user_settings') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Settings</a></li>
-                            <li><a href="{{ url_for('message.messages') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Messages</a></li>
-                            <a href="{{ url_for('user.followed_feed') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Followed Feed</a>
-                            <li><a href="{{ url_for('auth.logout') }}" class="rounded-b hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Logout</a></li>
-                        </ul>
-                    </li>
-                    {% if current_user.is_authenticated and current_user.is_admin %}
-                        <li><a href="{{ url_for('admin.admin_dashboard') }}" class="hover:underline">Admin</a></li>
-                    {% endif %}
-                {% else %}
-                    <li><a href="{{ url_for('auth.login') }}" class="hover:underline">Login</a></li>
-                    <li><a href="{{ url_for('auth.register') }}" class="hover:underline">Register</a></li>
-                {% endif %}
+    {% if current_user.is_authenticated %}
+        <li class="dropdown relative">
+            <a href="#" class="hover:underline flex items-center">
+                Management <i class="fas fa-chevron-down ml-1"></i>
+            </a>
+            <ul class="dropdown-menu absolute hidden text-gray-700 pt-1 bg-white rounded-md shadow-xl" style="min-width: 150px;">
+                <li><a href="{{ url_for('dashboard.user_dashboard') }}" class="rounded-t hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Dashboard</a></li>
+                <li><a href="{{ url_for('dog.dog_management') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Dogs</a></li>
+                <li><a href="{{ url_for('litter.litter_management') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Litters</a></li>
+                <li><a href="{{ url_for('vet.vet_appointments') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Vet Appointments</a></li>
             </ul>
+        </li>
+        
+        <li class="dropdown relative">
+            <a href="#" class="hover:underline flex items-center">
+                <i class="fas fa-user-circle mr-1"></i> {{ current_user.username }} <i class="fas fa-chevron-down ml-1"></i>
+            </a>
+            <ul class="dropdown-menu absolute hidden text-gray-700 pt-1 bg-white rounded-md shadow-xl" style="min-width: 150px;">
+                <li><a href="{{ url_for('user.user_profile', username=current_user.username) }}" class="rounded-t hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">My Profile</a></li>
+                <li><a href="{{ url_for('user.user_settings') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Settings</a></li>
+                <li><a href="{{ url_for('message.messages') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Messages</a></li>
+                <li><a href="{{ url_for('user.followed_feed') }}" class="hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Followed Feed</a></li>
+                <li><a href="{{ url_for('auth.logout') }}" class="rounded-b hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap">Logout</a></li>
+            </ul>
+        </li>
+        {% if current_user.is_authenticated and current_user.is_admin %}
+            <li><a href="{{ url_for('admin.admin_dashboard') }}" class="hover:underline">Admin</a></li>
+        {% endif %}
+    {% else %}
+        <li><a href="{{ url_for('auth.login') }}" class="hover:underline">Login</a></li>
+        <li><a href="{{ url_for('auth.register') }}" class="hover:underline">Register</a></li>
+    {% endif %}
+</ul>
             
             <!-- Mobile Menu Button -->
             <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
@@ -116,36 +118,41 @@
     <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 mobile-menu-overlay"></div>
 
     <!-- Mobile Menu -->
-    <div id="mobile-menu" class="fixed top-0 left-0 bottom-0 w-64 bg-white z-50 overflow-y-auto">
-        <div class="p-4">
-            <button id="close-mobile-menu" class="text-gray-500 hover:text-gray-800">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
-        </div>
-        
-        <ul class="text-gray-800 text-lg">
-            <ul class="text-gray-800 text-lg">
-                <li><a href="{{ url_for('main.home') }}" class="block py-2 px-4 hover:bg-gray-100">Home</a></li>
-                <li><a href="{{ url_for('litter.public_litters') }}" class="block py-2 px-4 hover:bg-gray-100">Puppies</a></li>
-                <li><a href="{{ url_for('blog.blog_index') }}" class="block py-2 px-4 hover:bg-gray-100">Blog</a></li>
-                <li><a href="{{ url_for('main.about') }}" class="block py-2 px-4 hover:bg-gray-100">About</a></li>
-                <li><a href="{{ url_for('main.contact') }}" class="block py-2 px-4 hover:bg-gray-100">Contact</a></li>
-            {% if current_user.is_authenticated %}
-                <li><a href="{{ url_for('dog.dog_management') }}" class="block py-2 px-4 hover:bg-gray-100">Dogs</a></li>
-                <li><a href="{{ url_for('litter.litter_management') }}" class="block py-2 px-4 hover:bg-gray-100">Litters</a></li>
-                <li><a href="{{ url_for('vet.vet_appointments') }}" class="block py-2 px-4 hover:bg-gray-100">Vet Appointments</a></li>
-                <li><a href="{{ url_for('user.user_profile', username=current_user.username) }}" class="block py-2 px-4 hover:bg-gray-100">My Profile</a></li>
-                <li><a href="{{ url_for('user.user_settings') }}" class="block py-2 px-4 hover:bg-gray-100">Settings</a></li>
-                <li><a href="{{ url_for('message.messages') }}" class="block py-2 px-4 hover:bg-gray-100">Messages</a></li>
-                <li><a href="{{ url_for('auth.logout') }}" class="block py-2 px-4 hover:bg-gray-100">Logout</a></li>
-            {% else %}
-                <li><a href="{{ url_for('auth.login') }}" class="block py-2 px-4 hover:bg-gray-100">Login</a></li>
-                <li><a href="{{ url_for('auth.register') }}" class="block py-2 px-4 hover:bg-gray-100">Register</a></li>
-            {% endif %}
-        </ul>
+<div id="mobile-menu" class="fixed top-0 left-0 bottom-0 w-64 bg-white z-50 overflow-y-auto">
+    <div class="p-4">
+        <button id="close-mobile-menu" class="text-gray-500 hover:text-gray-800">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
     </div>
+    
+    <ul class="text-gray-800 text-lg">
+        <li><a href="{{ url_for('main.home') }}" class="block py-2 px-4 hover:bg-gray-100">Home</a></li>
+        <li><a href="{{ url_for('litter.public_litters') }}" class="block py-2 px-4 hover:bg-gray-100">Puppies</a></li>
+        <li><a href="{{ url_for('blog.blog_index') }}" class="block py-2 px-4 hover:bg-gray-100">Blog</a></li>
+        <li><a href="{{ url_for('main.breeder_network') }}" class="block py-2 px-4 hover:bg-gray-100">Find Breeders</a></li>
+        <li><a href="{{ url_for('main.about') }}" class="block py-2 px-4 hover:bg-gray-100">About</a></li>
+        <li><a href="{{ url_for('main.contact') }}" class="block py-2 px-4 hover:bg-gray-100">Contact</a></li>
+        {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('dashboard.user_dashboard') }}" class="block py-2 px-4 hover:bg-gray-100">Dashboard</a></li>
+            <li><a href="{{ url_for('dog.dog_management') }}" class="block py-2 px-4 hover:bg-gray-100">Dogs</a></li>
+            <li><a href="{{ url_for('litter.litter_management') }}" class="block py-2 px-4 hover:bg-gray-100">Litters</a></li>
+            <li><a href="{{ url_for('vet.vet_appointments') }}" class="block py-2 px-4 hover:bg-gray-100">Vet Appointments</a></li>
+            <li><a href="{{ url_for('user.user_profile', username=current_user.username) }}" class="block py-2 px-4 hover:bg-gray-100">My Profile</a></li>
+            <li><a href="{{ url_for('user.user_settings') }}" class="block py-2 px-4 hover:bg-gray-100">Settings</a></li>
+            <li><a href="{{ url_for('message.messages') }}" class="block py-2 px-4 hover:bg-gray-100">Messages</a></li>
+            <li><a href="{{ url_for('user.followed_feed') }}" class="block py-2 px-4 hover:bg-gray-100">Followed Feed</a></li>
+            <li><a href="{{ url_for('auth.logout') }}" class="block py-2 px-4 hover:bg-gray-100">Logout</a></li>
+            {% if current_user.is_admin %}
+                <li><a href="{{ url_for('admin.admin_dashboard') }}" class="block py-2 px-4 hover:bg-gray-100">Admin</a></li>
+            {% endif %}
+        {% else %}
+            <li><a href="{{ url_for('auth.login') }}" class="block py-2 px-4 hover:bg-gray-100">Login</a></li>
+            <li><a href="{{ url_for('auth.register') }}" class="block py-2 px-4 hover:bg-gray-100">Register</a></li>
+        {% endif %}
+    </ul>
+</div>
 
     <main class="flex-grow">
         {% block content %}{% endblock %}
