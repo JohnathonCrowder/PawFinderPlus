@@ -150,7 +150,7 @@ def seller_dashboard():
                            get_recent_activity=get_recent_activity)
 
 def buyer_dashboard():
-    recent_litters = Litter.query.filter_by(is_public=True).order_by(Litter.date_of_birth.desc()).limit(5).all()
+    recent_litters = Litter.query.filter_by(is_public=True).order_by(Litter.date_of_birth.desc()).limit(6).all()
     available_puppies = Dog.query.filter(Dog.is_public == True, 
                                          Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])) \
                                  .order_by(Dog.created_at.desc()).limit(10).all()
@@ -160,13 +160,14 @@ def buyer_dashboard():
                                                   .distinct().order_by(Dog.breed).all()
     available_breeds = [breed[0] for breed in available_breeds]
 
+    # Get user's conversations (same as in seller dashboard)
     conversations = db.session.query(
         Message.conversation_id,
         func.max(Message.timestamp).label('last_message_time'),
         func.count(Message.id).filter(Message.read == False, Message.recipient_id == current_user.id).label('unread_count')
     ).filter(
         or_(Message.sender_id == current_user.id, Message.recipient_id == current_user.id)
-    ).group_by(Message.conversation_id).order_by(func.max(Message.timestamp).desc()).limit(5).all()
+    ).group_by(Message.conversation_id).order_by(func.max(Message.timestamp).desc()).limit(10).all()
 
     conversation_details = []
     for conv in conversations:

@@ -1,87 +1,467 @@
 {% extends "base.html" %}
 
-{% block title %}Buyer Dashboard - DogBreederPlus{% endblock %}
+{% block title %}Puppy Paradise - Your Buyer Dashboard{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.4.1/css/glide.core.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.4.1/css/glide.theme.min.css">
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f0f4f8;
+    }
+    .hero-section {
+        background-image: url('https://images.unsplash.com/photo-1548199973-03cce0bbc87b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+    }
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+    .featured-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .featured-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .featured-card img {
+        transition: all 0.3s ease;
+    }
+    .featured-card:hover img {
+        transform: scale(1.1);
+    }
+    .breed-tag {
+        transition: all 0.3s ease;
+    }
+    .breed-tag:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .section-title {
+        position: relative;
+        display: inline-block;
+    }
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 50%;
+        height: 3px;
+        background-color: #3B82F6;
+    }
+    .paw-print {
+        position: absolute;
+        opacity: 0.1;
+        z-index: -1;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Welcome to Your Buyer Dashboard, {{ current_user.username }}!</h1>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Recent Litters -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-semibold mb-4">Recent Litters</h2>
-            {% if recent_litters %}
-                <ul>
-                    {% for litter in recent_litters %}
-                        <li class="mb-2">
-                            <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="text-blue-500 hover:underline">
-                                {{ litter.name }} - {{ litter.father.breed }} (Born: {{ litter.date_of_birth.strftime('%Y-%m-%d') }})
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No recent litters available.</p>
-            {% endif %}
+<div class="min-h-screen">
+    <!-- Hero Section -->
+    <div class="hero-section text-white py-32 mb-12">
+        <div class="container mx-auto px-4 text-center hero-content">
+            <h1 class="text-5xl md:text-6xl font-bold mb-4" data-aos="fade-down">Welcome to Puppy Paradise!</h1>
+            <p class="text-xl md:text-2xl mb-8" data-aos="fade-up" data-aos-delay="200">Find your perfect furry companion today.</p>
+            <a href="{{ url_for('litter.public_litters') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 inline-block transform hover:scale-105" data-aos="zoom-in" data-aos-delay="400">
+                Browse Available Puppies
+            </a>
         </div>
+    </div>
 
-        <!-- Available Puppies -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-semibold mb-4">Available Puppies</h2>
-            {% if available_puppies %}
-                <ul>
-                    {% for puppy in available_puppies %}
-                        <li class="mb-2">
-                            <a href="{{ url_for('dog.dog_profile', id=puppy.id) }}" class="text-blue-500 hover:underline">
-                                {{ puppy.name }} - {{ puppy.breed }} ({{ puppy.status.value }})
-                            </a>
+    <div class="container mx-auto px-4">
+        <!-- Featured Puppies -->
+        <section class="mb-24 relative">
+            <h2 class="text-4xl font-bold mb-12 text-center section-title">Featured Puppies</h2>
+            <div class="glide">
+                <div class="glide__track" data-glide-el="track">
+                    <ul class="glide__slides">
+                        {% for puppy in available_puppies[:6] %}
+                        <li class="glide__slide">
+                            <div class="featured-card bg-white rounded-lg overflow-hidden shadow-lg mx-4">
+                                {% if puppy.images %}
+                                <img src="{{ url_for('dog.get_dog_image', image_id=puppy.images[0].id) }}" alt="{{ puppy.name }}" class="w-full h-64 object-cover">
+                                {% else %}
+                                <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
+                                    <span class="text-gray-500 text-2xl">No Image</span>
+                                </div>
+                                {% endif %}
+                                <div class="p-6">
+                                    <h3 class="text-xl font-semibold mb-2">{{ puppy.name }}</h3>
+                                    <p class="text-gray-600 mb-4">{{ puppy.breed }}</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-blue-600 font-bold">{{ puppy.status.value }}</span>
+                                        {% if puppy.price %}
+                                        <span class="text-green-600 font-bold">${{ "%.2f"|format(puppy.price) }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{{ url_for('dog.dog_profile', id=puppy.id) }}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 w-full text-center">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
                         </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No available puppies at the moment.</p>
-            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="glide__arrows" data-glide-el="controls">
+                    <button class="glide__arrow glide__arrow--left" data-glide-dir="<">prev</button>
+                    <button class="glide__arrow glide__arrow--right" data-glide-dir=">">next</button>
+                </div>
+            </div>
+            <img src="https://www.svgrepo.com/show/96550/paw-print.svg" alt="Paw print" class="paw-print w-32 h-32 top-0 left-0 transform -translate-x-1/2 -translate-y-1/2">
+        </section>
+
+<!-- Recent Litters -->
+<section class="mb-24 relative" data-aos="fade-up">
+    <h2 class="text-4xl font-bold mb-12 text-center text-gray-800">Recent Litters</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for litter in recent_litters %}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <div class="relative">
+                {% if litter.images %}
+                <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" alt="{{ litter.name }}" class="w-full h-48 object-cover transition-transform duration-300 transform hover:scale-105">
+                {% else %}
+                <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                    <svg class="w-16 h-16 text-gray-400 transition-transform duration-300 transform hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6.672 1.911a1 1 0 10-1.932.518l.259.966a1 1 0 001.932-.518l-.26-.966zM2.429 4.74a1 1 0 10-.517 1.932l.966.259a1 1 0 00.517-1.932l-.966-.26zm8.814-.569a1 1 0 00-1.415-1.414l-.707.707a1 1 0 101.415 1.415l.707-.708zm-7.071 7.072l.707-.707A1 1 0 003.465 9.12l-.708.707a1 1 0 001.415 1.415zm3.2-5.171a1 1 0 00-1.3 1.3l4 10a1 1 0 001.823.075l1.38-2.759 3.018 3.02a1 1 0 001.414-1.415l-3.019-3.02 2.76-1.379a1 1 0 00-.076-1.822l-10-4z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                {% endif %}
+                <div class="absolute top-0 left-0 bg-blue-500 text-white px-3 py-1 m-2 rounded-br-lg text-sm font-semibold transition-all duration-300 hover:bg-blue-600">
+                    {{ litter.puppies|length }} puppies
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="text-xl font-semibold mb-2 text-gray-800 transition-colors duration-300 hover:text-blue-600">{{ litter.name }}</h3>
+                <p class="text-gray-600 mb-4">{{ litter.father.breed }}</p>
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-sm text-gray-500">Born: {{ litter.date_of_birth.strftime('%b %d, %Y') }}</span>
+                    {% set available_puppies = litter.puppies|selectattr("status", "in", [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])|list %}
+                    <span class="bg-green-100 text-green-800 text-sm font-semibold px-2.5 py-0.5 rounded transition-all duration-300 hover:bg-green-200">
+                        {{ available_puppies|length }} available
+                    </span>
+                </div>
+                {% set prices = available_puppies|map(attribute='price')|reject('none')|list %}
+                {% if prices %}
+                    {% set min_price = prices|min %}
+                    {% set max_price = prices|max %}
+                    <p class="text-lg font-semibold text-green-600 mb-4 transition-all duration-300 hover:scale-105 inline-block">
+                        {% if min_price == max_price %}
+                            ${{ "%.2f"|format(min_price) }}
+                        {% else %}
+                            ${{ "%.2f"|format(min_price) }} - ${{ "%.2f"|format(max_price) }}
+                        {% endif %}
+                    </p>
+                {% else %}
+                    <p class="text-lg font-semibold text-gray-600 mb-4">Price on request</p>
+                {% endif %}
+                <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition-all duration-300 hover:shadow-md">
+                    View Litter
+                </a>
+            </div>
         </div>
+        {% endfor %}
+    </div>
+    {% if recent_litters|length > 6 %}
+    <div class="text-center mt-12">
+        <a href="{{ url_for('litter.public_litters') }}" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+            View All Litters
+        </a>
+    </div>
+    {% endif %}
+</section>
 
         <!-- Available Breeds -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-semibold mb-4">Available Breeds</h2>
-            {% if available_breeds %}
-                <ul>
-                    {% for breed in available_breeds %}
-                        <li class="mb-2">
-                            <a href="{{ url_for('litter.public_litters', breed=breed) }}" class="text-blue-500 hover:underline">
-                                {{ breed }}
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No breeds available at the moment.</p>
-            {% endif %}
-        </div>
+        <section class="mb-24 relative" data-aos="fade-up">
+            <h2 class="text-4xl font-bold mb-12 text-center section-title">Explore Breeds</h2>
+            <div class="flex flex-wrap justify-center gap-4">
+                {% for breed in available_breeds %}
+                <a href="{{ url_for('litter.public_litters', breed=breed) }}" class="breed-tag bg-blue-100 text-blue-800 text-sm font-medium px-6 py-3 rounded-full hover:bg-blue-200 transition duration-300 transform hover:scale-105">
+                    {{ breed }}
+                </a>
+                {% endfor %}
+            </div>
+            <img src="https://www.svgrepo.com/show/96550/paw-print.svg" alt="Paw print" class="paw-print w-32 h-32 top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2">
+        </section>
 
-        <!-- Quick Links -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-semibold mb-4">Quick Links</h2>
-            <ul>
-                <li class="mb-2">
-                    <a href="{{ url_for('litter.public_litters') }}" class="text-blue-500 hover:underline">
-                        Browse All Litters
-                    </a>
-                </li>
-                <li class="mb-2">
-                    <a href="{{ url_for('main.breeder_network') }}" class="text-blue-500 hover:underline">
-                        Find Breeders
-                    </a>
-                </li>
-                <li class="mb-2">
-                    <a href="{{ url_for('message.messages') }}" class="text-blue-500 hover:underline">
-                        My Messages
-                    </a>
-                </li>
-            </ul>
+        <!-- Messaging Center -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mt-12">
+            <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-4">
+                <h2 class="text-2xl font-bold text-white">Messaging Center</h2>
+            </div>
+            <div class="flex h-[500px]">
+                <!-- Conversation List -->
+                <div class="w-1/3 border-r">
+                    <div class="overflow-y-auto h-full" id="conversationList">
+                        {% for conv in conversation_details %}
+                            <div class="conversation-item p-4 border-b hover:bg-gray-100 cursor-pointer transition duration-300" data-conversation-id="{{ conv.conversation_id }}" data-recipient-id="{{ conv.other_user.id }}">
+                                <div class="flex items-center">
+                                    {% if conv.other_user.profile_picture_data %}
+                                        <img src="{{ url_for('user.get_profile_picture', user_id=conv.other_user.id) }}" alt="{{ conv.other_user.username }}" class="w-12 h-12 rounded-full mr-3 object-cover">
+                                    {% else %}
+                                        <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center mr-3">
+                                            <span class="text-xl font-bold text-white">{{ conv.other_user.username[0]|upper }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex-grow">
+                                        <p class="font-semibold text-gray-800">{{ conv.other_user.username }}</p>
+                                        <p class="text-sm text-gray-600 truncate">{{ conv.last_message.content }}</p>
+                                    </div>
+                                    {% if conv.unread_count > 0 %}
+                                        <span class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 unread-badge">{{ conv.unread_count }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Message Display and Input -->
+                <div class="w-2/3 flex flex-col">
+                    <div id="messageDisplay" class="flex-grow overflow-y-auto p-4 space-y-4">
+                        <div class="flex items-center justify-center h-full text-gray-500">
+                            Select a conversation to view messages
+                        </div>
+                    </div>
+                    <div class="border-t p-4">
+                        <form id="messageForm" class="flex items-center">
+                            <input type="text" id="messageInput" class="flex-grow border rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Type your message...">
+                            <button type="submit" class="bg-indigo-500 text-white px-6 py-2 rounded-r-lg hover:bg-indigo-600 transition duration-300 flex items-center">
+                                <span class="mr-2">Send</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.4.1/glide.min.js"></script>
+<script>
+    AOS.init({
+        duration: 1000,
+        once: true,
+    });
+
+    new Glide('.glide', {
+        type: 'carousel',
+        perView: 3,
+        focusAt: 'center',
+        breakpoints: {
+            1024: {
+                perView: 2
+            },
+            600: {
+                perView: 1
+            }
+        }
+    }).mount();
+    let currentConversationId = null;
+    let currentRecipientId = null;
+    let lastCheckTimestamp = Date.now() / 1000;
+    let displayedMessageIds = new Set();
+    let highestMessageId = 0;
+    
+    function updateConversationList(newMessage) {
+        const conversationList = document.getElementById('conversationList');
+        const existingItem = conversationList.querySelector(`[data-conversation-id="${newMessage.conversation_id}"]`);
+    
+        if (existingItem) {
+            // Update existing conversation item
+            const contentElement = existingItem.querySelector('p.truncate');
+            contentElement.textContent = newMessage.content;
+    
+            // Move the item to the top of the list
+            conversationList.insertBefore(existingItem, conversationList.firstChild);
+    
+            // Update unread badge
+            let unreadBadge = existingItem.querySelector('.unread-badge');
+            if (!unreadBadge) {
+                unreadBadge = document.createElement('span');
+                unreadBadge.className = 'bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 unread-badge';
+                existingItem.querySelector('.flex-grow').appendChild(unreadBadge);
+            }
+            const currentCount = parseInt(unreadBadge.textContent) || 0;
+            unreadBadge.textContent = currentCount + 1;
+        } else {
+            // Create new conversation item
+            // You'll need to fetch user details for the new conversation
+            // This is a simplified version
+            const newItem = document.createElement('div');
+            newItem.className = 'conversation-item p-4 border-b hover:bg-gray-100 cursor-pointer transition duration-300';
+            newItem.setAttribute('data-conversation-id', newMessage.conversation_id);
+            newItem.setAttribute('data-recipient-id', newMessage.sender_id);
+            newItem.innerHTML = `
+                <div class="flex items-center">
+                    <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center mr-3">
+                        <span class="text-xl font-bold text-white">?</span>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-semibold text-gray-800">New User</p>
+                        <p class="text-sm text-gray-600 truncate">${newMessage.content}</p>
+                    </div>
+                    <span class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 unread-badge">1</span>
+                </div>
+            `;
+            conversationList.insertBefore(newItem, conversationList.firstChild);
+            addConversationItemListener(newItem);
+        }
+    }
+    
+    function addConversationItemListener(item) {
+        item.addEventListener('click', function() {
+            const newConversationId = this.dataset.conversationId;
+            const newRecipientId = this.dataset.recipientId;
+            
+            if (newConversationId !== currentConversationId) {
+                currentConversationId = newConversationId;
+                currentRecipientId = newRecipientId;
+                highestMessageId = 0; // Reset highestMessageId when switching conversations
+                displayedMessageIds.clear(); // Clear displayed message IDs
+                loadMessages(currentConversationId);
+            }
+            
+            document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('bg-indigo-100'));
+            this.classList.add('bg-indigo-100');
+            
+            // Remove unread badge
+            const unreadBadge = this.querySelector('.unread-badge');
+            if (unreadBadge) {
+                unreadBadge.remove();
+            }
+        });
+    }
+    
+    document.querySelectorAll('.conversation-item').forEach(addConversationItemListener);
+    
+    function loadMessages(conversationId) {
+        const messageDisplay = document.getElementById('messageDisplay');
+        messageDisplay.innerHTML = '<div class="text-center text-gray-500">Loading messages...</div>';
+    
+        fetch(`/dashboard/messages/${conversationId}?last_id=${highestMessageId}`)
+            .then(response => response.json())
+            .then(messages => {
+                messageDisplay.innerHTML = ''; // Clear the loading message
+                messages.forEach(message => {
+                    if (message.id > highestMessageId) {
+                        highestMessageId = message.id;
+                    }
+                    appendMessage(message);
+                });
+                messageDisplay.scrollTop = messageDisplay.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error loading messages:', error);
+                messageDisplay.innerHTML = '<div class="text-center text-red-500">Error loading messages. Please try again.</div>';
+            });
+    }
+    
+    function appendMessage(message) {
+        if (displayedMessageIds.has(message.id)) {
+            return; // Skip if the message has already been displayed
+        }
+    
+        const messageDisplay = document.getElementById('messageDisplay');
+        const messageElement = document.createElement('div');
+        messageElement.className = `mb-4 ${message.is_sender ? 'text-right' : 'text-left'}`;
+        messageElement.innerHTML = `
+            <div class="inline-block ${message.is_sender ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-800'} rounded-lg px-4 py-2 max-w-xs lg:max-w-md">
+                <p>${message.content}</p>
+                <p class="text-xs mt-1 ${message.is_sender ? 'text-indigo-200' : 'text-gray-500'}">${message.timestamp}</p>
+            </div>
+        `;
+        messageDisplay.appendChild(messageElement);
+        messageDisplay.scrollTop = messageDisplay.scrollHeight;
+        displayedMessageIds.add(message.id);
+    }
+    
+    document.getElementById('messageForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!currentConversationId) return;
+    
+        const messageInput = document.getElementById('messageInput');
+        const content = messageInput.value.trim();
+        if (!content) return;
+    
+        fetch('/dashboard/send_message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                conversation_id: currentConversationId,
+                recipient_id: currentRecipientId,
+                content: content
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                messageInput.value = '';
+                appendMessage(data.message);
+                if (data.message.id > highestMessageId) {
+                    highestMessageId = data.message.id;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            alert('Failed to send message. Please try again.');
+        });
+    });
+    
+    function checkNewMessages() {
+        if (!currentConversationId) return; // Don't check for new messages if no conversation is selected
+    
+        fetch(`/dashboard/check_new_messages?last_check=${lastCheckTimestamp}&last_id=${highestMessageId}`)
+            .then(response => response.json())
+            .then(newMessages => {
+                newMessages.forEach(message => {
+                    updateConversationList(message);
+                    if (message.conversation_id === currentConversationId) {
+                        appendMessage({
+                            id: message.id,
+                            content: message.content,
+                            timestamp: message.timestamp,
+                            is_sender: false
+                        });
+                        if (message.id > highestMessageId) {
+                            highestMessageId = message.id;
+                        }
+                    }
+                });
+                lastCheckTimestamp = Date.now() / 1000;
+            })
+            .catch(error => {
+                console.error('Error checking for new messages:', error);
+            });
+    }
+    
+    // Check for new messages every 5 seconds
+    setInterval(checkNewMessages, 5000);
+    </script>
 {% endblock %}
