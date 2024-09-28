@@ -170,26 +170,47 @@
                     <li><a href="{{ url_for('main.home') }}" class="hover:underline">Home</a></li>
                     <li><a href="{{ url_for('litter.public_litters') }}" class="hover:underline">Puppies</a></li>
                     <li><a href="{{ url_for('blog.blog_index') }}" class="hover:underline">Blog</a></li>
+                    <li><a href="{{ url_for('main.breeder_network') }}" class="hover:underline">Find Breeders</a></li>
                     <li><a href="{{ url_for('main.about') }}" class="hover:underline">About Us</a></li>
                     <li><a href="{{ url_for('main.contact') }}" class="hover:underline">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">User Area</h4>
+                <ul class="space-y-2">
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('dashboard.user_dashboard') }}" class="hover:underline">Dashboard</a></li>
+                        <li><a href="{{ url_for('dog.dog_management') }}" class="hover:underline">Manage Dogs</a></li>
+                        <li><a href="{{ url_for('litter.litter_management') }}" class="hover:underline">Manage Litters</a></li>
+                        <li><a href="{{ url_for('vet.vet_appointments') }}" class="hover:underline">Vet Appointments</a></li>
+                        <li><a href="{{ url_for('user.user_profile', username=current_user.username) }}" class="hover:underline">My Profile</a></li>
+                        <li><a href="{{ url_for('user.followed_feed') }}" class="hover:underline">Followed Feed</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('auth.login') }}" class="hover:underline">Login</a></li>
+                        <li><a href="{{ url_for('auth.register') }}" class="hover:underline">Register</a></li>
+                    {% endif %}
                 </ul>
             </div>
             <div>
                 <h4 class="font-bold mb-4">Contact Us</h4>
                 <p class="text-sm">Email: info@dogbreederplus.com</p>
                 <p class="text-sm">Phone: (123) 456-7890</p>
-            </div>
-            <div>
-                <h4 class="font-bold mb-4">Follow Us</h4>
-                <div class="flex space-x-4">
-                    <a href="#" class="text-white hover:text-blue-300"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="text-white hover:text-blue-300"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-white hover:text-blue-300"><i class="fab fa-instagram"></i></a>
+                <div class="mt-4">
+                    <h4 class="font-bold mb-2">Follow Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-white hover:text-blue-300"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white hover:text-blue-300"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white hover:text-blue-300"><i class="fab fa-instagram"></i></a>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="mt-8 text-center text-sm">
             <p>&copy; 2023 DogBreederPlus. All rights reserved.</p>
+            <div class="mt-2">
+                <a href="{{ url_for('main.privacy_policy') }}" class="hover:underline mr-4">Privacy Policy</a>
+                <a href="{{ url_for('main.terms_of_service') }}" class="hover:underline">Terms of Service</a>
+            </div>
         </div>
     </footer>
 
