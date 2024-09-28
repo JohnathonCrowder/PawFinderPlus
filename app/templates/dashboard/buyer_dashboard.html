@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Buyer Dashboard - DogBreederPlus{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Welcome to Your Buyer Dashboard, {{ current_user.username }}!</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Recent Litters -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">Recent Litters</h2>
+            {% if recent_litters %}
+                <ul>
+                    {% for litter in recent_litters %}
+                        <li class="mb-2">
+                            <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="text-blue-500 hover:underline">
+                                {{ litter.name }} - {{ litter.father.breed }} (Born: {{ litter.date_of_birth.strftime('%Y-%m-%d') }})
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No recent litters available.</p>
+            {% endif %}
+        </div>
+
+        <!-- Available Puppies -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">Available Puppies</h2>
+            {% if available_puppies %}
+                <ul>
+                    {% for puppy in available_puppies %}
+                        <li class="mb-2">
+                            <a href="{{ url_for('dog.dog_profile', id=puppy.id) }}" class="text-blue-500 hover:underline">
+                                {{ puppy.name }} - {{ puppy.breed }} ({{ puppy.status.value }})
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No available puppies at the moment.</p>
+            {% endif %}
+        </div>
+
+        <!-- Available Breeds -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">Available Breeds</h2>
+            {% if available_breeds %}
+                <ul>
+                    {% for breed in available_breeds %}
+                        <li class="mb-2">
+                            <a href="{{ url_for('litter.public_litters', breed=breed) }}" class="text-blue-500 hover:underline">
+                                {{ breed }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No breeds available at the moment.</p>
+            {% endif %}
+        </div>
+
+        <!-- Quick Links -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">Quick Links</h2>
+            <ul>
+                <li class="mb-2">
+                    <a href="{{ url_for('litter.public_litters') }}" class="text-blue-500 hover:underline">
+                        Browse All Litters
+                    </a>
+                </li>
+                <li class="mb-2">
+                    <a href="{{ url_for('main.breeder_network') }}" class="text-blue-500 hover:underline">
+                        Find Breeders
+                    </a>
+                </li>
+                <li class="mb-2">
+                    <a href="{{ url_for('message.messages') }}" class="text-blue-500 hover:underline">
+                        My Messages
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

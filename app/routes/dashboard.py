@@ -1,12 +1,10 @@
 from flask import Blueprint, render_template, current_app, jsonify, request
 from flask_login import login_required, current_user
-from app.models import User, Dog, Litter, VetAppointment, Message, DogStatus, AppointmentCategory, BlogPost
+from app.models import User, Dog, Litter, VetAppointment, Message, DogStatus, AppointmentCategory, BlogPost, UserRole
 from app.extensions import db
-from sqlalchemy import func, or_, extract, distinct
+from sqlalchemy import func, or_, extract, distinct, case
 from datetime import datetime, timedelta
 from itertools import chain
-from sqlalchemy import func, or_, extract, distinct, case
-
 
 bp = Blueprint('dashboard', __name__)
 
@@ -14,7 +12,6 @@ def get_datetime(item):
     if hasattr(item, 'created_at'):
         return item.created_at
     elif hasattr(item, 'date_of_birth'):
-        # Convert date to datetime
         return datetime.combine(item.date_of_birth, datetime.min.time())
     else:
         return datetime.min
@@ -22,7 +19,6 @@ def get_datetime(item):
 def get_recent_activity(user, limit=5):
     recent_activity = []
     
-    # Get recent dogs
     recent_dogs = Dog.query.filter_by(user_id=user.id).order_by(Dog.created_at.desc()).limit(limit).all()
     for dog in recent_dogs:
         recent_activity.append({
@@ -32,17 +28,15 @@ def get_recent_activity(user, limit=5):
             'icon': 'fas fa-dog'
         })
     
-    # Get recent litters
     recent_litters = Litter.query.filter_by(user_id=user.id).order_by(Litter.date_of_birth.desc()).limit(limit).all()
     for litter in recent_litters:
         recent_activity.append({
             'type': 'litter',
             'text': f'New litter born: {litter.name}',
-            'date': datetime.combine(litter.date_of_birth, datetime.min.time()),  # Convert date to datetime
+            'date': datetime.combine(litter.date_of_birth, datetime.min.time()),
             'icon': 'fas fa-paw'
         })
     
-    # Sort all activities by date
     recent_activity.sort(key=lambda x: x['date'], reverse=True)
     
     return recent_activity[:limit]
@@ -50,16 +44,19 @@ def get_recent_activity(user, limit=5):
 @bp.route('/dashboard')
 @login_required
 def user_dashboard():
-    # Key statistics
+    if current_user.role == UserRole.SELLER:
+        return seller_dashboard()
+    else:
+        return buyer_dashboard()
+
+def seller_dashboard():
     total_dogs = Dog.query.filter_by(user_id=current_user.id).count()
     total_litters = Litter.query.filter_by(user_id=current_user.id).count()
     
-    # Dog status distribution
     dog_status_distribution = db.session.query(
         Dog.status, func.count(Dog.id)
     ).filter_by(user_id=current_user.id).group_by(Dog.status).all()
     
-    # Age distribution of dogs
     current_date = datetime.now().date()
     age_distribution = db.session.query(
         case(
@@ -70,7 +67,6 @@ def user_dashboard():
         func.count(Dog.id)
     ).filter_by(user_id=current_user.id).group_by('age_group').all()
     
-    # Litter size distribution
     subquery = db.session.query(
         Litter.id,
         func.count(Dog.id).label('puppy_count')
@@ -84,13 +80,11 @@ def user_dashboard():
         func.count(subquery.c.id).label('count')
     ).group_by('litter_size').all()
     
-    # Upcoming appointments
     upcoming_appointments = VetAppointment.query.join(Dog).filter(
         Dog.user_id == current_user.id,
         VetAppointment.date >= datetime.utcnow()
     ).order_by(VetAppointment.date).limit(5).all()
 
-    # Get feed items
     followed_users = [user.id for user in current_user.followed]
     recent_dogs = Dog.query.filter(Dog.user_id.in_(followed_users), Dog.is_public == True).order_by(Dog.created_at.desc()).limit(10).all()
     recent_litters = Litter.query.filter(Litter.user_id.in_(followed_users), Litter.is_public == True).order_by(Litter.date_of_birth.desc()).limit(10).all()
@@ -106,7 +100,6 @@ def user_dashboard():
         reverse=True
     )
     
-    # Get user's conversations
     conversations = db.session.query(
         Message.conversation_id,
         func.max(Message.timestamp).label('last_message_time'),
@@ -128,17 +121,14 @@ def user_dashboard():
             'unread_count': conv.unread_count
         })
 
-    # Get breeds of the current user's dogs
     user_breeds = db.session.query(Dog.breed).filter(Dog.user_id == current_user.id).distinct().all()
     user_breeds = [breed[0] for breed in user_breeds]
 
-    # Find other breeders with the same breeds
     similar_breeders = db.session.query(User).join(Dog).filter(
         User.id != current_user.id,
         Dog.breed.in_(user_breeds)
     ).group_by(User.id).order_by(func.count(Dog.id).desc()).limit(5).all()
 
-    # Eager load the related data for similar breeders
     for breeder in similar_breeders:
         breeder.dogs = Dog.query.filter_by(user_id=breeder.id).all()
         breeder.litters = Litter.query.filter_by(user_id=breeder.id).all()
@@ -159,6 +149,45 @@ def user_dashboard():
                            similar_breeders=similar_breeders,
                            get_recent_activity=get_recent_activity)
 
+def buyer_dashboard():
+    recent_litters = Litter.query.filter_by(is_public=True).order_by(Litter.date_of_birth.desc()).limit(5).all()
+    available_puppies = Dog.query.filter(Dog.is_public == True, 
+                                         Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])) \
+                                 .order_by(Dog.created_at.desc()).limit(10).all()
+    
+    available_breeds = db.session.query(Dog.breed).filter(Dog.is_public == True, 
+                                                          Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])) \
+                                                  .distinct().order_by(Dog.breed).all()
+    available_breeds = [breed[0] for breed in available_breeds]
+
+    conversations = db.session.query(
+        Message.conversation_id,
+        func.max(Message.timestamp).label('last_message_time'),
+        func.count(Message.id).filter(Message.read == False, Message.recipient_id == current_user.id).label('unread_count')
+    ).filter(
+        or_(Message.sender_id == current_user.id, Message.recipient_id == current_user.id)
+    ).group_by(Message.conversation_id).order_by(func.max(Message.timestamp).desc()).limit(5).all()
+
+    conversation_details = []
+    for conv in conversations:
+        last_message = Message.query.filter_by(conversation_id=conv.conversation_id).order_by(Message.timestamp.desc()).first()
+        other_user_id = last_message.recipient_id if last_message.sender_id == current_user.id else last_message.sender_id
+        other_user = User.query.get(other_user_id)
+        
+        conversation_details.append({
+            'conversation_id': conv.conversation_id,
+            'other_user': other_user,
+            'last_message': last_message,
+            'unread_count': conv.unread_count
+        })
+
+    return render_template('dashboard/buyer_dashboard.html',
+                           recent_litters=recent_litters,
+                           available_puppies=available_puppies,
+                           available_breeds=available_breeds,
+                           conversation_details=conversation_details,
+                           DogStatus=DogStatus)
+
 @bp.route('/dashboard/messages/<conversation_id>')
 @login_required
 def get_conversation_messages(conversation_id):
@@ -168,7 +197,6 @@ def get_conversation_messages(conversation_id):
         Message.id > last_id
     ).order_by(Message.timestamp.asc()).all()
     
-    # Mark messages as read
     for message in messages:
         if message.recipient_id == current_user.id and not message.read:
             message.read = True
