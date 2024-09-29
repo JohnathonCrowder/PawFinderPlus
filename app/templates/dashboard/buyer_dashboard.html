@@ -365,65 +365,201 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 
-        <!-- Recent Litters -->
-        <section class="mb-24 relative" data-aos="fade-up">
-            <h2 class="text-4xl font-bold mb-12 text-center text-gray-800">Recent Litters</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for litter in recent_litters %}
-                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                    <div class="relative">
-                        {% if litter.images %}
-                            <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" alt="{{ litter.name }}" class="w-full h-48 object-cover transition-transform duration-300 transform hover:scale-105">
-                        {% else %}
-                            <div class="w-full h-48 bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center">
-                                <svg class="w-16 h-16 text-gray-400 transition-transform duration-300 transform hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M6.672 1.911a1 1 0 10-1.932.518l.259.966a1 1 0 001.932-.518l-.26-.966zM2.429 4.74a1 1 0 10-.517 1.932l.966.259a1 1 0 00.517-1.932l-.966-.26zm8.814-.569a1 1 0 00-1.415-1.414l-.707.707a1 1 0 101.415 1.415l.707-.708zm-7.071 7.072l.707-.707A1 1 0 003.465 9.12l-.708.707a1 1 0 001.415 1.415zm3.2-5.171a1 1 0 00-1.3 1.3l4 10a1 1 0 001.823.075l1.38-2.759 3.018 3.02a1 1 0 001.414-1.415l-3.019-3.02 2.76-1.379a1 1 0 00-.076-1.822l-10-4z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        {% endif %}
-                        <div class="absolute top-0 left-0 bg-blue-500 text-white px-3 py-1 m-2 rounded-br-lg text-sm font-semibold transition-all duration-300 hover:bg-blue-600">
+        <!-- Recent Litters Section -->
+<section class="mb-24 relative" data-aos="fade-up">
+    <div class="bg-white rounded-2xl shadow-lg p-8">
+        <h2 class="text-3xl font-bold mb-6 text-gray-800 flex items-center">
+            <i class="fas fa-paw text-blue-500 mr-3"></i>Recent Litters
+        </h2>
+
+        <!-- Search, Filter, and View Toggle -->
+        <div class="mb-6 flex flex-col sm:flex-row gap-4">
+            <div class="relative flex-grow">
+                <input type="text" 
+                       id="litterSearch" 
+                       placeholder="Search litters..." 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <select id="litterSort" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="most_puppies">Most Puppies</option>
+                <option value="most_available">Most Available</option>
+            </select>
+            <div class="flex items-center space-x-2">
+                <button id="gridView" class="px-3 py-2 bg-blue-500 text-white rounded-lg"><i class="fas fa-th-large"></i></button>
+                <button id="listView" class="px-3 py-2 bg-gray-200 text-gray-600 rounded-lg"><i class="fas fa-list"></i></button>
+            </div>
+        </div>
+
+        <!-- Litter Statistics -->
+<div class="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">
+    <h3 class="text-xl font-semibold text-gray-700 mb-4">Litter Statistics</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center">
+            <p class="text-3xl font-bold text-blue-600">{{ recent_litters|length }}</p>
+            <p class="text-sm text-gray-600">Total Litters</p>
+        </div>
+        <div class="text-center">
+            <p class="text-3xl font-bold text-green-600">{{ recent_litters|map(attribute='puppies')|map('length')|sum }}</p>
+            <p class="text-sm text-gray-600">Total Puppies</p>
+        </div>
+        <div class="text-center">
+            <p class="text-3xl font-bold text-purple-600">
+                {{ recent_litters|map(attribute='puppies')|map('selectattr', 'status', 'in', [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])|map('list')|map('length')|sum }}
+            </p>
+            <p class="text-sm text-gray-600">Available Puppies</p>
+        </div>
+        <div class="text-center">
+            <p class="text-3xl font-bold text-yellow-600">
+                {{ recent_litters|map(attribute='puppies')|map('length')|max }}
+            </p>
+            <p class="text-sm text-gray-600">Largest Litter Size</p>
+        </div>
+    </div>
+</div>
+
+        <!-- All Recent Litters -->
+        <div id="litterList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for litter in recent_litters %}
+            <div class="litter-card bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl">
+                <div class="relative h-48">
+                    {% if litter.images %}
+                        <img src="{{ url_for('litter.get_litter_image', image_id=litter.images[0].id) }}" 
+                             alt="{{ litter.name }}" 
+                             class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                            <i class="fas fa-paw text-4xl text-blue-300"></i>
+                        </div>
+                    {% endif %}
+                    <div class="absolute top-0 right-0 m-4">
+                        <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                             {{ litter.puppies|length }} puppies
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800 transition-colors duration-300 hover:text-blue-600">{{ litter.name }}</h3>
-                        <p class="text-gray-600 mb-4">{{ litter.father.breed }}</p>
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="text-sm text-gray-500">Born: {{ litter.date_of_birth.strftime('%b %d, %Y') }}</span>
-                            {% set available_puppies = litter.puppies|selectattr("status", "in", [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])|list %}
-                            <span class="bg-green-100 text-green-800 text-sm font-semibold px-2.5 py-0.5 rounded transition-all duration-300 hover:bg-green-200">
-                                {{ available_puppies|length }} available
-                            </span>
-                        </div>
-                        {% if available_puppies %}
-                            {% set prices = available_puppies|map(attribute='price')|reject('none')|list %}
-                            {% if prices %}
-                                <p class="text-lg font-semibold text-green-600 mb-4 transition-all duration-300 hover:scale-105 inline-block">
-                                    {% if prices|min == prices|max %}
-                                        ${{ "%.2f"|format(prices|min) }}
-                                    {% else %}
-                                        ${{ "%.2f"|format(prices|min) }} - ${{ "%.2f"|format(prices|max) }}
-                                    {% endif %}
-                                </p>
-                            {% else %}
-                                <p class="text-lg font-semibold text-gray-600 mb-4">Price on request</p>
-                            {% endif %}
-                        {% endif %}
-                        <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition-all duration-300 hover:shadow-md">
-                            View Litter
-                        </a>
+                        </span>
                     </div>
                 </div>
-                {% endfor %}
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">{{ litter.name }}</h3>
+                    <p class="text-blue-600 mb-2">{{ litter.father.breed }}</p>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-calendar-alt mr-2 text-gray-500"></i>
+                        <span class="text-gray-600">Born {{ litter.date_of_birth.strftime('%B %d, %Y') }}</span>
+                    </div>
+                    {% set available_puppies = litter.puppies|selectattr("status", "in", [DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])|list %}
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-gray-600">
+                            <i class="fas fa-venus-mars mr-1 text-pink-500"></i>
+                            {{ litter.puppies|selectattr("gender", "equalto", "Male")|list|length }} M / 
+                            {{ litter.puppies|selectattr("gender", "equalto", "Female")|list|length }} F
+                        </span>
+                        {% if available_puppies %}
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-semibold">
+                                {{ available_puppies|length }} available
+                            </span>
+                        {% else %}
+                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm">
+                                No puppies available
+                            </span>
+                        {% endif %}
+                    </div>
+                    <a href="{{ url_for('litter.litter_detail', id=litter.id) }}" 
+                       class="block w-full text-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full hover:from-blue-600 hover:to-purple-600 transition duration-300">
+                        View Details
+                    </a>
+                </div>
             </div>
-            {% if recent_litters|length > 6 %}
-            <div class="text-center mt-12">
-                <a href="{{ url_for('litter.public_litters') }}" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                    View All Litters
-                </a>
-            </div>
-            {% endif %}
-        </section>
+            {% endfor %}
+        </div>
+
+        {% if recent_litters|length > 6 %}
+        <div class="text-center mt-8">
+            <a href="{{ url_for('litter.public_litters') }}" 
+               class="inline-block px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full hover:from-blue-600 hover:to-purple-600 transition duration-300 transform hover:scale-105">
+                <i class="fas fa-paw mr-2"></i>View All Litters
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const litterSearch = document.getElementById('litterSearch');
+    const litterSort = document.getElementById('litterSort');
+    const litterCards = document.querySelectorAll('.litter-card');
+    const gridViewBtn = document.getElementById('gridView');
+    const listViewBtn = document.getElementById('listView');
+    const litterList = document.getElementById('litterList');
+    
+    function filterAndSortLitters() {
+        const searchTerm = litterSearch.value.toLowerCase();
+        const sortOrder = litterSort.value;
+        
+        const litterArray = Array.from(litterCards);
+        
+        litterArray.forEach(card => {
+            const litterName = card.querySelector('h3').textContent.toLowerCase();
+            const litterBreed = card.querySelector('.text-blue-600').textContent.toLowerCase();
+            
+            if (litterName.includes(searchTerm) || litterBreed.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        litterArray.sort((a, b) => {
+            const dateA = new Date(a.querySelector('.text-gray-600').textContent.replace('Born ', ''));
+            const dateB = new Date(b.querySelector('.text-gray-600').textContent.replace('Born ', ''));
+            const puppiesA = parseInt(a.querySelector('.bg-blue-500').textContent);
+            const puppiesB = parseInt(b.querySelector('.bg-blue-500').textContent);
+            const availableA = parseInt(a.querySelector('.bg-green-100')?.textContent || '0');
+            const availableB = parseInt(b.querySelector('.bg-green-100')?.textContent || '0');
+            
+            switch (sortOrder) {
+                case 'oldest':
+                    return dateA - dateB;
+                case 'most_puppies':
+                    return puppiesB - puppiesA;
+                case 'most_available':
+                    return availableB - availableA;
+                default: // newest
+                    return dateB - dateA;
+            }
+        });
+        
+        litterArray.forEach(card => litterList.appendChild(card));
+    }
+    
+    function toggleView(isGrid) {
+        if (isGrid) {
+            litterList.classList.remove('flex', 'flex-col');
+            litterList.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+            gridViewBtn.classList.remove('bg-gray-200', 'text-gray-600');
+            gridViewBtn.classList.add('bg-blue-500', 'text-white');
+            listViewBtn.classList.remove('bg-blue-500', 'text-white');
+            listViewBtn.classList.add('bg-gray-200', 'text-gray-600');
+        } else {
+            litterList.classList.remove('grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+            litterList.classList.add('flex', 'flex-col', 'space-y-4');
+            listViewBtn.classList.remove('bg-gray-200', 'text-gray-600');
+            listViewBtn.classList.add('bg-blue-500', 'text-white');
+            gridViewBtn.classList.remove('bg-blue-500', 'text-white');
+            gridViewBtn.classList.add('bg-gray-200', 'text-gray-600');
+        }
+    }
+    
+    litterSearch.addEventListener('input', filterAndSortLitters);
+    litterSort.addEventListener('change', filterAndSortLitters);
+    gridViewBtn.addEventListener('click', () => toggleView(true));
+    listViewBtn.addEventListener('click', () => toggleView(false));
+    
+    // Initialize
+    filterAndSortLitters();
+});
+</script>
 
         <!-- Available Breeds -->
         <section class="mb-24 relative" data-aos="fade-up">
