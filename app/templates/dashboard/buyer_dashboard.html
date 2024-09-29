@@ -205,40 +205,114 @@
 </div>
 
             <!-- Breed Selection Sidebar -->
-            <div class="lg:w-1/3" data-aos="fade-up" data-aos-delay="300">
-                <div class="bg-white rounded-2xl shadow-lg p-8 sticky top-8">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6">Browse by Breed</h3>
-                    <div class="space-y-4 max-h-96 overflow-y-auto pr-4 custom-scrollbar">
-                        {% for breed in available_breeds %}
-                        <a href="{{ url_for('litter.public_litters', breed=breed) }}" 
-                           class="block py-3 px-6 rounded-lg hover:bg-blue-50 transition duration-300 group">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-700 group-hover:text-blue-600 font-medium">{{ breed }}</span>
-                                <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full group-hover:bg-blue-100 group-hover:text-blue-600">
-                                    {{ available_puppies|selectattr('breed', 'equalto', breed)|list|length }} available
-                                </span>
-                            </div>
-                        </a>
-                        {% endfor %}
-                    </div>
-                    <div class="mt-8">
-                        <a href="{{ url_for('litter.public_litters') }}" 
-                           class="block w-full text-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full hover:from-blue-600 hover:to-purple-600 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Explore All Breeds
-                        </a>
-                    </div>
-                </div>
+<div class="lg:w-1/3" data-aos="fade-up" data-aos-delay="300">
+    <div class="bg-white rounded-2xl shadow-lg p-8 sticky top-8">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <i class="fas fa-search text-blue-500 mr-3"></i>Browse by Breed
+        </h3>
+        
+        <!-- Search input for breeds -->
+        <div class="mb-6 relative">
+            <input type="text" 
+                   id="breedSearch" 
+                   placeholder="Search breeds..." 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
+
+        <!-- Popular Breeds Section -->
+        <div class="mb-6">
+            <h4 class="text-lg font-semibold text-gray-700 mb-3">Popular Breeds</h4>
+            <div class="flex flex-wrap gap-2">
+                {% for breed in available_breeds[:5] %}
+                <a href="{{ url_for('litter.public_litters', breed=breed) }}" 
+                   class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition duration-300 text-sm font-medium">
+                    {{ breed }}
+                </a>
+                {% endfor %}
             </div>
         </div>
 
+        <!-- All Breeds List -->
+        <div class="space-y-4 max-h-96 overflow-y-auto pr-4 custom-scrollbar" id="breedList">
+            {% for breed in available_breeds %}
+            <a href="{{ url_for('litter.public_litters', breed=breed) }}" 
+               class="breed-item block py-3 px-6 rounded-lg hover:bg-blue-50 transition duration-300 group">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-700 group-hover:text-blue-600 font-medium">{{ breed }}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded-full group-hover:bg-blue-100 group-hover:text-blue-600">
+                            {{ available_puppies|selectattr('breed', 'equalto', breed)|list|length }}
+                            <span class="hidden md:inline">available</span>
+                        </span>
+                        <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-500"></i>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
         <!-- Call to Action -->
-        <div class="text-center mt-20" data-aos="fade-up" data-aos-delay="400">
+        <div class="mt-8">
             <a href="{{ url_for('litter.public_litters') }}" 
-               class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full hover:from-blue-600 hover:to-purple-600 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-xl font-semibold">
-                <i class="fas fa-search mr-3"></i>
-                Explore All Puppies
+               class="block w-full text-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full hover:from-blue-600 hover:to-purple-600 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="fas fa-paw mr-2"></i>Explore All Breeds
             </a>
         </div>
+
+        <!-- Quick Stats -->
+        <div class="mt-6 bg-gray-50 rounded-lg p-4">
+            <h4 class="text-lg font-semibold text-gray-700 mb-3">Quick Stats</h4>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-blue-600">{{ available_breeds|length }}</p>
+                    <p class="text-sm text-gray-600">Breeds</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-green-600">{{ available_puppies|length }}</p>
+                    <p class="text-sm text-gray-600">Puppies</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const breedSearch = document.getElementById('breedSearch');
+    const breedItems = document.querySelectorAll('.breed-item');
+    
+    breedSearch.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        breedItems.forEach(item => {
+            const breedName = item.querySelector('span').textContent.toLowerCase();
+            if (breedName.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
     </div>
 </section>
 
