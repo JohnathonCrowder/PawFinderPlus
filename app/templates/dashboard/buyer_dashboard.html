@@ -234,23 +234,25 @@
         </div>
 
         <!-- All Breeds List -->
-        <div class="space-y-4 max-h-96 overflow-y-auto pr-4 custom-scrollbar" id="breedList">
-            {% for breed in available_breeds %}
-            <a href="{{ url_for('litter.public_litters', breed=breed) }}" 
-               class="breed-item block py-3 px-6 rounded-lg hover:bg-blue-50 transition duration-300 group">
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-700 group-hover:text-blue-600 font-medium">{{ breed }}</span>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded-full group-hover:bg-blue-100 group-hover:text-blue-600">
-                            {{ available_puppies|selectattr('breed', 'equalto', breed)|list|length }}
-                            <span class="hidden md:inline">available</span>
-                        </span>
-                        <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-500"></i>
-                    </div>
-                </div>
-            </a>
-            {% endfor %}
+<div class="space-y-2 max-h-96 overflow-y-auto pr-4 custom-scrollbar" id="breedList">
+    {% for breed in available_breeds %}
+    <a href="{{ url_for('litter.public_litters', breed=breed) }}" 
+       class="breed-item block py-3 px-4 rounded-lg hover:bg-blue-50 transition duration-300 group">
+        <div class="flex justify-between items-center">
+            <span class="text-gray-700 group-hover:text-blue-600 font-medium">{{ breed }}</span>
+            <div class="flex items-center space-x-2">
+                {% set available_count = available_puppies|selectattr('breed', 'equalto', breed)|list|length %}
+                <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full group-hover:bg-blue-200 transition-colors duration-300 flex items-center">
+                    <i class="fas fa-paw mr-1 text-blue-500"></i>
+                    <span>{{ available_count }}</span>
+                    <span class="hidden sm:inline ml-1">{{ 'puppy' if available_count == 1 else 'puppies' }}</span>
+                </span>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-500 transition-colors duration-300"></i>
+            </div>
         </div>
+    </a>
+    {% endfor %}
+</div>
 
         <!-- Call to Action -->
         <div class="mt-8">
@@ -346,6 +348,21 @@ document.addEventListener('DOMContentLoaded', function() {
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
         background: #555;
     }
+    @keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+.breed-item:hover .bg-blue-100 {
+    animation: pulse 2s infinite;
+}
 </style>
 
         <!-- Recent Litters -->
