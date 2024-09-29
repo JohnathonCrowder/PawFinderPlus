@@ -5,6 +5,8 @@ from app.extensions import db
 from sqlalchemy import func, or_, extract, distinct, case
 from datetime import datetime, timedelta
 from itertools import chain
+from sqlalchemy.orm import joinedload
+
 
 bp = Blueprint('dashboard', __name__)
 
@@ -116,18 +118,28 @@ def seller_dashboard():
                            similar_breeders=similar_breeders,
                            get_recent_activity=get_recent_activity)
 
+@login_required
 def buyer_dashboard():
+    # Recent Litters
     recent_litters = Litter.query.filter_by(is_public=True).order_by(Litter.date_of_birth.desc()).limit(6).all()
-    available_puppies = Dog.query.filter(Dog.is_public == True, 
-                                         Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])) \
-                                 .order_by(Dog.created_at.desc()).limit(10).all()
     
-    available_breeds = db.session.query(Dog.breed).filter(Dog.is_public == True, 
-                                                          Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])) \
-                                                  .distinct().order_by(Dog.breed).all()
+    # Available Puppies
+    available_puppies = Dog.query.filter(
+        Dog.is_public == True,
+        Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])
+    ).options(
+        joinedload(Dog.owner),  # Ensure owner info is eagerly loaded
+        joinedload(Dog.images)  # Eagerly load images to avoid N+1 queries
+    ).order_by(Dog.created_at.desc()).limit(10).all()
+    
+    # Available Breeds
+    available_breeds = db.session.query(Dog.breed).filter(
+        Dog.is_public == True, 
+        Dog.status.in_([DogStatus.AVAILABLE_NOW, DogStatus.AVAILABLE_SOON])
+    ).distinct().order_by(Dog.breed).all()
     available_breeds = [breed[0] for breed in available_breeds]
 
-    # Get user's conversations (same as in seller dashboard)
+    # User's conversations
     conversations = db.session.query(
         Message.conversation_id,
         func.max(Message.timestamp).label('last_message_time'),
@@ -149,16 +161,17 @@ def buyer_dashboard():
             'unread_count': conv.unread_count
         })
 
-    # Add these lines for the appointments
+    # Upcoming Appointments
     upcoming_appointments = VetAppointment.query.join(Dog).filter(
         Dog.user_id == current_user.id,
         VetAppointment.date >= datetime.utcnow()
     ).order_by(VetAppointment.date).limit(5).all()
 
-    # Add these lines for similar breeders
+    # User Breeds (for similar breeders section)
     user_breeds = db.session.query(Dog.breed).filter(Dog.user_id == current_user.id).distinct().all()
     user_breeds = [breed[0] for breed in user_breeds]
 
+    # Similar Breeders
     similar_breeders = db.session.query(User).join(Dog).filter(
         User.id != current_user.id,
         Dog.breed.in_(user_breeds)
@@ -169,6 +182,31 @@ def buyer_dashboard():
         breeder.litters = Litter.query.filter_by(user_id=breeder.id).all()
         breeder.follower_count = breeder.followers.count()
 
+    def get_recent_activity(user, limit=5):
+        recent_activity = []
+        
+        recent_dogs = Dog.query.filter_by(user_id=user.id).order_by(Dog.created_at.desc()).limit(limit).all()
+        for dog in recent_dogs:
+            recent_activity.append({
+                'type': 'dog',
+                'text': f'Added new dog: {dog.name}',
+                'date': dog.created_at,
+                'icon': 'fas fa-dog'
+            })
+        
+        recent_litters = Litter.query.filter_by(user_id=user.id).order_by(Litter.date_of_birth.desc()).limit(limit).all()
+        for litter in recent_litters:
+            recent_activity.append({
+                'type': 'litter',
+                'text': f'New litter born: {litter.name}',
+                'date': datetime.combine(litter.date_of_birth, datetime.min.time()),
+                'icon': 'fas fa-paw'
+            })
+        
+        recent_activity.sort(key=lambda x: x['date'], reverse=True)
+        
+        return recent_activity[:limit]
+
     return render_template('dashboard/buyer_dashboard.html',
                            recent_litters=recent_litters,
                            available_puppies=available_puppies,
@@ -178,7 +216,9 @@ def buyer_dashboard():
                            user_breeds=user_breeds,
                            similar_breeders=similar_breeders,
                            get_recent_activity=get_recent_activity,
-                           DogStatus=DogStatus)
+                           DogStatus=DogStatus,
+                           AppointmentCategory=AppointmentCategory,
+                           datetime=datetime)
 
 @bp.route('/dashboard/messages/<conversation_id>')
 @login_required
