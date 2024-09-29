@@ -9,10 +9,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.4.1/css/glide.core.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.4.1/css/glide.theme.min.css">
 <style>
+    /* General styles */
     body {
         font-family: 'Poppins', sans-serif;
         background-color: #f0f4f8;
     }
+
+    /* Hero section styles */
     .hero-section {
         background-image: url('https://images.unsplash.com/photo-1548199973-03cce0bbc87b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
         background-size: cover;
@@ -32,6 +35,8 @@
         position: relative;
         z-index: 1;
     }
+
+    /* Card styles */
     .featured-card {
         transition: all 0.3s ease;
         overflow: hidden;
@@ -46,6 +51,8 @@
     .featured-card:hover img {
         transform: scale(1.1);
     }
+
+    /* Breed tag styles */
     .breed-tag {
         transition: all 0.3s ease;
     }
@@ -53,6 +60,8 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
+
+    /* Section styles */
     .section-title {
         position: relative;
         display: inline-block;
@@ -70,6 +79,135 @@
         position: absolute;
         opacity: 0.1;
         z-index: -1;
+    }
+
+    /* Animation keyframes */
+    @keyframes blob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+    }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+        70% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    /* Animation classes */
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+    .animation-delay-4000 {
+        animation-delay: 4s;
+    }
+    .breed-item:hover .bg-blue-100 {
+        animation: pulse 2s infinite;
+    }
+
+    /* Scrollbar styles */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    /* Carousel styles */
+    #breederCarousel {
+        position: relative;
+        overflow: hidden;
+    }
+    #breederSlider {
+        display: flex;
+        transition: transform 0.3s ease-in-out;
+    }
+    .carousel-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+    .carousel-button:hover {
+        background-color: #f8f9fa;
+    }
+    #prevBreeder {
+        left: 10px;
+    }
+    #nextBreeder {
+        right: 10px;
+    }
+
+    /* Message center styles */
+    .conversation-item {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    .conversation-item:hover {
+        background-color: #f3f4f6;
+    }
+    .conversation-item.active {
+        background-color: #e5edff;
+    }
+    #messageDisplay {
+        scrollbar-width: thin;
+        scrollbar-color: #888 #f1f1f1;
+    }
+    .message-input {
+        resize: none;
+        min-height: 40px;
+        max-height: 120px;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 4rem 0;
+        }
+        .featured-card {
+            margin-bottom: 1.5rem;
+        }
+        #breederCarousel {
+            margin: 0 -1rem;
+        }
+        .carousel-button {
+            width: 32px;
+            height: 32px;
+        }
+    }
+
+    /* Utility classes */
+    .flex-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .text-gradient {
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        background-image: linear-gradient(to right, #3B82F6, #8B5CF6);
     }
 </style>
 {% endblock %}
@@ -279,22 +417,7 @@
     </div>
 </div>
 
-<style>
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 10px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-</style>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -318,52 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 
-<style>
-    @keyframes blob {
-        0% { transform: translate(0px, 0px) scale(1); }
-        33% { transform: translate(30px, -50px) scale(1.1); }
-        66% { transform: translate(-20px, 20px) scale(0.9); }
-        100% { transform: translate(0px, 0px) scale(1); }
-    }
-    .animate-blob {
-        animation: blob 7s infinite;
-    }
-    .animation-delay-2000 {
-        animation-delay: 2s;
-    }
-    .animation-delay-4000 {
-        animation-delay: 4s;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 10px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-    @keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
-    }
-    70% {
-        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-    }
-}
 
-.breed-item:hover .bg-blue-100 {
-    animation: pulse 2s infinite;
-}
-</style>
 
         <!-- Recent Litters Section -->
 <section class="mb-24 relative" data-aos="fade-up">
@@ -484,82 +562,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const litterSearch = document.getElementById('litterSearch');
-    const litterSort = document.getElementById('litterSort');
-    const litterCards = document.querySelectorAll('.litter-card');
-    const gridViewBtn = document.getElementById('gridView');
-    const listViewBtn = document.getElementById('listView');
-    const litterList = document.getElementById('litterList');
-    
-    function filterAndSortLitters() {
-        const searchTerm = litterSearch.value.toLowerCase();
-        const sortOrder = litterSort.value;
-        
-        const litterArray = Array.from(litterCards);
-        
-        litterArray.forEach(card => {
-            const litterName = card.querySelector('h3').textContent.toLowerCase();
-            const litterBreed = card.querySelector('.text-blue-600').textContent.toLowerCase();
-            
-            if (litterName.includes(searchTerm) || litterBreed.includes(searchTerm)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        
-        litterArray.sort((a, b) => {
-            const dateA = new Date(a.querySelector('.text-gray-600').textContent.replace('Born ', ''));
-            const dateB = new Date(b.querySelector('.text-gray-600').textContent.replace('Born ', ''));
-            const puppiesA = parseInt(a.querySelector('.bg-blue-500').textContent);
-            const puppiesB = parseInt(b.querySelector('.bg-blue-500').textContent);
-            const availableA = parseInt(a.querySelector('.bg-green-100')?.textContent || '0');
-            const availableB = parseInt(b.querySelector('.bg-green-100')?.textContent || '0');
-            
-            switch (sortOrder) {
-                case 'oldest':
-                    return dateA - dateB;
-                case 'most_puppies':
-                    return puppiesB - puppiesA;
-                case 'most_available':
-                    return availableB - availableA;
-                default: // newest
-                    return dateB - dateA;
-            }
-        });
-        
-        litterArray.forEach(card => litterList.appendChild(card));
-    }
-    
-    function toggleView(isGrid) {
-        if (isGrid) {
-            litterList.classList.remove('flex', 'flex-col');
-            litterList.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
-            gridViewBtn.classList.remove('bg-gray-200', 'text-gray-600');
-            gridViewBtn.classList.add('bg-blue-500', 'text-white');
-            listViewBtn.classList.remove('bg-blue-500', 'text-white');
-            listViewBtn.classList.add('bg-gray-200', 'text-gray-600');
-        } else {
-            litterList.classList.remove('grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
-            litterList.classList.add('flex', 'flex-col', 'space-y-4');
-            listViewBtn.classList.remove('bg-gray-200', 'text-gray-600');
-            listViewBtn.classList.add('bg-blue-500', 'text-white');
-            gridViewBtn.classList.remove('bg-blue-500', 'text-white');
-            gridViewBtn.classList.add('bg-gray-200', 'text-gray-600');
-        }
-    }
-    
-    litterSearch.addEventListener('input', filterAndSortLitters);
-    litterSort.addEventListener('change', filterAndSortLitters);
-    gridViewBtn.addEventListener('click', () => toggleView(true));
-    listViewBtn.addEventListener('click', () => toggleView(false));
-    
-    // Initialize
-    filterAndSortLitters();
-});
-</script>
+
 
         <!-- Explore Breeds Section -->
 <section class="mb-24 relative" data-aos="fade-up">
@@ -649,56 +652,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const breedSearch = document.getElementById('breedSearch');
-    const breedSort = document.getElementById('breedSort');
-    const breedGrid = document.getElementById('breedGrid');
-    const breedCards = document.querySelectorAll('.breed-card');
 
-    function filterAndSortBreeds() {
-        const searchTerm = breedSearch.value.toLowerCase();
-        const sortOrder = breedSort.value;
-        
-        const breedArray = Array.from(breedCards);
-        
-        breedArray.forEach(card => {
-            const breedName = card.querySelector('h3').textContent.toLowerCase();
-            if (breedName.includes(searchTerm)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        
-        breedArray.sort((a, b) => {
-            const puppiesA = parseInt(a.dataset.puppies);
-            const puppiesB = parseInt(b.dataset.puppies);
-            const priceA = parseFloat(a.dataset.price);
-            const priceB = parseFloat(b.dataset.price);
-            
-            switch (sortOrder) {
-                case 'popularity':
-                    return puppiesB - puppiesA;
-                case 'price_low':
-                    return priceA - priceB;
-                case 'price_high':
-                    return priceB - priceA;
-                case 'availability':
-                    return puppiesB - puppiesA;
-            }
-        });
-        
-        breedArray.forEach(card => breedGrid.appendChild(card));
-    }
-    
-    breedSearch.addEventListener('input', filterAndSortBreeds);
-    breedSort.addEventListener('change', filterAndSortBreeds);
-    
-    // Initialize
-    filterAndSortBreeds();
-});
-</script>
 
 
         <!-- Upcoming Appointments -->
@@ -930,247 +884,338 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.4.1/glide.min.js"></script>
 <script>
-    AOS.init({
-        duration: 1000,
-        once: true,
-    });
-
-    new Glide('.glide', {
-        type: 'carousel',
-        perView: 3,
-        focusAt: 'center',
-        breakpoints: {
-            1024: {
-                perView: 2
-            },
-            600: {
-                perView: 1
-            }
-        }
-    }).mount();
-
-    let currentConversationId = null;
-    let currentRecipientId = null;
-    let lastCheckTimestamp = Date.now() / 1000;
-    let displayedMessageIds = new Set();
-    let highestMessageId = 0;
-    
-    function updateConversationList(newMessage) {
-        const conversationList = document.getElementById('conversationList');
-        const existingItem = conversationList.querySelector(`[data-conversation-id="${newMessage.conversation_id}"]`);
-    
-        if (existingItem) {
-            // Update existing conversation item
-            const contentElement = existingItem.querySelector('p.truncate');
-            contentElement.textContent = newMessage.content;
-    
-            // Move the item to the top of the list
-            conversationList.insertBefore(existingItem, conversationList.firstChild);
-    
-            // Update unread badge
-            let unreadBadge = existingItem.querySelector('.unread-badge');
-            if (!unreadBadge) {
-                unreadBadge = document.createElement('span');
-                unreadBadge.className = 'bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 unread-badge';
-                existingItem.querySelector('.flex-grow').appendChild(unreadBadge);
-            }
-            const currentCount = parseInt(unreadBadge.textContent) || 0;
-            unreadBadge.textContent = currentCount + 1;
-        } else {
-            // Create new conversation item
-            // You'll need to fetch user details for the new conversation
-            // This is a simplified version
-            const newItem = document.createElement('div');
-            newItem.className = 'conversation-item p-4 border-b hover:bg-gray-100 cursor-pointer transition duration-300';
-            newItem.setAttribute('data-conversation-id', newMessage.conversation_id);
-            newItem.setAttribute('data-recipient-id', newMessage.sender_id);
-            newItem.innerHTML = `
-                <div class="flex items-center">
-                    <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center mr-3">
-                        <span class="text-xl font-bold text-white">?</span>
-                    </div>
-                    <div class="flex-grow">
-                        <p class="font-semibold text-gray-800">New User</p>
-                        <p class="text-sm text-gray-600 truncate">${newMessage.content}</p>
-                    </div>
-                    <span class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 unread-badge">1</span>
-                </div>
-            `;
-            conversationList.insertBefore(newItem, conversationList.firstChild);
-            addConversationItemListener(newItem);
-        }
-    }
-    
-    function addConversationItemListener(item) {
-        item.addEventListener('click', function() {
-            const newConversationId = this.dataset.conversationId;
-            const newRecipientId = this.dataset.recipientId;
-            
-            if (newConversationId !== currentConversationId) {
-                currentConversationId = newConversationId;
-                currentRecipientId = newRecipientId;
-                highestMessageId = 0; // Reset highestMessageId when switching conversations
-                displayedMessageIds.clear(); // Clear displayed message IDs
-                loadMessages(currentConversationId);
-            }
-            
-            document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('bg-indigo-100'));
-            this.classList.add('bg-indigo-100');
-            
-            // Remove unread badge
-            const unreadBadge = this.querySelector('.unread-badge');
-            if (unreadBadge) {
-                unreadBadge.remove();
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS (Animate on Scroll)
+        AOS.init({
+            duration: 1000,
+            once: true,
         });
-    }
     
-    document.querySelectorAll('.conversation-item').forEach(addConversationItemListener);
+        // Initialize Glide.js carousel
+        new Glide('.glide', {
+            type: 'carousel',
+            perView: 3,
+            focusAt: 'center',
+            breakpoints: {
+                1024: { perView: 2 },
+                600: { perView: 1 }
+            }
+        }).mount();
     
-    function loadMessages(conversationId) {
-        const messageDisplay = document.getElementById('messageDisplay');
-        messageDisplay.innerHTML = '<div class="text-center text-gray-500">Loading messages...</div>';
+        // Messaging variables
+        let currentConversationId = null;
+        let currentRecipientId = null;
+        let lastCheckTimestamp = Date.now() / 1000;
+        let displayedMessageIds = new Set();
+        let highestMessageId = 0;
     
-        fetch(`/dashboard/messages/${conversationId}?last_id=${highestMessageId}`)
-            .then(response => response.json())
-            .then(messages => {
-                messageDisplay.innerHTML = ''; // Clear the loading message
-                messages.forEach(message => {
-                    if (message.id > highestMessageId) {
-                        highestMessageId = message.id;
-                    }
-                    appendMessage(message);
-                });
-                messageDisplay.scrollTop = messageDisplay.scrollHeight;
-            })
-            .catch(error => {
-                console.error('Error loading messages:', error);
-                messageDisplay.innerHTML = '<div class="text-center text-red-500">Error loading messages. Please try again.</div>';
-            });
-    }
-    
-    function appendMessage(message) {
-        if (displayedMessageIds.has(message.id)) {
-            return; // Skip if the message has already been displayed
-        }
-    
-        const messageDisplay = document.getElementById('messageDisplay');
-        const messageElement = document.createElement('div');
-        messageElement.className = `mb-4 ${message.is_sender ? 'text-right' : 'text-left'}`;
-        messageElement.innerHTML = `
-            <div class="inline-block ${message.is_sender ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-800'} rounded-lg px-4 py-2 max-w-xs lg:max-w-md">
-                <p>${message.content}</p>
-                <p class="text-xs mt-1 ${message.is_sender ? 'text-indigo-200' : 'text-gray-500'}">${message.timestamp}</p>
-            </div>
-        `;
-        messageDisplay.appendChild(messageElement);
-        messageDisplay.scrollTop = messageDisplay.scrollHeight;
-        displayedMessageIds.add(message.id);
-    }
-    
-    document.getElementById('messageForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (!currentConversationId) return;
-    
-        const messageInput = document.getElementById('messageInput');
-        const content = messageInput.value.trim();
-        if (!content) return;
-    
-        fetch('/dashboard/send_message', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                conversation_id: currentConversationId,
-                recipient_id: currentRecipientId,
-                content: content
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                messageInput.value = '';
-                appendMessage(data.message);
-                if (data.message.id > highestMessageId) {
-                    highestMessageId = data.message.id;
+        // Breed search functionality
+        const breedSearch = document.getElementById('breedSearch');
+        const breedItems = document.querySelectorAll('.breed-item');
+        
+        breedSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            breedItems.forEach(item => {
+                const breedName = item.querySelector('span').textContent.toLowerCase();
+                if (breedName.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
                 }
-            }
-        })
-        .catch(error => {
-            console.error('Error sending message:', error);
-            alert('Failed to send message. Please try again.');
+            });
         });
-    });
     
-    function checkNewMessages() {
-        if (!currentConversationId) return; // Don't check for new messages if no conversation is selected
+        // Litter filtering and sorting
+        const litterSearch = document.getElementById('litterSearch');
+        const litterSort = document.getElementById('litterSort');
+        const litterCards = document.querySelectorAll('.litter-card');
+        const gridViewBtn = document.getElementById('gridView');
+        const listViewBtn = document.getElementById('listView');
+        const litterList = document.getElementById('litterList');
+        
+        function filterAndSortLitters() {
+            const searchTerm = litterSearch.value.toLowerCase();
+            const sortOrder = litterSort.value;
+            
+            const litterArray = Array.from(litterCards);
+            
+            litterArray.forEach(card => {
+                const litterName = card.querySelector('h3').textContent.toLowerCase();
+                const litterBreed = card.querySelector('.text-blue-600').textContent.toLowerCase();
+                
+                if (litterName.includes(searchTerm) || litterBreed.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            litterArray.sort((a, b) => {
+                const dateA = new Date(a.querySelector('.text-gray-600').textContent.replace('Born ', ''));
+                const dateB = new Date(b.querySelector('.text-gray-600').textContent.replace('Born ', ''));
+                const puppiesA = parseInt(a.querySelector('.bg-blue-500').textContent);
+                const puppiesB = parseInt(b.querySelector('.bg-blue-500').textContent);
+                const availableA = parseInt(a.querySelector('.bg-green-100')?.textContent || '0');
+                const availableB = parseInt(b.querySelector('.bg-green-100')?.textContent || '0');
+                
+                switch (sortOrder) {
+                    case 'oldest':
+                        return dateA - dateB;
+                    case 'most_puppies':
+                        return puppiesB - puppiesA;
+                    case 'most_available':
+                        return availableB - availableA;
+                    default: // newest
+                        return dateB - dateA;
+                }
+            });
+            
+            litterArray.forEach(card => litterList.appendChild(card));
+        }
+        
+        function toggleView(isGrid) {
+            if (isGrid) {
+                litterList.classList.remove('flex', 'flex-col');
+                litterList.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+                gridViewBtn.classList.remove('bg-gray-200', 'text-gray-600');
+                gridViewBtn.classList.add('bg-blue-500', 'text-white');
+                listViewBtn.classList.remove('bg-blue-500', 'text-white');
+                listViewBtn.classList.add('bg-gray-200', 'text-gray-600');
+            } else {
+                litterList.classList.remove('grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+                litterList.classList.add('flex', 'flex-col', 'space-y-4');
+                listViewBtn.classList.remove('bg-gray-200', 'text-gray-600');
+                listViewBtn.classList.add('bg-blue-500', 'text-white');
+                gridViewBtn.classList.remove('bg-blue-500', 'text-white');
+                gridViewBtn.classList.add('bg-gray-200', 'text-gray-600');
+            }
+        }
+        
+        // Event listeners for litter filtering and sorting
+        if (litterSearch && litterSort) {
+            litterSearch.addEventListener('input', filterAndSortLitters);
+            litterSort.addEventListener('change', filterAndSortLitters);
+        }
+        if (gridViewBtn && listViewBtn) {
+            gridViewBtn.addEventListener('click', () => toggleView(true));
+            listViewBtn.addEventListener('click', () => toggleView(false));
+        }
     
-        fetch(`/dashboard/check_new_messages?last_check=${lastCheckTimestamp}&last_id=${highestMessageId}`)
-            .then(response => response.json())
-            .then(newMessages => {
-                newMessages.forEach(message => {
-                    updateConversationList(message);
-                    if (message.conversation_id === currentConversationId) {
-                        appendMessage({
-                            id: message.id,
-                            content: message.content,
-                            timestamp: message.timestamp,
-                            is_sender: false
-                        });
+        // Messaging functions
+        function updateConversationList(newMessage) {
+            const conversationList = document.getElementById('conversationList');
+            const existingItem = conversationList.querySelector(`[data-conversation-id="${newMessage.conversation_id}"]`);
+        
+            if (existingItem) {
+                const contentElement = existingItem.querySelector('p.truncate');
+                contentElement.textContent = newMessage.content;
+                conversationList.insertBefore(existingItem, conversationList.firstChild);
+        
+                let unreadBadge = existingItem.querySelector('.unread-badge');
+                if (!unreadBadge) {
+                    unreadBadge = document.createElement('span');
+                    unreadBadge.className = 'bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 unread-badge';
+                    existingItem.querySelector('.flex-grow').appendChild(unreadBadge);
+                }
+                const currentCount = parseInt(unreadBadge.textContent) || 0;
+                unreadBadge.textContent = currentCount + 1;
+            } else {
+                const newItem = document.createElement('div');
+                newItem.className = 'conversation-item p-4 border-b hover:bg-gray-100 cursor-pointer transition duration-300';
+                newItem.setAttribute('data-conversation-id', newMessage.conversation_id);
+                newItem.setAttribute('data-recipient-id', newMessage.sender_id);
+                newItem.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center mr-3">
+                            <span class="text-xl font-bold text-white">?</span>
+                        </div>
+                        <div class="flex-grow">
+                            <p class="font-semibold text-gray-800">New User</p>
+                            <p class="text-sm text-gray-600 truncate">${newMessage.content}</p>
+                        </div>
+                        <span class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 unread-badge">1</span>
+                    </div>
+                `;
+                conversationList.insertBefore(newItem, conversationList.firstChild);
+                addConversationItemListener(newItem);
+            }
+        }
+        
+        function addConversationItemListener(item) {
+            item.addEventListener('click', function() {
+                const newConversationId = this.dataset.conversationId;
+                const newRecipientId = this.dataset.recipientId;
+                
+                if (newConversationId !== currentConversationId) {
+                    currentConversationId = newConversationId;
+                    currentRecipientId = newRecipientId;
+                    highestMessageId = 0;
+                    displayedMessageIds.clear();
+                    loadMessages(currentConversationId);
+                }
+                
+                document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('bg-indigo-100'));
+                this.classList.add('bg-indigo-100');
+                
+                const unreadBadge = this.querySelector('.unread-badge');
+                if (unreadBadge) {
+                    unreadBadge.remove();
+                }
+            });
+        }
+        
+        document.querySelectorAll('.conversation-item').forEach(addConversationItemListener);
+        
+        function loadMessages(conversationId) {
+            const messageDisplay = document.getElementById('messageDisplay');
+            messageDisplay.innerHTML = '<div class="text-center text-gray-500">Loading messages...</div>';
+        
+            fetch(`/dashboard/messages/${conversationId}?last_id=${highestMessageId}`)
+                .then(response => response.json())
+                .then(messages => {
+                    messageDisplay.innerHTML = '';
+                    messages.forEach(message => {
                         if (message.id > highestMessageId) {
                             highestMessageId = message.id;
                         }
-                    }
+                        appendMessage(message);
+                    });
+                    messageDisplay.scrollTop = messageDisplay.scrollHeight;
+                })
+                .catch(error => {
+                    console.error('Error loading messages:', error);
+                    messageDisplay.innerHTML = '<div class="text-center text-red-500">Error loading messages. Please try again.</div>';
                 });
-                lastCheckTimestamp = Date.now() / 1000;
-            })
-            .catch(error => {
-                console.error('Error checking for new messages:', error);
+        }
+        
+        function appendMessage(message) {
+            if (displayedMessageIds.has(message.id)) return;
+        
+            const messageDisplay = document.getElementById('messageDisplay');
+            const messageElement = document.createElement('div');
+            messageElement.className = `mb-4 ${message.is_sender ? 'text-right' : 'text-left'}`;
+            messageElement.innerHTML = `
+                <div class="inline-block ${message.is_sender ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-800'} rounded-lg px-4 py-2 max-w-xs lg:max-w-md">
+                    <p>${message.content}</p>
+                    <p class="text-xs mt-1 ${message.is_sender ? 'text-indigo-200' : 'text-gray-500'}">${message.timestamp}</p>
+                </div>
+            `;
+            messageDisplay.appendChild(messageElement);
+            messageDisplay.scrollTop = messageDisplay.scrollHeight;
+            displayedMessageIds.add(message.id);
+        }
+        
+        const messageForm = document.getElementById('messageForm');
+        if (messageForm) {
+            messageForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (!currentConversationId) return;
+            
+                const messageInput = document.getElementById('messageInput');
+                const content = messageInput.value.trim();
+                if (!content) return;
+            
+                fetch('/dashboard/send_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        conversation_id: currentConversationId,
+                        recipient_id: currentRecipientId,
+                        content: content
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        messageInput.value = '';
+                        appendMessage(data.message);
+                        if (data.message.id > highestMessageId) {
+                            highestMessageId = data.message.id;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending message:', error);
+                    alert('Failed to send message. Please try again.');
+                });
             });
-    }
+        }
+        
+        function checkNewMessages() {
+            if (!currentConversationId) return;
+        
+            fetch(`/dashboard/check_new_messages?last_check=${lastCheckTimestamp}&last_id=${highestMessageId}`)
+                .then(response => response.json())
+                .then(newMessages => {
+                    newMessages.forEach(message => {
+                        updateConversationList(message);
+                        if (message.conversation_id === currentConversationId) {
+                            appendMessage({
+                                id: message.id,
+                                content: message.content,
+                                timestamp: message.timestamp,
+                                is_sender: false
+                            });
+                            if (message.id > highestMessageId) {
+                                highestMessageId = message.id;
+                            }
+                        }
+                    });
+                    lastCheckTimestamp = Date.now() / 1000;
+                })
+                .catch(error => console.error('Error checking for new messages:', error));
+        }
+        
+        // Check for new messages every 5 seconds
+        setInterval(checkNewMessages, 5000);
     
-    // Check for new messages every 5 seconds
-    setInterval(checkNewMessages, 5000);
-
-    // Similar Breeders Carousel
-    document.addEventListener('DOMContentLoaded', function() {
+        // Breeder carousel functionality
         const slider = document.getElementById('breederSlider');
         const prevBtn = document.getElementById('prevBreeder');
         const nextBtn = document.getElementById('nextBreeder');
-        let currentIndex = 0;
-        const itemWidth = slider.children[0].offsetWidth;
-        const itemsPerPage = Math.floor(slider.offsetWidth / itemWidth);
-        const maxIndex = slider.children.length - itemsPerPage;
-
-        function updateSliderPosition() {
-            slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
-            prevBtn.style.display = currentIndex > 0 ? 'block' : 'none';
-            nextBtn.style.display = currentIndex < maxIndex ? 'block' : 'none';
-        }
-
-        prevBtn.addEventListener('click', () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateSliderPosition();
+        
+        if (slider && prevBtn && nextBtn) {
+            let currentIndex = 0;
+            const itemWidth = slider.children[0].offsetWidth;
+            const itemsPerPage = Math.floor(slider.offsetWidth / itemWidth);
+            const maxIndex = slider.children.length - itemsPerPage;
+    
+            function updateSliderPosition() {
+                slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
+                prevBtn.style.display = currentIndex > 0 ? 'block' : 'none';
+                nextBtn.style.display = currentIndex < maxIndex ? 'block' : 'none';
             }
-        });
-
-        nextBtn.addEventListener('click', () => {
-            if (currentIndex < maxIndex) {
-                currentIndex++;
-                updateSliderPosition();
-            }
-        });
-
-        updateSliderPosition();
-
-        // Refresh carousel on window resize
-        window.addEventListener('resize', () => {
-            currentIndex = 0;
+    
+            prevBtn.addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateSliderPosition();
+                }
+            });
+    
+            nextBtn.addEventListener('click', () => {
+                if (currentIndex < maxIndex) {
+                    currentIndex++;
+                    updateSliderPosition();
+                }
+            });
+    
             updateSliderPosition();
-        });
+    
+            window.addEventListener('resize', () => {
+                currentIndex = 0;
+                updateSliderPosition();
+            });
+        }
+    
+        // Initialize any necessary functionality
+        if (litterCards.length > 0) {
+            filterAndSortLitters();
+        }
     });
-</script>
+    </script>
 {% endblock %}
