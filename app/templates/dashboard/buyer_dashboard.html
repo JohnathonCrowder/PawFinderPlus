@@ -561,18 +561,145 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-        <!-- Available Breeds -->
-        <section class="mb-24 relative" data-aos="fade-up">
-            <h2 class="text-4xl font-bold mb-12 text-center section-title">Explore Breeds</h2>
-            <div class="flex flex-wrap justify-center gap-4">
-                {% for breed in available_breeds %}
-                <a href="{{ url_for('litter.public_litters', breed=breed) }}" class="breed-tag bg-blue-100 text-blue-800 text-sm font-medium px-6 py-3 rounded-full hover:bg-blue-200 transition duration-300 transform hover:scale-105">
-                    {{ breed }}
-                </a>
-                {% endfor %}
+        <!-- Explore Breeds Section -->
+<section class="mb-24 relative" data-aos="fade-up">
+    <div class="bg-white rounded-2xl shadow-lg p-8">
+        <!-- Header -->
+        <div class="mb-8 text-center">
+            <h2 class="text-3xl font-bold mb-2 text-gray-800">Explore Dog Breeds</h2>
+            <p class="text-gray-600">Find your perfect companion among {{ available_breeds|length }} unique breeds</p>
+        </div>
+
+        <!-- Breed Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-blue-50 rounded-xl p-4 text-center">
+                <p class="text-3xl font-bold text-blue-600 mb-1">{{ available_breeds|length }}</p>
+                <p class="text-sm text-gray-600">Breeds</p>
             </div>
-            <img src="https://www.svgrepo.com/show/96550/paw-print.svg" alt="Paw print" class="paw-print w-32 h-32 top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2">
-        </section>
+            <div class="bg-green-50 rounded-xl p-4 text-center">
+                <p class="text-3xl font-bold text-green-600 mb-1">{{ available_puppies|length }}</p>
+                <p class="text-sm text-gray-600">Puppies</p>
+            </div>
+            <div class="bg-purple-50 rounded-xl p-4 text-center">
+                {% set avg_price = available_puppies|selectattr('price')|map(attribute='price')|list %}
+                <p class="text-3xl font-bold text-purple-600 mb-1">${{ (avg_price|sum / avg_price|length)|round|int if avg_price else 0 }}</p>
+                <p class="text-sm text-gray-600">Avg Price</p>
+            </div>
+            <div class="bg-yellow-50 rounded-xl p-4 text-center">
+                <p class="text-3xl font-bold text-yellow-600 mb-1">{{ available_puppies|selectattr('status', 'equalto', DogStatus.AVAILABLE_NOW)|list|length }}</p>
+                <p class="text-sm text-gray-600">Ready Now</p>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-8">
+            <div class="relative flex-grow">
+                <input type="text" 
+                       id="breedSearch" 
+                       placeholder="Search breeds..." 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <select id="breedSort" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="popularity">Sort by Popularity</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="availability">Most Available</option>
+            </select>
+        </div>
+
+        <!-- Breed Cards -->
+        <div id="breedGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for breed in available_breeds %}
+            {% set breed_puppies = available_puppies|selectattr('breed', 'equalto', breed)|list %}
+            <div class="breed-card" data-breed="{{ breed }}" data-puppies="{{ breed_puppies|length }}" 
+                 data-price="{{ breed_puppies|selectattr('price')|map(attribute='price')|list|sum / breed_puppies|selectattr('price')|map(attribute='price')|list|length if breed_puppies|selectattr('price')|map(attribute='price')|list else 0 }}">
+                <div class="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">{{ breed }}</h3>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                                {{ breed_puppies|length }} available
+                            </span>
+                            {% if breed_puppies|selectattr('price')|map(attribute='price')|list %}
+                            <span class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
+                                ${{ (breed_puppies|selectattr('price')|map(attribute='price')|list|sum / breed_puppies|selectattr('price')|map(attribute='price')|list|length)|round|int }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="text-center p-2 bg-gray-50 rounded-lg">
+                                <p class="text-sm text-gray-600">Ready Now</p>
+                                <p class="text-lg font-semibold text-gray-800">{{ breed_puppies|selectattr('status', 'equalto', DogStatus.AVAILABLE_NOW)|list|length }}</p>
+                            </div>
+                            <div class="text-center p-2 bg-gray-50 rounded-lg">
+                                <p class="text-sm text-gray-600">Coming Soon</p>
+                                <p class="text-lg font-semibold text-gray-800">{{ breed_puppies|selectattr('status', 'equalto', DogStatus.AVAILABLE_SOON)|list|length }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('litter.public_litters', breed=breed) }}" 
+                           class="block w-full text-center px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300">
+                            View {{ breed }} Puppies
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const breedSearch = document.getElementById('breedSearch');
+    const breedSort = document.getElementById('breedSort');
+    const breedGrid = document.getElementById('breedGrid');
+    const breedCards = document.querySelectorAll('.breed-card');
+
+    function filterAndSortBreeds() {
+        const searchTerm = breedSearch.value.toLowerCase();
+        const sortOrder = breedSort.value;
+        
+        const breedArray = Array.from(breedCards);
+        
+        breedArray.forEach(card => {
+            const breedName = card.querySelector('h3').textContent.toLowerCase();
+            if (breedName.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        breedArray.sort((a, b) => {
+            const puppiesA = parseInt(a.dataset.puppies);
+            const puppiesB = parseInt(b.dataset.puppies);
+            const priceA = parseFloat(a.dataset.price);
+            const priceB = parseFloat(b.dataset.price);
+            
+            switch (sortOrder) {
+                case 'popularity':
+                    return puppiesB - puppiesA;
+                case 'price_low':
+                    return priceA - priceB;
+                case 'price_high':
+                    return priceB - priceA;
+                case 'availability':
+                    return puppiesB - puppiesA;
+            }
+        });
+        
+        breedArray.forEach(card => breedGrid.appendChild(card));
+    }
+    
+    breedSearch.addEventListener('input', filterAndSortBreeds);
+    breedSort.addEventListener('change', filterAndSortBreeds);
+    
+    // Initialize
+    filterAndSortBreeds();
+});
+</script>
+
 
         <!-- Upcoming Appointments -->
         <div class="dashboard-card p-6 mb-8 bg-blue-50 border border-blue-200 rounded-lg">
