@@ -8,39 +8,6 @@ from itertools import chain
 
 bp = Blueprint('dashboard', __name__)
 
-def get_datetime(item):
-    if hasattr(item, 'created_at'):
-        return item.created_at
-    elif hasattr(item, 'date_of_birth'):
-        return datetime.combine(item.date_of_birth, datetime.min.time())
-    else:
-        return datetime.min
-    
-def get_recent_activity(user, limit=5):
-    recent_activity = []
-    
-    recent_dogs = Dog.query.filter_by(user_id=user.id).order_by(Dog.created_at.desc()).limit(limit).all()
-    for dog in recent_dogs:
-        recent_activity.append({
-            'type': 'dog',
-            'text': f'Added new dog: {dog.name}',
-            'date': dog.created_at,
-            'icon': 'fas fa-dog'
-        })
-    
-    recent_litters = Litter.query.filter_by(user_id=user.id).order_by(Litter.date_of_birth.desc()).limit(limit).all()
-    for litter in recent_litters:
-        recent_activity.append({
-            'type': 'litter',
-            'text': f'New litter born: {litter.name}',
-            'date': datetime.combine(litter.date_of_birth, datetime.min.time()),
-            'icon': 'fas fa-paw'
-        })
-    
-    recent_activity.sort(key=lambda x: x['date'], reverse=True)
-    
-    return recent_activity[:limit]
-
 @bp.route('/dashboard')
 @login_required
 def user_dashboard():
@@ -182,11 +149,35 @@ def buyer_dashboard():
             'unread_count': conv.unread_count
         })
 
+    # Add these lines for the appointments
+    upcoming_appointments = VetAppointment.query.join(Dog).filter(
+        Dog.user_id == current_user.id,
+        VetAppointment.date >= datetime.utcnow()
+    ).order_by(VetAppointment.date).limit(5).all()
+
+    # Add these lines for similar breeders
+    user_breeds = db.session.query(Dog.breed).filter(Dog.user_id == current_user.id).distinct().all()
+    user_breeds = [breed[0] for breed in user_breeds]
+
+    similar_breeders = db.session.query(User).join(Dog).filter(
+        User.id != current_user.id,
+        Dog.breed.in_(user_breeds)
+    ).group_by(User.id).order_by(func.count(Dog.id).desc()).limit(5).all()
+
+    for breeder in similar_breeders:
+        breeder.dogs = Dog.query.filter_by(user_id=breeder.id).all()
+        breeder.litters = Litter.query.filter_by(user_id=breeder.id).all()
+        breeder.follower_count = breeder.followers.count()
+
     return render_template('dashboard/buyer_dashboard.html',
                            recent_litters=recent_litters,
                            available_puppies=available_puppies,
                            available_breeds=available_breeds,
                            conversation_details=conversation_details,
+                           upcoming_appointments=upcoming_appointments,
+                           user_breeds=user_breeds,
+                           similar_breeders=similar_breeders,
+                           get_recent_activity=get_recent_activity,
                            DogStatus=DogStatus)
 
 @bp.route('/dashboard/messages/<conversation_id>')
@@ -256,3 +247,36 @@ def check_new_messages():
     } for msg in new_messages]
 
     return jsonify(new_message_data)
+
+def get_datetime(item):
+    if hasattr(item, 'created_at'):
+        return item.created_at
+    elif hasattr(item, 'date_of_birth'):
+        return datetime.combine(item.date_of_birth, datetime.min.time())
+    else:
+        return datetime.min
+    
+def get_recent_activity(user, limit=5):
+    recent_activity = []
+    
+    recent_dogs = Dog.query.filter_by(user_id=user.id).order_by(Dog.created_at.desc()).limit(limit).all()
+    for dog in recent_dogs:
+        recent_activity.append({
+            'type': 'dog',
+            'text': f'Added new dog: {dog.name}',
+            'date': dog.created_at,
+            'icon': 'fas fa-dog'
+        })
+    
+    recent_litters = Litter.query.filter_by(user_id=user.id).order_by(Litter.date_of_birth.desc()).limit(limit).all()
+    for litter in recent_litters:
+        recent_activity.append({
+            'type': 'litter',
+            'text': f'New litter born: {litter.name}',
+            'date': datetime.combine(litter.date_of_birth, datetime.min.time()),
+            'icon': 'fas fa-paw'
+        })
+    
+    recent_activity.sort(key=lambda x: x['date'], reverse=True)
+    
+    return recent_activity[:limit]
