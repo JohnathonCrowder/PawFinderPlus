@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import login_required, current_user
-from app.models import User, Message
+from app.models import User, Message, Dog
 from app.extensions import db, socketio
 from datetime import datetime
 from sqlalchemy import or_, and_
@@ -205,3 +205,41 @@ def handle_stop_typing(data):
 def get_or_create_conversation(user1_id, user2_id):
     conversation_id = f"{min(user1_id, user2_id)}_{max(user1_id, user2_id)}"
     return conversation_id
+
+
+
+@bp.route('/contact_owner/<int:dog_id>')
+@login_required
+def contact_owner(dog_id):
+    from app.models import Dog  # Import at the top of your file if not already there
+    
+    # Get the dog and its owner
+    dog = Dog.query.get_or_404(dog_id)
+    owner = dog.owner
+    
+    # Don't allow messaging yourself
+    if owner.id == current_user.id:
+        flash('You cannot message yourself.', 'error')
+        return redirect(url_for('dog.dog_profile', id=dog_id))
+    
+    # Create or get conversation ID
+    conversation_id = get_or_create_conversation(current_user.id, owner.id)
+    
+    # Redirect to the messages page
+    return redirect(url_for('message.messages'))
+
+
+@bp.route('/conversation/<int:user_id>')
+@login_required
+def conversation(user_id):
+    other_user = User.query.get_or_404(user_id)
+    
+    # Don't allow messaging yourself
+    if user_id == current_user.id:
+        flash('You cannot message yourself.', 'error')
+        return redirect(url_for('main.home'))
+    
+    # Create or get conversation ID
+    conversation_id = get_or_create_conversation(current_user.id, user_id)
+    
+    return redirect(url_for('message.messages'))
