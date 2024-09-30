@@ -1,8 +1,7 @@
 from flask import Flask
-from .extensions import db
+from .extensions import db, socketio
 from .config import Config
 from flask_migrate import Migrate
-from flask_socketio import SocketIO
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from .routes import init_app as init_routes
@@ -11,19 +10,18 @@ from .models import User
 import click
 
 migrate = Migrate()
-socketio = SocketIO()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    config_class.init_app(app) 
+    config_class.init_app(app)
 
     # Initialize extensions
     db.init_app(app)
+    socketio.init_app(app, cors_allowed_origins="*")
     migrate.init_app(app, db)
-    socketio.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
 
@@ -32,7 +30,6 @@ def create_app(config_class=Config):
 
     @login_manager.user_loader
     def load_user(user_id):
-        from .models import User  # Import here to avoid circular imports
         return User.query.get(int(user_id))
 
     # Register blueprints
