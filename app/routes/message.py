@@ -8,6 +8,7 @@ from flask_socketio import emit, join_room, leave_room
 
 bp = Blueprint('message', __name__)
 
+
 @bp.route('/messages')
 @login_required
 def messages():
@@ -54,7 +55,7 @@ def get_conversation_messages(conversation_id):
     messages_data = [{
         'id': msg.id,
         'content': msg.content,
-        'timestamp': msg.timestamp.isoformat(),
+        'timestamp': msg.timestamp.isoformat() + 'Z',  # Add 'Z' to indicate UTC
         'is_sender': msg.sender_id == current_user.id,
         'sender_name': msg.sender.username,
         'read': msg.read
@@ -83,7 +84,7 @@ def send_message():
         sender_id=current_user.id,
         recipient_id=recipient_id,
         content=content,
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow()  # Ensure UTC timestamp
     )
     db.session.add(new_message)
     db.session.commit()
@@ -94,7 +95,7 @@ def send_message():
         'message': {
             'id': new_message.id,
             'content': new_message.content,
-            'timestamp': new_message.timestamp.isoformat(),
+            'timestamp': new_message.timestamp.isoformat() + 'Z',  # Add 'Z' to indicate UTC
             'sender_name': current_user.username,
             'is_sender': False
         }
@@ -105,7 +106,7 @@ def send_message():
         'message': {
             'id': new_message.id,
             'content': new_message.content,
-            'timestamp': new_message.timestamp.isoformat(),
+            'timestamp': new_message.timestamp.isoformat() + 'Z',  # Add 'Z' to indicate UTC
             'is_sender': True,
             'sender_name': current_user.username,
             'read': False
