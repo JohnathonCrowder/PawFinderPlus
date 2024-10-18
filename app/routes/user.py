@@ -117,7 +117,7 @@ def user_profile(username):
     }
 
     shareable_link = generate_shareable_link('user.user_profile', username=username)
-    social_links = generate_social_links(shareable_link, f"Check out {user.username}'s profile on DogBreederPlus!")
+    social_links = generate_social_links(shareable_link, f"Check out {user.username}'s profile on PuppyHorizon!")
    
                            
 

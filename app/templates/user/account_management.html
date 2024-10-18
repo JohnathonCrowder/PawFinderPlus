@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Premium Dog Breeding Management Plans | DogBreederPlus{% endblock %}
+{% block title %}Premium Dog Breeding Management Plans | PuppyHorizon{% endblock %}
 
 {% block head %}
 {{ super() }}
-<meta name="description" content="Elevate your dog breeding program with DogBreederPlus premium plans. Access advanced genetics tools, health analytics, and expert support.">
+<meta name="description" content="Elevate your dog breeding program with PuppyHorizon premium plans. Access advanced genetics tools, health analytics, and expert support.">
 <link rel="canonical" href="{{ url_for('user.account_management', _external=True) }}">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
@@ -64,7 +64,7 @@
 
     <section aria-labelledby="current-plan" class="gradient-bg text-white p-8 rounded-lg shadow-md mb-16 text-center" data-aos="fade-up" data-aos-delay="200">
         <h2 id="current-plan" class="text-3xl font-semibold mb-4">Your Current Plan: <span class="font-bold">{{ user_data.account_type.value }}</span></h2>
-        <p class="text-xl mb-6">Experience the full potential of DogBreederPlus with our advanced features.</p>
+        <p class="text-xl mb-6">Experience the full potential of PuppyHorizon with our advanced features.</p>
         <a href="#compare" class="bg-white text-blue-600 px-8 py-3 rounded-full font-bold hover:bg-blue-100 transition duration-300">Explore Premium Features</a>
     </section>
 

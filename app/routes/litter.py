@@ -73,7 +73,7 @@ def litter_detail(id):
         flash('This litter is not publicly visible.', 'error')
         return redirect(url_for('main.home'))
     shareable_link = generate_shareable_link('litter.litter_detail', id=id)
-    social_links = generate_social_links(shareable_link, f"Check out this litter on DogBreederPlus!")
+    social_links = generate_social_links(shareable_link, f"Check out this litter on PuppyHorizon!")
     return render_template('litter/litter_detail.html', litter=litter, DogStatus=DogStatus, shareable_link=shareable_link, social_links=social_links)
 
 

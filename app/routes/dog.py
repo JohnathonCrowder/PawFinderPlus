@@ -181,7 +181,7 @@ def dog_profile(id):
         flash('This dog profile is not publicly visible.', 'error')
         return redirect(url_for('main.home'))
     shareable_link = generate_shareable_link('dog.dog_profile', id=id)
-    social_links = generate_social_links(shareable_link, f"Check out {dog.name}'s profile on DogBreederPlus!")
+    social_links = generate_social_links(shareable_link, f"Check out {dog.name}'s profile on PuppyHorizon!")
     return render_template('dog/dog_profile.html', dog=dog, date=datetime.now().date(), DogStatus=DogStatus, shareable_link=shareable_link, social_links=social_links)
 
 @bp.route('/dog_image/<int:image_id>')
